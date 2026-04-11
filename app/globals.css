@@ -1,0 +1,12 @@
+@import "tailwindcss";
+
+@theme {
+  /* Brand Colors */
+  --color-mex-blue: #1D3B8E;
+  --color-mex-orange: #E64815;
+  --color-mex-dark: #000000;
+  --color-mex-gray: #F3F4F6;
+  
+  /* Typography */
+  --font-sans: var(--font-montserrat), sans-serif;
+}

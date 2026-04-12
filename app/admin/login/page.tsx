@@ -2,9 +2,9 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
-import Link from "next/link";
 import { Lock, Mail, ArrowRight, User as UserIcon } from "lucide-react";
+import { signupPasswordRuleChecks } from "@/lib/passwordPolicy";
+import SignupPasswordHints from "@/components/SignupPasswordHints";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -18,10 +18,19 @@ export default function LoginPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
 
+  const signupPasswordOk =
+    isLogin || Object.values(signupPasswordRuleChecks(password)).every(Boolean);
+
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
     setError("");
+
+    if (!isLogin && !signupPasswordOk) {
+      setIsSubmitting(false);
+      setError("Please meet all password requirements below.");
+      return;
+    }
 
     try {
       const res = await fetch("/api/auth", {
@@ -51,27 +60,21 @@ export default function LoginPage() {
   };
 
   return (
-    // THE PRO TRICK: 'fixed inset-0 z-[100]' makes the login page fullscreen, hiding the header and footer!
-    <div className="fixed inset-0 z-[100] bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8 font-sans overflow-hidden">
-      
-      {/* Decorative Background */}
-      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-mex-blue/10 rounded-full blur-3xl pointer-events-none"></div>
-      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-mex-orange/10 rounded-full blur-3xl pointer-events-none"></div>
+    <div className="relative min-h-screen overflow-x-hidden bg-gray-50 px-4 py-10 font-sans sm:py-14">
+      <div className="pointer-events-none absolute left-[-10%] top-[-10%] h-[40%] w-[40%] rounded-full bg-mex-blue/10 blur-3xl" />
+      <div className="pointer-events-none absolute bottom-[-10%] right-[-10%] h-[40%] w-[40%] rounded-full bg-mex-orange/10 blur-3xl" />
 
-      <div className="sm:mx-auto sm:w-full sm:max-w-md relative z-10">
-        <Link href="/">
-          <Image src="/Logo.JPG" alt="MEX509" width={200} height={60} className="mx-auto h-16 w-auto object-contain cursor-pointer" />
-        </Link>
-        <h2 className="mt-6 text-center text-3xl font-black tracking-tight text-mex-dark">
-          {isLogin ? "Welcome Back" : "Create Your Account"}
-        </h2>
-        <p className="mt-2 text-center text-sm text-gray-600 font-medium">
-          {isLogin ? "Enter your details to access your portal." : "Join MEX509 to track your shipments easily."}
-        </p>
-      </div>
+      <div className="relative z-10 mx-auto w-full max-w-md">
+        <div className="mb-8 text-center sm:mb-10">
+          <h2 className="text-2xl font-black tracking-tight text-mex-dark sm:text-3xl">
+            {isLogin ? "Welcome Back" : "Create Your Account"}
+          </h2>
+          <p className="mx-auto mt-2 max-w-sm text-sm font-medium text-gray-600">
+            {isLogin ? "Sign in to the admin dashboard." : "Strong password required for new admin accounts."}
+          </p>
+        </div>
 
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md relative z-10">
-        <div className="bg-white py-8 px-4 shadow-2xl sm:rounded-3xl sm:px-10 border border-gray-100">
+        <div className="rounded-3xl border border-gray-100 bg-white px-6 py-8 shadow-2xl sm:px-10 sm:py-10">
           
           {error && (
             <div className="bg-red-50 text-red-600 p-4 rounded-xl text-sm font-bold mb-6 text-center animate-in zoom-in duration-300">
@@ -79,7 +82,7 @@ export default function LoginPage() {
             </div>
           )}
 
-          <form className="space-y-5" onSubmit={handleAuth}>
+          <form className="space-y-4 sm:space-y-5" onSubmit={handleAuth}>
             
             {/* Show Name Fields ONLY if Signing Up */}
             {!isLogin && (
@@ -116,11 +119,29 @@ export default function LoginPage() {
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                   <Lock className="h-5 w-5 text-gray-400" />
                 </div>
-                <input type="password" required value={password} onChange={(e) => setPassword(e.target.value)} className="w-full border border-gray-300 rounded-xl pl-11 pr-4 py-3 focus:ring-2 focus:ring-mex-blue outline-none font-medium text-gray-700" placeholder="••••••••" />
+                <input
+                  type="password"
+                  required
+                  autoComplete={isLogin ? "current-password" : "new-password"}
+                  minLength={!isLogin ? 10 : undefined}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full border border-gray-300 rounded-xl pl-11 pr-4 py-3 focus:ring-2 focus:ring-mex-blue outline-none font-medium text-gray-700"
+                  placeholder="••••••••"
+                />
               </div>
+              {!isLogin && (
+                <div className="mt-3">
+                  <SignupPasswordHints password={password} />
+                </div>
+              )}
             </div>
 
-            <button type="submit" disabled={isSubmitting} className="w-full flex justify-center items-center gap-2 bg-mex-blue text-white font-bold text-lg px-4 py-4 rounded-xl hover:bg-blue-900 transition-all shadow-lg shadow-blue-500/30 disabled:opacity-70 mt-4">
+            <button
+              type="submit"
+              disabled={isSubmitting || !signupPasswordOk}
+              className="w-full flex justify-center items-center gap-2 bg-mex-blue text-white font-bold text-lg px-4 py-4 rounded-xl hover:bg-blue-900 transition-all shadow-lg shadow-blue-500/30 disabled:opacity-70 mt-4"
+            >
               {isSubmitting ? "Processing..." : isLogin ? "Secure Login" : "Create Account"} <ArrowRight size={20} />
             </button>
           </form>

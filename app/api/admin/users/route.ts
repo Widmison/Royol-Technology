@@ -55,8 +55,8 @@ export async function POST(req: Request) {
       });
 
       await prisma.user.delete({ where: { id } });
-      
-      return NextResponse.json({ success: true });
+
+      return NextResponse.json({ success: true, message: "Client deleted successfully." });
     }
 
     return NextResponse.json({ error: "Invalid action" }, { status: 400 });

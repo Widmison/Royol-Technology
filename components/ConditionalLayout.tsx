@@ -3,25 +3,33 @@
 import { usePathname } from "next/navigation";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
-import AdminNavbar from "./AdminNavbar";
-import AdminFooter from "./AdminFooter";
+
+/**
+ * Marketing site only: header + footer.
+ * Portals (client login, client dashboard, admin, pay) render full-screen without site chrome
+ * so they can live on their own subdomains later without visual coupling to the public site.
+ */
+function isPortalPath(pathname: string) {
+  return (
+    pathname.startsWith("/admin") ||
+    pathname.startsWith("/dashboard") ||
+    pathname === "/login" ||
+    pathname.startsWith("/pay/")
+  );
+}
 
 export default function ConditionalLayout({ children }: { children: React.ReactNode }) {
-  const pathname = usePathname();
-  const isAdminRoute = pathname?.startsWith("/admin");
+  const pathname = usePathname() ?? "";
+
+  if (isPortalPath(pathname)) {
+    return <>{children}</>;
+  }
 
   return (
     <div className="flex flex-col min-h-screen">
-      {/* If Admin Route, show Admin Header. Otherwise, show Public Header */}
-      {isAdminRoute ? <AdminNavbar /> : <Navbar />}
-      
-      {/* Ensure Admin Dashboard spans the full height nicely */}
-      <main className={!isAdminRoute ? "flex-grow" : "flex-grow flex flex-col bg-gray-50"}>
-        {children}
-      </main>
-      
-      {/* If Admin Route, show Admin Footer. Otherwise, show Public Footer */}
-      {isAdminRoute ? <AdminFooter /> : <Footer />}
+      <Navbar />
+      <main className="flex-grow">{children}</main>
+      <Footer />
     </div>
   );
 }

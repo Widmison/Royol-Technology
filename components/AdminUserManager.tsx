@@ -26,6 +26,7 @@ export default function AdminUserManager({ initialUsers }: { initialUsers: any[]
   
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
 
   const filteredUsers = users.filter(u => 
     `${u.firstName} ${u.lastName} ${u.email} ${u.phone}`.toLowerCase().includes(search.toLowerCase())
@@ -60,22 +61,31 @@ export default function AdminUserManager({ initialUsers }: { initialUsers: any[]
   const handleAction = async (action: "create" | "update" | "delete") => {
     setIsProcessing(true);
     setError("");
+    setSuccessMessage("");
 
     try {
+      const payload =
+        action === "delete" && selectedUser
+          ? { action: "delete", id: selectedUser.id }
+          : { action, ...formData, id: selectedUser?.id ?? formData.id };
+
       const res = await fetch("/api/admin/users", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action, ...formData, id: selectedUser?.id }),
+        body: JSON.stringify(payload),
       });
 
       const data = await res.json();
 
       if (!res.ok) throw new Error(data.error || "Action failed");
 
-      // Update the UI instantly
       if (action === "create") setUsers([data.user, ...users]);
-      if (action === "update") setUsers(users.map(u => u.id === data.user.id ? data.user : u));
-      if (action === "delete") setUsers(users.filter(u => u.id !== selectedUser.id));
+      if (action === "update") setUsers(users.map((u) => (u.id === data.user.id ? data.user : u)));
+      if (action === "delete" && selectedUser) {
+        setUsers(users.filter((u) => u.id !== selectedUser.id));
+        setSuccessMessage(data.message || "Client deleted successfully.");
+        window.setTimeout(() => setSuccessMessage(""), 5000);
+      }
 
       setIsAddOpen(false);
       setIsEditOpen(false);
@@ -90,6 +100,11 @@ export default function AdminUserManager({ initialUsers }: { initialUsers: any[]
 
   return (
     <div className="space-y-6">
+      {successMessage && (
+        <div className="animate-in fade-in zoom-in rounded-2xl border border-green-200 bg-green-50 px-4 py-3 text-center text-sm font-black text-green-800 duration-200">
+          {successMessage}
+        </div>
+      )}
       {/* HEADER & SEARCH */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div className="flex items-center bg-white rounded-xl px-4 py-3 w-full md:w-96 border border-gray-200 shadow-sm focus-within:border-mex-blue focus-within:ring-2 focus-within:ring-blue-50 transition-all">

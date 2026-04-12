@@ -8,6 +8,7 @@ export default function DashboardNewBox({ user }: { user: any }) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   // We pre-fill their info so they only have to select the package details!
   const [departure, setDeparture] = useState("Miami Warehouse");
@@ -17,15 +18,15 @@ export default function DashboardNewBox({ user }: { user: any }) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setError(null);
 
     try {
-      const res = await fetch("/api/shipments/new", {
+      const res = await fetch("/api/shipments", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           firstName: user.firstName,
           lastName: user.lastName,
-          email: user.email,
           phone: user.phone || "Not Provided",
           departure,
           category,
@@ -33,15 +34,24 @@ export default function DashboardNewBox({ user }: { user: any }) {
         }),
       });
 
+      const data = await res.json().catch(() => ({}));
+
       if (res.ok) {
         setSuccess(true);
         setTimeout(() => {
-          router.push("/dashboard?tab=overview"); // Send them back to overview!
-          router.refresh(); // Refresh the data
+          router.push("/dashboard?tab=overview");
+          router.refresh();
         }, 2000);
+      } else {
+        setError(
+          typeof data.error === "string"
+            ? data.error
+            : "Could not save your registration. Please try again."
+        );
       }
-    } catch (error) {
-      console.error(error);
+    } catch (err) {
+      console.error(err);
+      setError("Network error. Check your connection and try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -49,7 +59,7 @@ export default function DashboardNewBox({ user }: { user: any }) {
 
   if (success) {
     return (
-      <div className="bg-white p-10 rounded-3xl shadow-sm border border-green-100 text-center animate-in zoom-in duration-300">
+      <div className="bg-white p-6 sm:p-10 rounded-3xl shadow-sm border border-green-100 text-center animate-in zoom-in duration-300 max-w-full w-full">
         <CheckCircle className="w-20 h-20 text-green-500 mx-auto mb-4" />
         <h2 className="text-3xl font-black text-mex-dark mb-2">Box Registered!</h2>
         <p className="text-gray-500 font-medium">Your package is ready to be dropped off. Redirecting you...</p>
@@ -58,7 +68,7 @@ export default function DashboardNewBox({ user }: { user: any }) {
   }
 
   return (
-    <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100 max-w-2xl animate-in fade-in duration-500">
+    <div className="bg-white p-5 sm:p-8 rounded-3xl shadow-sm border border-gray-100 max-w-2xl w-full mx-auto animate-in fade-in duration-500">
       <div className="mb-6 pb-6 border-b border-gray-100">
         <h2 className="text-2xl font-black text-mex-dark">Pre-Register a New Box</h2>
         <p className="text-gray-500 font-medium text-sm mt-1">
@@ -67,6 +77,14 @@ export default function DashboardNewBox({ user }: { user: any }) {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
+        {error && (
+          <div
+            role="alert"
+            className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-bold text-red-700"
+          >
+            {error}
+          </div>
+        )}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <label className="block text-sm font-bold text-gray-700 mb-2 flex items-center gap-2"><MapPin size={16}/> Drop-off Location</label>

@@ -1,12 +1,18 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
+const PACKAGE_STATUSES = ["PROCESSING", "IN_TRANSIT", "CUSTOMS", "READY_FOR_PICKUP", "DELIVERED"] as const;
+
 export async function POST(req: Request) {
   try {
     const { trackingId, status, location, description } = await req.json();
 
     if (!trackingId || !status || !location) {
       return NextResponse.json({ error: "Tracking ID, status, and location are required." }, { status: 400 });
+    }
+
+    if (!PACKAGE_STATUSES.includes(status)) {
+      return NextResponse.json({ error: "Invalid package status." }, { status: 400 });
     }
 
     // 1. Find the package and the client who owns it

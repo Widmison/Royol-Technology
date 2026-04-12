@@ -1,11 +1,43 @@
 import Image from "next/image";
 import Link from "next/link";
 // Added Star and Quote to the lucide-react import
-import { Search, MapPin, Plane, Ship, ShieldCheck, Clock, Package, Star, Quote } from "lucide-react";
+import {
+  Search,
+  MapPin,
+  Plane,
+  Ship,
+  ShieldCheck,
+  Clock,
+  Package,
+  Star,
+  Quote,
+  Phone,
+  Mail,
+  ExternalLink,
+  Truck,
+  ClipboardList,
+  CreditCard,
+} from "lucide-react";
+import type { Metadata } from "next";
+import HomeJsonLd from "@/components/seo/HomeJsonLd";
+
+export const metadata: Metadata = {
+  title: "Shipping USA, DR & China to Haiti",
+  description:
+    "Track packages, request a quote, and ship with MEX509 from Doral, FL. Air, ocean, and ground freight to Haiti — fast, secure, guaranteed service.",
+  alternates: { canonical: "/" },
+  openGraph: {
+    title: "MEX509 | Voye Li Vit, Resevwa Li Vit!",
+    description:
+      "Sèvis rapid e sekirize. Livrezon garanti! USA, DR, and China to Haiti — track, quote, and ship.",
+    url: "/",
+  },
+};
 
 export default function Home() {
   return (
     <div className="flex flex-col min-h-screen">
+      <HomeJsonLd />
       
       {/* HERO SECTION (Your Custom Design) */}
       <section className="bg-mex-gray pt-6 pb-24 lg:pt-10 lg:pb-32 relative overflow-hidden">
@@ -33,21 +65,30 @@ export default function Home() {
               Sèvis rapid e sekirize. Livrezon garanti! Fast, secure, and headache-free delivery logistics from USA, DR, and China to Haiti.
             </p>
 
-            <div className="bg-white p-3 md:p-5 rounded-2xl shadow-xl flex flex-col sm:flex-row gap-3 items-center border border-gray-100 relative z-20 max-w-3xl mx-auto">
+            <form
+              action="/track"
+              method="get"
+              className="bg-white p-3 md:p-5 rounded-2xl shadow-xl flex flex-col sm:flex-row gap-3 items-stretch sm:items-center border border-gray-100 relative z-20 max-w-3xl mx-auto"
+            >
               <div className="relative w-full flex-grow">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                   <Search className="h-5 w-5 text-gray-400" />
                 </div>
                 <input
-                  type="text"
+                  name="id"
+                  type="search"
+                  autoComplete="off"
                   placeholder="Enter tracking number (e.g., MEX1234)"
                   className="w-full pl-11 pr-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-mex-orange focus:border-transparent text-gray-800 font-medium"
                 />
               </div>
-              <Link href="/track" className="w-full sm:w-auto bg-mex-blue text-white px-8 py-3 rounded-xl font-bold hover:bg-blue-900 transition-colors whitespace-nowrap flex items-center justify-center gap-2">
-                Track
-              </Link>
-            </div>
+              <button
+                type="submit"
+                className="w-full sm:w-auto bg-mex-blue text-white px-8 py-3 rounded-xl font-bold hover:bg-blue-900 transition-colors whitespace-nowrap flex items-center justify-center gap-2"
+              >
+                Track package
+              </button>
+            </form>
           </div>
 
         </div>
@@ -104,6 +145,142 @@ export default function Home() {
             </div>
 
           </div>
+          <p className="mt-10 max-w-2xl mx-auto text-center text-sm text-gray-600">
+            <span className="font-bold text-mex-dark">Ground &amp; regional freight</span> is available too —{" "}
+            <Link href="/services" className="font-bold text-mex-blue underline-offset-2 hover:underline">
+              browse all services
+            </Link>{" "}
+            or{" "}
+            <Link href="/quote" className="font-bold text-mex-orange underline-offset-2 hover:underline">
+              start a quote
+            </Link>
+            .
+          </p>
+        </div>
+      </section>
+
+      {/* HOW IT WORKS — reduces uncertainty for first-time shippers */}
+      <section className="border-t border-gray-100 bg-gray-50 py-16 sm:py-20" aria-labelledby="how-it-works-heading">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="mx-auto mb-12 max-w-2xl text-center">
+            <h2 id="how-it-works-heading" className="text-3xl font-black italic uppercase text-mex-blue sm:text-4xl">
+              How it works
+            </h2>
+            <p className="mt-3 text-sm font-medium text-gray-600 sm:text-base">
+              From your first quote to delivery in Haiti — simple steps, clear expectations.
+            </p>
+          </div>
+          <ol className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
+            {[
+              {
+                step: "1",
+                title: "Pre-register online",
+                body: "Tell us what you’re shipping, where it’s going, and how you want it sent (air, ocean, or ground).",
+                icon: ClipboardList,
+              },
+              {
+                step: "2",
+                title: "Drop off in Doral",
+                body: "Bring your packages to our Doral counter. We weigh, verify, and prepare your shipment.",
+                icon: MapPin,
+              },
+              {
+                step: "3",
+                title: "Pay & we ship",
+                body: "After weighing you get a clear invoice. Once paid, your cargo moves on the next available leg.",
+                icon: CreditCard,
+              },
+              {
+                step: "4",
+                title: "Track to delivery",
+                body: "Use your tracking ID anytime for status updates until your recipient gets the package.",
+                icon: Package,
+              },
+            ].map(({ step, title, body, icon: Icon }) => (
+              <li
+                key={step}
+                className="relative flex flex-col rounded-2xl border border-gray-100 bg-white p-6 shadow-sm"
+              >
+                <span className="mb-4 inline-flex h-9 w-9 items-center justify-center rounded-full bg-mex-orange text-sm font-black text-white">
+                  {step}
+                </span>
+                <Icon className="mb-3 h-8 w-8 text-mex-blue" aria-hidden />
+                <h3 className="text-lg font-black text-mex-dark">{title}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-gray-600">{body}</p>
+              </li>
+            ))}
+          </ol>
+          <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4">
+            <Link
+              href="/quote"
+              className="inline-flex items-center justify-center rounded-full bg-mex-orange px-8 py-3 text-sm font-bold text-white shadow-lg shadow-orange-500/25 transition hover:bg-orange-700"
+            >
+              Start your quote
+            </Link>
+            <Link
+              href="/login"
+              className="text-sm font-bold text-mex-blue underline-offset-4 hover:underline"
+            >
+              Already a customer? Sign in
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* VISIT + CONTACT — trust & convenience */}
+      <section className="bg-white py-14 sm:py-16" aria-labelledby="visit-heading">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col gap-10 lg:flex-row lg:items-center lg:justify-between">
+            <div className="max-w-xl">
+              <h2 id="visit-heading" className="text-2xl font-black italic uppercase text-mex-dark sm:text-3xl">
+                Visit us in Doral
+              </h2>
+              <p className="mt-3 text-sm font-medium text-gray-600 sm:text-base">
+                Walk-ins welcome for drop-off and questions. Call ahead if you’re bringing oversized cargo.
+              </p>
+              <address className="mt-6 not-italic text-base font-bold text-mex-dark">
+                1962 NW 82nd Ave
+                <br />
+                Doral, FL 33126
+              </address>
+              <div className="mt-6 flex flex-col gap-3 text-sm font-semibold text-gray-700 sm:flex-row sm:flex-wrap sm:items-center sm:gap-6">
+                <a
+                  href="tel:+50934494494"
+                  className="inline-flex items-center gap-2 text-mex-blue transition hover:text-mex-orange"
+                >
+                  <Phone className="h-4 w-4 shrink-0" aria-hidden />
+                  +509 34 49 44 94
+                </a>
+                <a
+                  href="mailto:info@mex509.com"
+                  className="inline-flex items-center gap-2 text-mex-blue transition hover:text-mex-orange"
+                >
+                  <Mail className="h-4 w-4 shrink-0" aria-hidden />
+                  info@mex509.com
+                </a>
+              </div>
+              <a
+                href="https://www.google.com/maps/search/?api=1&query=1962+NW+82nd+Ave+Doral+FL+33126"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-6 inline-flex items-center gap-2 rounded-xl border-2 border-mex-blue px-5 py-3 text-sm font-bold text-mex-blue transition hover:bg-mex-blue hover:text-white"
+              >
+                Open in Google Maps
+                <ExternalLink className="h-4 w-4" aria-hidden />
+              </a>
+            </div>
+            <div className="flex flex-1 flex-col items-start rounded-2xl border border-gray-100 bg-mex-gray/50 p-6 sm:p-8 lg:max-w-md">
+              <Truck className="mb-3 h-10 w-10 text-mex-orange" aria-hidden />
+              <h3 className="text-lg font-black text-mex-dark">Pickup &amp; cutoffs</h3>
+              <p className="mt-2 text-sm leading-relaxed text-gray-600">
+                Air and ocean schedules vary by week. After you submit a quote, our team confirms timing, required
+                paperwork, and anything special about your cargo — so there are no surprises at the counter.
+              </p>
+              <Link href="/services" className="mt-4 text-sm font-bold text-mex-orange hover:underline">
+                Read service details →
+              </Link>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -155,6 +332,52 @@ export default function Home() {
             </div>
           </div>
 
+        </div>
+      </section>
+
+      {/* FAQ — answers objections before they bounce */}
+      <section className="border-t border-gray-100 bg-white py-16 sm:py-20" aria-labelledby="faq-heading">
+        <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
+          <h2 id="faq-heading" className="text-center text-3xl font-black italic uppercase text-mex-blue sm:text-4xl">
+            Common questions
+          </h2>
+          <p className="mx-auto mt-3 max-w-xl text-center text-sm text-gray-600">
+            Quick answers for new shippers. For specifics on your box, we’re happy to help by phone or email.
+          </p>
+          <div className="mt-10 space-y-3">
+            {[
+              {
+                q: "Do I need an account to get a quote?",
+                a: "No. You can complete the quote form first. Creating an account is useful to save addresses, see invoices, and track everything in one place.",
+              },
+              {
+                q: "What happens after I submit a quote?",
+                a: "You’ll bring your goods to our Doral location for weighing. We then invoice you based on actual weight/volume and service — you pay before we release the shipment into transit.",
+              },
+              {
+                q: "How long do air and ocean take?",
+                a: "Typical ranges are about 5–7 business days for air and about 14–21 for ocean, depending on consolidation and customs. We’ll confirm a realistic window for your lane when you check in.",
+              },
+              {
+                q: "Can you handle shopping purchases or door delivery?",
+                a: "Yes — we offer shopping assistance and local delivery options as part of our service lineup. See the Services page for how each product works.",
+              },
+              {
+                q: "What should I bring to drop-off?",
+                a: "Your packed items, any invoices or declarations you have, and a valid ID. If you’re unsure what’s allowed, contact us before you ship so we can advise.",
+              },
+            ].map((item) => (
+              <details
+                key={item.q}
+                className="group rounded-2xl border border-gray-200 bg-gray-50/80 px-5 py-4 open:bg-white open:shadow-md"
+              >
+                <summary className="cursor-pointer font-bold text-mex-dark text-sm sm:text-base">
+                  {item.q}
+                </summary>
+                <p className="mt-3 border-t border-gray-100 pt-3 text-sm leading-relaxed text-gray-600">{item.a}</p>
+              </details>
+            ))}
+          </div>
         </div>
       </section>
 

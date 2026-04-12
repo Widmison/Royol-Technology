@@ -1,27 +1,48 @@
-import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
+
+/**
+ * Paths that may be visited on the admin host *without* the `/admin` prefix
+ * (short URLs). Everything else (e.g. `/quote`, `/services`, `/track`) must
+ * be served as the public app — do not rewrite to `/admin/...` or those
+ * routes 404.
+ */
+const ADMIN_SHORTCUT_PREFIXES = [
+  "/login",
+  "/dashboard",
+  "/shipments",
+  "/invoices",
+  "/clients",
+  "/settings",
+  "/scan",
+  "/search",
+] as const;
+
+function isAdminShortcut(pathname: string): boolean {
+  return ADMIN_SHORTCUT_PREFIXES.some((p) => pathname === p || pathname.startsWith(`${p}/`));
+}
 
 export function middleware(req: NextRequest) {
   const url = req.nextUrl;
-  
-  // Get the hostname (e.g., 'admin.mex509.com' or 'localhost:3000')
-  const hostname = req.headers.get('host') || '';
+  const hostname = req.headers.get("host") || "";
+  const hostNoPort = hostname.split(":")[0] ?? hostname;
 
-  // Check if the URL starts with the 'admin' subdomain
-  if (hostname.startsWith('admin.')) {
-    
-    // If they just go to admin.yourwebsite.com/, rewrite them to the login page
-    if (url.pathname === '/') {
-      return NextResponse.rewrite(new URL('/admin/login', req.url));
-    }
-    
-    // If they go to admin.yourwebsite.com/dashboard, rewrite to /admin/dashboard
-    if (!url.pathname.startsWith('/admin')) {
-      return NextResponse.rewrite(new URL(`/admin${url.pathname}`, req.url));
-    }
+  if (!hostNoPort.startsWith("admin.")) {
+    return NextResponse.next();
   }
 
-  // Otherwise, let them browse the normal public website
+  if (url.pathname === "/") {
+    return NextResponse.rewrite(new URL("/admin/login", req.url));
+  }
+
+  if (url.pathname.startsWith("/admin")) {
+    return NextResponse.next();
+  }
+
+  if (isAdminShortcut(url.pathname)) {
+    return NextResponse.rewrite(new URL(`/admin${url.pathname}`, req.url));
+  }
+
   return NextResponse.next();
 }
 

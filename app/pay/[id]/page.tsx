@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
-import Image from "next/image";
+import BrandLogo from "@/components/BrandLogo";
 import { CheckCircle, CreditCard, Receipt, MapPin, Package, ShieldCheck } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -27,11 +27,11 @@ export default async function ClientPaymentPage({ params }: { params: Promise<{ 
   const trackingNumber = invoice.request.package?.trackingId;
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col items-center py-12 px-4 sm:px-6 lg:px-8 font-sans">
+    <div className="min-h-dvh bg-gray-50 flex flex-col items-center py-8 sm:py-12 px-3 sm:px-6 lg:px-8 font-sans">
       
       {/* LOGO */}
-      <div className="mb-8">
-        <Image src="/Logo.JPG" alt="MEX509" width={150} height={50} className="h-12 w-auto object-contain" />
+      <div className="mb-8 flex justify-center">
+        <BrandLogo href="/" width={240} height={80} alt="MEX509" className="h-12 w-auto object-left" prefetch={false} />
       </div>
 
       <div className="bg-white rounded-3xl shadow-2xl border border-gray-100 w-full max-w-lg overflow-hidden">

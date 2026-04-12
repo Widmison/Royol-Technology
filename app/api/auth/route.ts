@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { cookies } from "next/headers";
+import { validateSignupPassword } from "@/lib/passwordPolicy";
+import { sendSignupVerificationEmail } from "@/lib/sendVerificationEmail";
 
 // Helper function to generate a random 6-digit code
 const generateCode = () => Math.floor(100000 + Math.random() * 900000).toString();
@@ -16,6 +18,9 @@ export async function POST(req: Request) {
     let user;
 
     if (action === "signup") {
+      const pwError = validateSignupPassword(password);
+      if (pwError) return NextResponse.json({ error: pwError }, { status: 400 });
+
       const existingUser = await prisma.user.findUnique({ where: { email } });
       if (existingUser) return NextResponse.json({ error: "Email already in use." }, { status: 400 });
 
@@ -30,11 +35,27 @@ export async function POST(req: Request) {
         },
       });
 
+      const emailed = await sendSignupVerificationEmail(email, newCode);
+
       console.log(`\n========================================`);
       console.log(`🔒 EMAIL VERIFICATION CODE FOR ${email}: ${newCode}`);
+      console.log(emailed ? "   (copy also sent by email via Resend)" : "   (email not sent — check RESEND_API_KEY / EMAIL_FROM)");
       console.log(`========================================\n`);
 
-      return NextResponse.json({ success: true, requireVerification: true }, { status: 200 });
+      return NextResponse.json(
+        {
+          success: true,
+          requireVerification: true,
+          verificationEmailSent: emailed,
+          ...(process.env.NODE_ENV === "development" && {
+            devVerificationCode: newCode,
+            devVerificationNote: emailed
+              ? "A verification email was sent. The code is also shown here in development only."
+              : "RESEND_API_KEY or EMAIL_FROM may be missing — code shown here for local testing.",
+          }),
+        },
+        { status: 200 }
+      );
     }
 
     if (action === "login") {
@@ -54,7 +75,18 @@ export async function POST(req: Request) {
         console.log(`🔒 NEW VERIFICATION CODE FOR ${email}: ${newCode}`);
         console.log(`========================================\n`);
 
-        return NextResponse.json({ success: true, requireVerification: true }, { status: 200 });
+        return NextResponse.json(
+          {
+            success: true,
+            requireVerification: true,
+            ...(process.env.NODE_ENV === "development" && {
+              devVerificationCode: newCode,
+              devVerificationNote:
+                "Email/SMS is not wired yet; this code is only returned in development.",
+            }),
+          },
+          { status: 200 }
+        );
       }
     }
 

@@ -16,10 +16,11 @@ export async function POST(req: Request) {
         category: body.category,
         description: body.description,
         shippingMethod: body.shippingMethod,
+        destinationCountry: body.destinationCountry || null,
         address: body.address,
         state: body.state,
         city: body.city,
-        zipCode: body.zipCode,
+        zipCode: (body.zipCode && String(body.zipCode).trim()) || "—",
       },
     });
 

@@ -1,3 +1,5 @@
+import BrandLogo from "@/components/BrandLogo";
+
 export default function Footer() {
   return (
     <footer className="bg-mex-dark text-white py-12 mt-auto">
@@ -5,12 +7,22 @@ export default function Footer() {
         
         {/* Left Side: Brand & Slogan */}
         <div className="flex flex-col items-center md:items-start text-center md:text-left w-full md:w-auto">
-          <div className="flex items-center mb-2">
-            <span className="text-3xl font-black italic text-white tracking-tighter">MEX</span>
-            <span className="text-sm font-black italic text-mex-orange align-top -mt-2">509</span>
+          <div className="mb-3 flex items-center justify-center md:justify-start">
+            <BrandLogo href="/" width={200} height={64} className="h-12 w-auto max-w-[180px] object-left" prefetch={false} />
           </div>
           <p className="text-gray-400 text-sm font-medium mt-1">Reliable. Fast. Secure.</p>
           <p className="text-gray-500 text-xs mt-1">Sèvis rapid e sekirize. Livrezon garanti!</p>
+          <a
+            href="https://docs.google.com/forms/d/e/1FAIpQLSevT3DsMg7B3fXAX9sqz4xOZYds_Xhk2QzmWOn2yCsgPSs7kA/viewform?pli=1"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="group mx-auto mt-4 block w-full max-w-sm text-center text-sm font-bold text-mex-orange underline decoration-mex-orange underline-offset-4 transition-colors hover:text-white hover:decoration-white"
+          >
+            <span className="block">Invest with us — tell us you want to partner (Google Form)</span>
+            <span className="mt-1 block text-xs font-medium normal-case text-gray-400 group-hover:text-gray-200">
+              Envesti avè nou — ranpli fòm patnè a isit la.
+            </span>
+          </a>
         </div>
 
         {/* Middle: Contact & Terms */}

@@ -1,14 +1,21 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+import { useRouter, usePathname } from "next/navigation";
 import { Search, ScanBarcode, Camera, X } from "lucide-react";
 import { Scanner } from '@yudiel/react-qr-scanner';
 
 export default function AdminSearchBar({ initialQuery = "" }: { initialQuery?: string }) {
   const router = useRouter();
+  const pathname = usePathname();
   const [query, setQuery] = useState(initialQuery);
   const [isCameraOpen, setIsCameraOpen] = useState(false);
+
+  useEffect(() => {
+    if (pathname !== "/admin/search" || typeof window === "undefined") return;
+    const q = new URLSearchParams(window.location.search).get("q");
+    if (q != null) setQuery(q);
+  }, [pathname]);
 
   const handleSearch = (e?: React.FormEvent) => {
     if (e) e.preventDefault();

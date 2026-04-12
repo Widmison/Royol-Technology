@@ -53,11 +53,12 @@ model ShipmentRequest {
   departure        String
   category         String
   description      String
-  shippingMethod   String
-  address          String
-  state            String
-  city             String
-  zipCode          String
+  shippingMethod      String
+  destinationCountry  String? // Delivery country (quote step 2)
+  address             String
+  state               String
+  city                String
+  zipCode             String
   clientId         String?       // Optional: if they are logged in
   client           User?         @relation(fields: [clientId], references: [id])
   status           RequestStatus @default(PENDING_DROPOFF)

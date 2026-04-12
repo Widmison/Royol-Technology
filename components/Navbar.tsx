@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { Package, Menu, X, User } from 'lucide-react';
+import BrandLogo from "@/components/BrandLogo";
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -14,17 +14,15 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-20 items-center">
           
-          {/* OFFICIAL LOGO */}
-          <Link href="/" onClick={closeMenu} className="flex items-center">
-            <Image 
-              src="/Logo.jpg" 
-              alt="Mex509 Logo" 
-              width={160} 
-              height={50} 
-              className="h-10 w-auto object-contain" 
-              priority 
-            />
-          </Link>
+          <BrandLogo
+            href="/"
+            onClick={closeMenu}
+            width={220}
+            height={72}
+            className="h-10 w-auto max-w-[200px] object-left"
+            priority
+            prefetch={false}
+          />
 
           {/* Desktop Menu */}
           <div className="hidden md:flex items-center space-x-8">

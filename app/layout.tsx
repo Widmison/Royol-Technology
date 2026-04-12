@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Montserrat } from "next/font/google";
 import "./globals.css";
 import ConditionalLayout from "@/components/ConditionalLayout";
+import { getSiteUrlString } from "@/lib/site";
 
 // Load the custom Montserrat font
 const montserrat = Montserrat({
@@ -10,14 +11,71 @@ const montserrat = Montserrat({
   display: 'swap',
 });
 
-// Define the SEO metadata and Favicon (Browser Tab Icon)
+const siteUrl = getSiteUrlString();
+const defaultTitle = "MEX509 | Voye Li Vit, Resevwa Li Vit!";
+const defaultDescription =
+  "MEX509: fast, secure shipping from the USA, Dominican Republic, and China to Haiti. Air freight, ocean freight, ground freight, tracking, and Doral FL drop-off.";
+
 export const metadata: Metadata = {
-  title: "Mex509 | VOYE LI VIT, RESEVWA LI VIT!",
-  description: "Mex509: Fast, secure, and headache-free delivery logistics. Shipping from USA, DR, and China to Haiti.",
-  icons: {
-    icon: "/Logo.JPG",   // <-- Your standard browser tab icon
-    apple: "/Logo.JPG",  // <-- Your icon for iOS Home Screen saves
+  metadataBase: new URL(siteUrl),
+  title: {
+    default: defaultTitle,
+    template: "%s | MEX509",
   },
+  description: defaultDescription,
+  applicationName: "MEX509",
+  keywords: [
+    "MEX509",
+    "shipping to Haiti",
+    "freight Haiti",
+    "air freight Haiti",
+    "ocean freight Haiti",
+    "cargo Doral",
+    "logistics USA Haiti",
+    "package tracking Haiti",
+    "Dominican Republic to Haiti shipping",
+    "China to Haiti shipping",
+    "Doral FL shipping",
+  ],
+  authors: [{ name: "MEX509 Shipping Services", url: siteUrl }],
+  creator: "MEX509 Shipping Services",
+  publisher: "MEX509 Shipping Services",
+  formatDetection: { telephone: true, email: true },
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    alternateLocale: ["fr_FR", "ht_HT"],
+    url: "/",
+    siteName: "MEX509",
+    title: defaultTitle,
+    description: defaultDescription,
+    images: [
+      {
+        url: "/hero-v2.jpg",
+        width: 1200,
+        height: 630,
+        alt: "MEX509 delivery and logistics",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: defaultTitle,
+    description: defaultDescription,
+    images: ["/hero-v2.jpg"],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1, "max-video-preview": -1 },
+  },
+  icons: {
+    icon: "/logo.jpg",
+    apple: "/logo.jpg",
+  },
+  ...(process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION
+    ? { verification: { google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION } }
+    : {}),
 };
 
 export default function RootLayout({

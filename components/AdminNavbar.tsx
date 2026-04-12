@@ -1,6 +1,6 @@
 import Link from "next/link";
-import Image from "next/image";
 import { Bell, LogOut, ShieldCheck } from "lucide-react";
+import AdminWordmark from "@/components/AdminWordmark";
 
 export default function AdminNavbar() {
   return (
@@ -9,8 +9,8 @@ export default function AdminNavbar() {
         <div className="flex justify-between h-16 items-center">
           
           <div className="flex items-center gap-3">
-            <div className="bg-white px-2 py-1 rounded">
-              <Image src="/Logo.JPG" alt="MEX509" width={100} height={30} className="h-6 w-auto object-contain" />
+            <div className="rounded bg-white px-2 py-1">
+              <AdminWordmark href="/admin/dashboard" />
             </div>
             <span className="bg-mex-orange text-white text-[10px] font-black px-2 py-1 rounded tracking-widest uppercase flex items-center gap-1">
               <ShieldCheck size={12} /> Admin Portal

@@ -1,131 +1,254 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ScanLine, ScanBarcode, CheckCircle, Edit2, X, Save } from "lucide-react";
 
-export default function ShipmentActionMenu({ pkg }: { pkg: any }) {
+const LOCATION_PRESETS = [
+  "MEX509 — Miami hub (1962 NW 82nd Ave, Doral, FL)",
+  "Departed US — in transit to Haiti (air)",
+  "Miami Intl. / cargo transfer — awaiting connection",
+  "Port-au-Prince — sort & distribution facility",
+  "In transit — Route nationale (St-Marc / Gonaïves corridor)",
+  "Cap-Haïtien — regional delivery hub",
+  "Haiti customs — Port-au-Prince clearance",
+  "Ready for pickup — Tabar / Delmas corridor",
+  "Out for delivery — en route to client",
+  "St-Marc — Bon Jean / local corridor",
+  "Delivered — handed to recipient",
+];
+
+const CUSTOM_KEY = "__custom__";
+
+type PkgShape = {
+  trackingId: string;
+  status: string;
+  events?: { location: string; description: string | null; date: Date; status: string }[];
+};
+
+export default function ShipmentActionMenu({ pkg }: { pkg: PkgShape }) {
   const router = useRouter();
   const [isModalOpen, setIsModalOpen] = useState(false);
-  
-  const [status, setStatus] = useState(
-    pkg.status === "PROCESSING" ? "IN_TRANSIT" : 
-    pkg.status === "IN_TRANSIT" ? "READY_FOR_PICKUP" : "DELIVERED"
+
+  const latest = pkg.events?.[0];
+  const defaultLocation = latest?.location ?? LOCATION_PRESETS[0]!;
+
+  const initialPreset = useMemo(() => {
+    if (LOCATION_PRESETS.includes(defaultLocation)) return defaultLocation;
+    return CUSTOM_KEY;
+  }, [defaultLocation]);
+
+  const [status, setStatus] = useState(pkg.status);
+  const [locPreset, setLocPreset] = useState(initialPreset);
+  const [locCustom, setLocCustom] = useState(
+    initialPreset === CUSTOM_KEY ? defaultLocation : ""
   );
-  
-  // Set default location to Doral or St Marc based on package status!
-  const [location, setLocation] = useState(
-    pkg.status === "PROCESSING" ? "1962 NW 82nd Ave Doral, FL 33126" : "St Marc Rue louverture #336 Bon jean Market"
-  );
-  
+
+  const resolvedLocation =
+    locPreset === CUSTOM_KEY ? (locCustom.trim() || defaultLocation) : locPreset;
+
   const [description, setDescription] = useState("");
   const [isSaving, setIsSaving] = useState(false);
+  const [error, setError] = useState("");
 
-  // ==========================================
-  // PRIMARY BUTTON LOGIC (Scanner Link)
-  // ==========================================
-  let ScanButton;
-  if (pkg.status === 'PROCESSING') {
+  let ScanButton: ReactNode;
+  if (pkg.status === "PROCESSING") {
     ScanButton = (
-      <Link href="/admin/scan?mode=us" className="text-white bg-mex-blue hover:bg-blue-900 px-4 py-2.5 rounded-xl font-bold text-xs transition-colors flex items-center justify-center gap-2 flex-1 shadow-sm">
-        <ScanLine size={16}/> Scan Out (US)
+      <Link
+        href="/admin/scan?mode=us"
+        className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-mex-blue px-4 py-2.5 text-xs font-bold text-white shadow-sm transition-colors hover:bg-blue-900"
+      >
+        <ScanLine size={16} /> Scan out (US)
       </Link>
     );
-  } else if (pkg.status === 'IN_TRANSIT' || pkg.status === 'CUSTOMS') {
+  } else if (pkg.status === "IN_TRANSIT" || pkg.status === "CUSTOMS") {
     ScanButton = (
-      <Link href="/admin/scan?mode=haiti" className="text-white bg-mex-orange hover:bg-orange-700 px-4 py-2.5 rounded-xl font-bold text-xs transition-colors flex items-center justify-center gap-2 flex-1 shadow-sm">
-        <ScanBarcode size={16}/> Scan In (HT)
+      <Link
+        href="/admin/scan?mode=haiti"
+        className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-mex-orange px-4 py-2.5 text-xs font-bold text-white shadow-sm transition-colors hover:bg-orange-700"
+      >
+        <ScanBarcode size={16} /> Scan in (HT)
       </Link>
     );
-  } else if (pkg.status === 'READY_FOR_PICKUP') {
+  } else if (pkg.status === "READY_FOR_PICKUP") {
     ScanButton = (
-      <Link href="/admin/scan?mode=haiti" className="text-white bg-green-600 hover:bg-green-700 px-4 py-2.5 rounded-xl font-bold text-xs transition-colors flex items-center justify-center gap-2 flex-1 shadow-sm">
-        <CheckCircle size={16}/> Mark Delivered
+      <Link
+        href="/admin/scan?mode=haiti"
+        className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-green-600 px-4 py-2.5 text-xs font-bold text-white shadow-sm transition-colors hover:bg-green-700"
+      >
+        <CheckCircle size={16} /> Deliver
       </Link>
     );
   } else {
     ScanButton = (
-      <span className="text-gray-400 bg-gray-50 px-4 py-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-2 flex-1 border border-gray-200">
-        <CheckCircle size={16}/> Completed
+      <span className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-gray-200 bg-gray-50 px-4 py-2.5 text-xs font-bold text-gray-400">
+        <CheckCircle size={16} /> Done
       </span>
     );
   }
 
+  const openModal = () => {
+    setStatus(pkg.status);
+    const lp = LOCATION_PRESETS.includes(defaultLocation) ? defaultLocation : CUSTOM_KEY;
+    setLocPreset(lp);
+    setLocCustom(lp === CUSTOM_KEY ? defaultLocation : "");
+    setDescription("");
+    setError("");
+    setIsModalOpen(true);
+  };
+
   const handleManualUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSaving(true);
+    setError("");
     try {
       const res = await fetch("/api/admin/scan", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ trackingId: pkg.trackingId, status, location, description: description || "Manually updated by Admin" }),
+        body: JSON.stringify({
+          trackingId: pkg.trackingId,
+          status,
+          location: resolvedLocation,
+          description: description.trim() || `Status: ${String(status).replace(/_/g, " ")} — ${resolvedLocation}`,
+        }),
       });
-      if (res.ok) {
-        setIsModalOpen(false);
-        router.refresh();
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setError(typeof data.error === "string" ? data.error : "Update failed");
+        return;
       }
-    } catch (error) {
-      console.error(error);
+      setIsModalOpen(false);
+      router.refresh();
+    } catch {
+      setError("Network error");
     } finally {
       setIsSaving(false);
     }
   };
 
   return (
-    <div className="relative flex items-center gap-2 justify-end w-full md:w-auto">
+    <div className="relative flex w-full flex-wrap items-center justify-end gap-2 md:w-auto">
       {ScanButton}
-      
-      {/* SECONDARY MANUAL EDIT BUTTON */}
-      {pkg.status !== 'DELIVERED' && (
-        <button onClick={() => setIsModalOpen(true)} className="p-2.5 bg-white text-gray-500 hover:bg-gray-100 hover:text-mex-blue rounded-xl transition-colors shadow-sm border border-gray-200 shrink-0" title="Manual Override">
+
+      {pkg.status !== "DELIVERED" && (
+        <button
+          type="button"
+          onClick={openModal}
+          className="shrink-0 rounded-xl border border-gray-200 bg-white p-2.5 text-gray-500 shadow-sm transition-colors hover:bg-gray-100 hover:text-mex-blue"
+          title="Manual update (status + location)"
+        >
           <Edit2 size={16} />
         </button>
       )}
 
-      {/* MANUAL UPDATE MODAL */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-[200] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200 text-left">
-          <div className="bg-white w-full max-w-md rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
-            <div className="flex justify-between items-center p-6 border-b border-gray-100 bg-gray-50">
-              <h2 className="text-xl font-black text-mex-dark flex items-center gap-2"><Edit2 className="text-mex-blue"/> Manual Update</h2>
-              <button onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-gray-600 bg-white p-2 rounded-full shadow-sm"><X size={20}/></button>
+        <div className="fixed inset-0 z-[200] flex animate-in items-center justify-center bg-black/60 p-4 text-left fade-in duration-200">
+          <div className="max-h-[90dvh] w-full max-w-md animate-in overflow-y-auto rounded-3xl bg-white shadow-2xl zoom-in-95 duration-200">
+            <div className="flex items-center justify-between border-b border-gray-100 bg-gray-50 p-5">
+              <h2 className="flex items-center gap-2 text-xl font-black text-mex-dark">
+                <Edit2 className="text-mex-blue" />
+                Tracking update
+              </h2>
+              <button
+                type="button"
+                onClick={() => setIsModalOpen(false)}
+                className="rounded-full bg-white p-2 text-gray-400 shadow-sm hover:text-gray-600"
+              >
+                <X size={20} />
+              </button>
             </div>
-            
-            <form onSubmit={handleManualUpdate} className="p-6 space-y-5">
-              <div className="bg-blue-50 text-mex-blue px-4 py-3 rounded-xl font-black border border-blue-100 text-center mb-2 uppercase tracking-widest text-lg">
+
+            <form onSubmit={handleManualUpdate} className="space-y-4 p-6">
+              <div className="rounded-xl border border-blue-100 bg-blue-50 px-4 py-3 text-center text-lg font-black uppercase tracking-widest text-mex-blue">
                 {pkg.trackingId}
               </div>
 
+              {error && (
+                <div className="rounded-xl border border-red-100 bg-red-50 px-3 py-2 text-sm font-bold text-red-700">
+                  {error}
+                </div>
+              )}
+
               <div>
-                <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">New Status</label>
-                <select value={status} onChange={(e) => setStatus(e.target.value)} className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 focus:border-mex-blue outline-none font-bold text-mex-dark bg-gray-50">
-                  <option value="PROCESSING">Processing (At US Hub)</option>
-                  <option value="IN_TRANSIT">Shipped! (In Transit to Haiti)</option>
-                  <option value="CUSTOMS">Held at Customs</option>
-                  <option value="READY_FOR_PICKUP">Ready for Pickup (Emails Client!)</option>
-                  <option value="DELIVERED">Delivered / Picked Up</option>
-                </select>
-              </div>
-              
-              <div>
-                <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Current Location</label>
-                <select value={location} onChange={(e) => setLocation(e.target.value)} className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 focus:border-mex-blue outline-none font-bold text-mex-dark bg-gray-50">
-                  <option>1962 NW 82nd Ave Doral, FL 33126</option>
-                  <option>St Marc Rue louverture #336 Bon jean Market</option>
-                  <option>Haiti Customs Port</option>
+                <label className="mb-2 block text-[10px] font-bold uppercase tracking-wider text-gray-400">
+                  Package status
+                </label>
+                <select
+                  value={status}
+                  onChange={(e) => setStatus(e.target.value)}
+                  className="w-full rounded-xl border-2 border-gray-200 bg-gray-50 px-4 py-3 font-bold text-mex-dark outline-none focus:border-mex-blue"
+                >
+                  <option value="PROCESSING">Processing — US hub</option>
+                  <option value="IN_TRANSIT">In transit — to Haiti</option>
+                  <option value="CUSTOMS">Customs / inspection</option>
+                  <option value="READY_FOR_PICKUP">Ready for pickup</option>
+                  <option value="DELIVERED">Delivered</option>
                 </select>
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Admin Note (Optional)</label>
-                <input type="text" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="e.g., Delay due to weather" className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 focus:border-mex-blue outline-none font-bold text-mex-dark" />
+                <label className="mb-2 block text-[10px] font-bold uppercase tracking-wider text-gray-400">
+                  Location checkpoint
+                </label>
+                <select
+                  value={locPreset}
+                  onChange={(e) => setLocPreset(e.target.value)}
+                  className="mb-2 w-full rounded-xl border-2 border-gray-200 bg-gray-50 px-4 py-3 font-bold text-mex-dark outline-none focus:border-mex-blue"
+                >
+                  {LOCATION_PRESETS.map((p) => (
+                    <option key={p} value={p}>
+                      {p}
+                    </option>
+                  ))}
+                  <option value={CUSTOM_KEY}>Custom location…</option>
+                </select>
+                {locPreset === CUSTOM_KEY && (
+                  <textarea
+                    value={locCustom}
+                    onChange={(e) => setLocCustom(e.target.value)}
+                    rows={2}
+                    required
+                    placeholder="e.g. In transit — Jacmel depot, awaiting transfer"
+                    className="w-full rounded-xl border-2 border-gray-200 px-4 py-3 text-sm font-semibold text-mex-dark outline-none focus:border-mex-blue"
+                  />
+                )}
+                <p className="mt-1 text-[10px] font-medium text-gray-500">
+                  Clients see this line on the tracking timeline with the status above.
+                </p>
               </div>
 
-              <div className="pt-4 flex gap-3">
-                <button type="button" onClick={() => setIsModalOpen(false)} className="flex-1 py-3 font-bold text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors">Cancel</button>
-                <button type="submit" disabled={isSaving} className="flex-1 bg-mex-blue text-white py-3 rounded-xl font-bold hover:bg-blue-900 transition-colors shadow-lg shadow-blue-500/30 flex items-center justify-center gap-2 disabled:opacity-50">
-                  {isSaving ? "Saving..." : <><Save size={18}/> Update Tracking</>}
+              <div>
+                <label className="mb-2 block text-[10px] font-bold uppercase tracking-wider text-gray-400">
+                  Public note (optional)
+                </label>
+                <input
+                  type="text"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  placeholder="Delay, flight, contact attempt…"
+                  className="w-full rounded-xl border-2 border-gray-200 px-4 py-3 font-bold text-mex-dark outline-none focus:border-mex-blue"
+                />
+              </div>
+
+              <div className="flex gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setIsModalOpen(false)}
+                  className="flex-1 rounded-xl bg-gray-100 py-3 font-bold text-gray-600 transition-colors hover:bg-gray-200"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSaving}
+                  className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-mex-blue py-3 font-bold text-white shadow-lg shadow-blue-500/30 transition-colors hover:bg-blue-900 disabled:opacity-50"
+                >
+                  {isSaving ? "Saving…" : (
+                    <>
+                      <Save size={18} /> Save
+                    </>
+                  )}
                 </button>
               </div>
             </form>

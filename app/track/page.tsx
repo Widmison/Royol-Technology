@@ -1,9 +1,22 @@
+import type { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { 
   Search, CheckCircle, Truck, Package as PackageIcon, 
   MapPin, CreditCard, Receipt, AlertCircle 
 } from "lucide-react";
+
+export const metadata: Metadata = {
+  title: "Track your package",
+  description:
+    "Track MEX509 shipments in real time. Enter your tracking ID to see status, location updates, and delivery progress for cargo to Haiti.",
+  alternates: { canonical: "/track" },
+  openGraph: {
+    title: "Package tracking | MEX509",
+    description: "Look up your MEX509 tracking number for live shipment status.",
+    url: "/track",
+  },
+};
 
 export const dynamic = "force-dynamic";
 
@@ -37,22 +50,24 @@ export default async function TrackPage({ searchParams }: { searchParams: Promis
         {/* 1. HERO SEARCH SECTION (Always Visible)      */}
         {/* ========================================== */}
         <div className="mb-10 text-center">
-          <h1 className="text-3xl font-black italic text-mex-blue uppercase mb-4">Track Your Package</h1>
+          <h1 className="text-2xl sm:text-3xl font-black italic text-mex-blue uppercase mb-4 px-1">Track Your Package</h1>
           
           {/* Native HTML Form - Updates the URL instantly to ?id=MEX... */}
-          <form action="/track" method="GET" className="bg-white p-2 rounded-xl shadow-sm flex max-w-2xl mx-auto border border-gray-200 focus-within:ring-2 focus-within:ring-mex-orange transition-all">
-            <div className="flex items-center pl-4 text-gray-400">
-              <Search size={20} />
+          <form action="/track" method="GET" className="bg-white p-2 rounded-xl shadow-sm flex flex-col sm:flex-row max-w-2xl mx-auto border border-gray-200 focus-within:ring-2 focus-within:ring-mex-orange transition-all gap-2 sm:gap-0">
+            <div className="flex items-center flex-1 min-w-0 rounded-lg sm:rounded-none bg-gray-50/50 sm:bg-transparent border border-gray-100 sm:border-0">
+              <div className="flex items-center pl-3 sm:pl-4 text-gray-400 shrink-0">
+                <Search size={20} />
+              </div>
+              <input 
+                type="text" 
+                name="id"
+                required
+                defaultValue={trackingId || ""} 
+                placeholder="Enter Tracking ID (e.g. MEX12345)"
+                className="w-full min-w-0 pl-2 sm:pl-3 pr-3 py-3 focus:outline-none text-mex-dark font-black tracking-wider uppercase placeholder:font-medium placeholder:tracking-normal text-sm sm:text-base"
+              />
             </div>
-            <input 
-              type="text" 
-              name="id"
-              required
-              defaultValue={trackingId || ""} 
-              placeholder="Enter Tracking ID (e.g. MEX12345)"
-              className="w-full pl-3 pr-4 py-3 focus:outline-none text-mex-dark font-black tracking-wider uppercase placeholder:font-medium placeholder:tracking-normal"
-            />
-            <button type="submit" className="bg-mex-orange text-white px-8 py-3 rounded-lg font-bold hover:bg-orange-600 transition-colors shadow-md">
+            <button type="submit" className="w-full sm:w-auto shrink-0 bg-mex-orange text-white px-8 py-3 rounded-lg font-bold hover:bg-orange-600 transition-colors shadow-md">
               Track
             </button>
           </form>
@@ -75,7 +90,7 @@ export default async function TrackPage({ searchParams }: { searchParams: Promis
             
             {/* TRACKING TIMELINE */}
             {/* Note: It spans 3 columns if there is NO invoice, 2 columns if there IS an invoice */}
-            <div className={`bg-white rounded-3xl shadow-sm border border-gray-100 p-8 ${pkg.request.invoice ? 'lg:col-span-2' : 'lg:col-span-3'}`}>
+            <div className={`bg-white rounded-3xl shadow-sm border border-gray-100 p-5 sm:p-8 min-w-0 ${pkg.request.invoice ? 'lg:col-span-2' : 'lg:col-span-3'}`}>
               
               <div className="flex items-center justify-between border-b border-gray-100 pb-6 mb-8">
                 <div>
@@ -114,12 +129,14 @@ export default async function TrackPage({ searchParams }: { searchParams: Promis
                         </div>
                         
                         <div className={`flex-1 ${isLatest ? 'bg-orange-50/50 p-4 rounded-2xl border border-mex-orange/20 -mt-3' : ''}`}>
-                          <div className={`font-bold text-lg ${isLatest ? 'text-mex-orange' : 'text-mex-dark'}`}>
-                            {String(event.status).replace('_', ' ')}
+                          <div className={`font-bold text-base leading-snug sm:text-lg ${isLatest ? 'text-mex-orange' : 'text-mex-dark'}`}>
+                            {event.location}
                           </div>
-                          <div className="text-sm text-gray-600 mt-1">
-                            <strong className="text-gray-800">{event.location}</strong>
-                            {event.description && ` • ${event.description}`}
+                          <div className="mt-1 text-xs font-black uppercase tracking-wide text-gray-500">
+                            {String(event.status).replace(/_/g, " ")}
+                          </div>
+                          <div className="mt-1.5 text-sm text-gray-600">
+                            {event.description && <span className="font-medium">{event.description}</span>}
                           </div>
                           <div className={`text-xs font-bold mt-2 ${isLatest ? 'text-orange-400' : 'text-gray-400'}`}>
                             {new Date(event.date).toLocaleString()}
@@ -136,7 +153,7 @@ export default async function TrackPage({ searchParams }: { searchParams: Promis
             {/* 3. INVOICE MOCKUP (Hidden if no invoice!)  */}
             {/* ========================================== */}
             {pkg.request.invoice && (
-              <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 h-fit sticky top-6">
+              <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-5 sm:p-6 h-fit lg:sticky lg:top-6 min-w-0">
                 <h2 className="text-lg font-black text-mex-dark border-b border-gray-100 pb-4 mb-4 flex items-center gap-2 uppercase tracking-wide">
                   <Receipt className="text-mex-orange w-5 h-5" />
                   Invoice Summary

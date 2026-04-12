@@ -91,8 +91,8 @@ export default function QuoteTable({ quotes }: { quotes: any[] }) {
 
   return (
     <>
-      <div className="overflow-x-auto">
-        <table className="w-full text-left">
+      <div className="overflow-x-auto overscroll-x-contain -mx-px">
+        <table className="w-full text-left min-w-[640px]">
           <thead className="bg-white text-gray-400 text-xs uppercase tracking-wider border-b border-gray-100">
             <tr>
               <th className="p-4 font-bold">Client</th>

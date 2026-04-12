@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { sharePreviewOgImage } from "@/lib/share-image";
 
 export const metadata: Metadata = {
   title: "Request a shipping quote",
@@ -9,6 +10,11 @@ export const metadata: Metadata = {
     title: "Request a quote | MEX509",
     description: "Get a quote and pre-register your box for drop-off in Doral, FL.",
     url: "/quote",
+    images: [sharePreviewOgImage],
+  },
+  twitter: {
+    card: "summary",
+    images: [sharePreviewOgImage.url],
   },
 };
 

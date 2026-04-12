@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
+import { sharePreviewOgImage } from "@/lib/share-image";
 import Link from "next/link";
 import { 
   Search, CheckCircle, Truck, Package as PackageIcon, 
@@ -15,6 +16,11 @@ export const metadata: Metadata = {
     title: "Package tracking | MEX509",
     description: "Look up your MEX509 tracking number for live shipment status.",
     url: "/track",
+    images: [sharePreviewOgImage],
+  },
+  twitter: {
+    card: "summary",
+    images: [sharePreviewOgImage.url],
   },
 };
 

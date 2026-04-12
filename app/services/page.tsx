@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { sharePreviewOgImage } from "@/lib/share-image";
 import { Plane, Ship, ShoppingCart, MapPinned, Warehouse } from "lucide-react";
 import { LOGISTICS_SERVICES, type LogisticsServiceId } from "@/lib/logistics-services";
 
@@ -12,6 +13,11 @@ export const metadata: Metadata = {
     title: "Our logistics services | MEX509",
     description: "Air, ocean, shopping, warehouse, and local delivery tailored for Haiti-bound cargo.",
     url: "/services",
+    images: [sharePreviewOgImage],
+  },
+  twitter: {
+    card: "summary",
+    images: [sharePreviewOgImage.url],
   },
 };
 

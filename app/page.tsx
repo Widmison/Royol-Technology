@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import type { Metadata } from "next";
 import HomeJsonLd from "@/components/seo/HomeJsonLd";
+import { sharePreviewOgImage } from "@/lib/share-image";
 
 export const metadata: Metadata = {
   title: "Shipping USA, DR & China to Haiti",
@@ -31,6 +32,11 @@ export const metadata: Metadata = {
     description:
       "Sèvis rapid e sekirize. Livrezon garanti! USA, DR, and China to Haiti — track, quote, and ship.",
     url: "/",
+    images: [sharePreviewOgImage],
+  },
+  twitter: {
+    card: "summary",
+    images: [sharePreviewOgImage.url],
   },
 };
 

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { CguLegalSections, CguPageHeader } from "@/components/CguDocument";
+import { sharePreviewOgImage } from "@/lib/share-image";
 
 export const metadata: Metadata = {
   title: "Conditions Générales d'Utilisation",
@@ -13,6 +14,11 @@ export const metadata: Metadata = {
     url: "/conditions-generales",
     type: "article",
     locale: "fr_FR",
+    images: [sharePreviewOgImage],
+  },
+  twitter: {
+    card: "summary",
+    images: [sharePreviewOgImage.url],
   },
 };
 

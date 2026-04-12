@@ -3,6 +3,7 @@ import { Montserrat } from "next/font/google";
 import "./globals.css";
 import ConditionalLayout from "@/components/ConditionalLayout";
 import { getSiteUrlString } from "@/lib/site";
+import { sharePreviewOgImage } from "@/lib/share-image";
 
 // Load the custom Montserrat font
 const montserrat = Montserrat({
@@ -49,20 +50,13 @@ export const metadata: Metadata = {
     siteName: "MEX509",
     title: defaultTitle,
     description: defaultDescription,
-    images: [
-      {
-        url: "/hero-v2.jpg",
-        width: 1200,
-        height: 630,
-        alt: "MEX509 delivery and logistics",
-      },
-    ],
+    images: [sharePreviewOgImage],
   },
   twitter: {
-    card: "summary_large_image",
+    card: "summary",
     title: defaultTitle,
     description: defaultDescription,
-    images: ["/hero-v2.jpg"],
+    images: [sharePreviewOgImage.url],
   },
   robots: {
     index: true,

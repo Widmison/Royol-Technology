@@ -1,8 +1,14 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { requireAdminApiUser } from "@/lib/requireApiSession";
+import { validateSignupPassword } from "@/lib/passwordPolicy";
+import { hashPassword } from "@/lib/passwordCrypto";
 
 export async function POST(req: Request) {
   try {
+    const adminOrRes = await requireAdminApiUser();
+    if (adminOrRes instanceof NextResponse) return adminOrRes;
+
     const body = await req.json();
     
     // We added the address fields and removed 'role'
@@ -15,10 +21,14 @@ export async function POST(req: Request) {
       const existing = await prisma.user.findUnique({ where: { email } });
       if (existing) return NextResponse.json({ error: "Email already exists in the system." }, { status: 400 });
 
+      const rawPw = typeof password === "string" ? password : "";
+      const pwError = validateSignupPassword(rawPw);
+      if (pwError) return NextResponse.json({ error: pwError }, { status: 400 });
+
       const user = await prisma.user.create({
         data: {
           email,
-          password: password || "Mex509Secure!", // Default password if you leave it blank
+          password: await hashPassword(rawPw),
           firstName,
           lastName,
           phone,
@@ -27,7 +37,8 @@ export async function POST(req: Request) {
           isVerified: true, 
         }
       });
-      return NextResponse.json({ success: true, user });
+      const { password: _pw, ...safeUser } = user;
+      return NextResponse.json({ success: true, user: safeUser });
     }
 
     // ==========================================
@@ -39,7 +50,8 @@ export async function POST(req: Request) {
         where: { id },
         data: { email, firstName, lastName, phone, address, city, state, zipCode } // Update address!
       });
-      return NextResponse.json({ success: true, user });
+      const { password: _pwU, ...safeUser } = user;
+      return NextResponse.json({ success: true, user: safeUser });
     }
 
     // ==========================================

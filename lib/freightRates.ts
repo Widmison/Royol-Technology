@@ -1,29 +1,23 @@
-/**
- * Published rates (kept in sync with client dashboard pricing tab).
- */
-export const AIR_PER_LB_USD = 4.9;
-export const AIR_SERVICE_FEE_USD = 10;
-export const OCEAN_PER_LB_USD = 2.9;
-export const OCEAN_SERVICE_FEE_USD = 5;
+import { estimateShippingTotal, type CalculatorMethod } from "@/lib/shippingCalculatorRates";
 
-function isOceanMethod(shippingMethod: string): boolean {
-  const m = shippingMethod.trim().toLowerCase();
-  return (
+/**
+ * Maps quote / request labels (e.g. "Air Freight", "Ocean Freight") to calculator lanes
+ * so warehouse intake and `/api/invoice` match the public shipping estimator (same per-lb rates).
+ */
+export function shippingMethodToCalculatorMethod(shippingMethod: string): CalculatorMethod {
+  const m = (shippingMethod || "").trim().toLowerCase();
+  if (m.includes("ground") || m.includes("terrestre")) return "ground";
+  if (
     m.includes("ocean") ||
     m.includes("sea") ||
     m.includes("bateau") ||
     m.includes("bato")
-  );
+  ) {
+    return "sea";
+  }
+  return "air";
 }
 
-export function calculateFreightTotal(
-  weightLbs: number,
-  shippingMethod: string
-): number {
-  if (!Number.isFinite(weightLbs) || weightLbs <= 0) return 0;
-  const ocean = isOceanMethod(shippingMethod);
-  const perLb = ocean ? OCEAN_PER_LB_USD : AIR_PER_LB_USD;
-  const fee = ocean ? OCEAN_SERVICE_FEE_USD : AIR_SERVICE_FEE_USD;
-  const total = weightLbs * perLb + fee;
-  return Math.round(total * 100) / 100;
+export function calculateFreightTotal(weightLbs: number, shippingMethod: string): number {
+  return estimateShippingTotal(weightLbs, shippingMethodToCalculatorMethod(shippingMethod));
 }

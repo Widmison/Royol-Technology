@@ -6,6 +6,7 @@ import {
   Search, Plus, Edit2, Trash2, Mail, Phone, Calendar, 
   X, CheckCircle, AlertTriangle, MapPin
 } from "lucide-react";
+import { SIGNUP_PASSWORD_RULES_TEXT } from "@/lib/passwordPolicy";
 
 export default function AdminUserManager({ initialUsers }: { initialUsers: any[] }) {
   const router = useRouter();
@@ -221,8 +222,16 @@ export default function AdminUserManager({ initialUsers }: { initialUsers: any[]
                 
                 {isAddOpen && (
                   <div className="md:col-span-2">
-                    <label className="block text-sm font-bold text-gray-500 mb-2">Temporary Password</label>
-                    <input type="text" value={formData.password} onChange={(e) => setFormData({...formData, password: e.target.value})} className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-mex-blue outline-none font-bold text-mex-dark" placeholder="Leave blank for default (Mex509Secure!)" />
+                    <label className="block text-sm font-bold text-gray-500 mb-2">Initial password</label>
+                    <input
+                      type="password"
+                      autoComplete="new-password"
+                      value={formData.password}
+                      onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                      className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-mex-blue outline-none font-bold text-mex-dark"
+                      placeholder="Required — share securely with the client"
+                    />
+                    <p className="mt-2 text-xs font-medium text-gray-500">{SIGNUP_PASSWORD_RULES_TEXT}</p>
                   </div>
                 )}
 

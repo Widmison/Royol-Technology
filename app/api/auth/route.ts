@@ -1,23 +1,177 @@
+import { timingSafeEqual } from "crypto";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { cookies } from "next/headers";
 import { validateSignupPassword } from "@/lib/passwordPolicy";
 import { sendSignupVerificationEmail } from "@/lib/sendVerificationEmail";
+import { sendPasswordResetEmail } from "@/lib/sendPasswordResetEmail";
+import {
+  CLIENT_SESSION_COOKIE,
+  clearAuthSessionCookies,
+  sessionCookieOptions,
+} from "@/lib/authCookies";
+import { isAdminPortalLoginEmail } from "@/lib/adminAuthConfig";
+import { hashPassword, verifyPassword, shouldUpgradePasswordHash } from "@/lib/passwordCrypto";
+import { allowAuthAttempt, clientIp } from "@/lib/authRateLimit";
 
 // Helper function to generate a random 6-digit code
 const generateCode = () => Math.floor(100000 + Math.random() * 900000).toString();
 
+function normalizeResetCode(raw: string): string | null {
+  const digits = raw.replace(/\D/g, "");
+  return digits.length === 6 ? digits : null;
+}
+
+async function validateActiveResetCode(
+  emailRaw: string,
+  rawToken: string
+): Promise<{ ok: true; userId: string } | { ok: false; message: string }> {
+  const em = emailRaw.trim();
+  const tkNorm = normalizeResetCode(rawToken.trim());
+  if (!tkNorm) {
+    return { ok: false, message: "Enter the 6-digit code from your email." };
+  }
+
+  const account = await prisma.user.findFirst({
+    where: {
+      email: em,
+      passwordResetExpires: { gt: new Date() },
+      role: "CLIENT",
+      passwordResetToken: { not: null },
+    },
+  });
+
+  if (!account?.passwordResetToken) {
+    return {
+      ok: false,
+      message: "Invalid or expired code. Request a new reset from the login page.",
+    };
+  }
+
+  const a = Buffer.from(account.passwordResetToken, "utf8");
+  const b = Buffer.from(tkNorm, "utf8");
+  if (a.length !== b.length || !timingSafeEqual(a, b)) {
+    return {
+      ok: false,
+      message: "Invalid or expired code. Request a new reset from the login page.",
+    };
+  }
+
+  return { ok: true, userId: account.id };
+}
+
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    // Added 'phone' here!
-    const { action, email, password, firstName, lastName, phone, address, city, state, zipCode, code } = body;
+    const {
+      action,
+      email,
+      password,
+      firstName,
+      lastName,
+      phone,
+      address,
+      city,
+      state,
+      zipCode,
+      code,
+      token,
+      newPassword,
+    } = body;
+
+    const ip = clientIp(req);
+    const rateBuckets = ["login", "signup", "forgot_password", "verify_reset_code", "reset_password"];
+    if (
+      typeof action === "string" &&
+      rateBuckets.includes(action) &&
+      !allowAuthAttempt(`portal-auth:${action}:${ip}`)
+    ) {
+      return NextResponse.json({ error: "Too many attempts. Try again shortly." }, { status: 429 });
+    }
+
+    if (action === "forgot_password") {
+      const em = typeof email === "string" ? email.trim() : "";
+      if (!em) return NextResponse.json({ error: "Email is required" }, { status: 400 });
+
+      const account = await prisma.user.findUnique({ where: { email: em } });
+      let devResetCode: string | undefined;
+
+      if (account?.role === "CLIENT" && account.isVerified) {
+        const resetCode = generateCode();
+        const passwordResetExpires = new Date(Date.now() + 60 * 60 * 1000);
+        await prisma.user.update({
+          where: { id: account.id },
+          data: { passwordResetToken: resetCode, passwordResetExpires },
+        });
+        const emailed = await sendPasswordResetEmail(em, resetCode);
+        if (process.env.NODE_ENV === "development") {
+          console.log(`\n[MEX509] Password reset for ${em}. Email sent: ${emailed}. Code (1h): ${resetCode}\n`);
+          if (!emailed) devResetCode = resetCode;
+        }
+      }
+
+      return NextResponse.json({
+        success: true,
+        message:
+          "If an account exists for this email, you will receive a 6-digit reset code shortly. Check your inbox and spam folder.",
+        ...(devResetCode ? { devResetCode } : {}),
+      });
+    }
+
+    if (action === "verify_reset_code") {
+      const em = typeof email === "string" ? email.trim() : "";
+      const tk = typeof token === "string" ? token.trim() : "";
+      if (!em || !tk) {
+        return NextResponse.json({ error: "Email and verification code are required." }, { status: 400 });
+      }
+
+      const v = await validateActiveResetCode(em, tk);
+      if (!v.ok) {
+        return NextResponse.json({ error: v.message }, { status: 400 });
+      }
+
+      return NextResponse.json({ success: true });
+    }
+
+    if (action === "reset_password") {
+      const em = typeof email === "string" ? email.trim() : "";
+      const tk = typeof token === "string" ? token.trim() : "";
+      const np = typeof newPassword === "string" ? newPassword : "";
+      if (!em || !tk || !np) {
+        return NextResponse.json({ error: "Email, verification code, and new password are required." }, { status: 400 });
+      }
+      const pwError = validateSignupPassword(np);
+      if (pwError) return NextResponse.json({ error: pwError }, { status: 400 });
+
+      const v = await validateActiveResetCode(em, tk);
+      if (!v.ok) {
+        return NextResponse.json({ error: v.message }, { status: 400 });
+      }
+
+      await prisma.user.update({
+        where: { id: v.userId },
+        data: {
+          password: await hashPassword(np),
+          passwordResetToken: null,
+          passwordResetExpires: null,
+        },
+      });
+
+      return NextResponse.json({ success: true, message: "Password updated. You can sign in now." });
+    }
 
     if (!email) return NextResponse.json({ error: "Email is required" }, { status: 400 });
 
     let user;
 
     if (action === "signup") {
+      if (isAdminPortalLoginEmail(email)) {
+        return NextResponse.json(
+          { error: "This email is reserved for administrator sign-in." },
+          { status: 400 }
+        );
+      }
+
       const pwError = validateSignupPassword(password);
       if (pwError) return NextResponse.json({ error: pwError }, { status: 400 });
 
@@ -28,8 +182,15 @@ export async function POST(req: Request) {
 
       user = await prisma.user.create({
         data: {
-          email, password, firstName, lastName, phone, // Added 'phone' here!
-          address, city, state, zipCode, 
+          email,
+          password: await hashPassword(password),
+          firstName,
+          lastName,
+          phone,
+          address,
+          city,
+          state,
+          zipCode,
           isVerified: false,
           verificationCode: newCode,
         },
@@ -37,10 +198,12 @@ export async function POST(req: Request) {
 
       const emailed = await sendSignupVerificationEmail(email, newCode);
 
-      console.log(`\n========================================`);
-      console.log(`🔒 EMAIL VERIFICATION CODE FOR ${email}: ${newCode}`);
-      console.log(emailed ? "   (copy also sent by email via Resend)" : "   (email not sent — check RESEND_API_KEY / EMAIL_FROM)");
-      console.log(`========================================\n`);
+      if (process.env.NODE_ENV === "development") {
+        console.log(`\n========================================`);
+        console.log(`🔒 EMAIL VERIFICATION CODE FOR ${email}: ${newCode}`);
+        console.log(emailed ? "   (copy also sent by email via Resend)" : "   (email not sent — check RESEND_API_KEY / EMAIL_FROM)");
+        console.log(`========================================\n`);
+      }
 
       return NextResponse.json(
         {
@@ -60,8 +223,22 @@ export async function POST(req: Request) {
 
     if (action === "login") {
       user = await prisma.user.findUnique({ where: { email } });
-      if (!user || user.password !== password) {
+      if (!user || !(await verifyPassword(password, user.password))) {
         return NextResponse.json({ error: "Invalid email or password" }, { status: 401 });
+      }
+
+      if (shouldUpgradePasswordHash(user.password)) {
+        await prisma.user.update({
+          where: { id: user.id },
+          data: { password: await hashPassword(password) },
+        });
+      }
+
+      if (user.role === "ADMIN") {
+        return NextResponse.json(
+          { error: "This account is for the admin dashboard. Sign in on the admin portal instead." },
+          { status: 403 }
+        );
       }
 
       if (!user.isVerified) {
@@ -71,9 +248,11 @@ export async function POST(req: Request) {
           data: { verificationCode: newCode }
         });
 
-        console.log(`\n========================================`);
-        console.log(`🔒 NEW VERIFICATION CODE FOR ${email}: ${newCode}`);
-        console.log(`========================================\n`);
+        if (process.env.NODE_ENV === "development") {
+          console.log(`\n========================================`);
+          console.log(`🔒 NEW VERIFICATION CODE FOR ${email}: ${newCode}`);
+          console.log(`========================================\n`);
+        }
 
         return NextResponse.json(
           {
@@ -105,13 +284,17 @@ export async function POST(req: Request) {
     }
 
     if (user && user.isVerified) {
+      if (user.role === "ADMIN") {
+        return NextResponse.json(
+          { error: "Admin accounts must sign in through the admin portal." },
+          { status: 403 }
+        );
+      }
+
       const cookieStore = await cookies();
-      cookieStore.set("clientId", user.id, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        maxAge: 60 * 60 * 24 * 7,
-        path: "/",
-      });
+      const opts = sessionCookieOptions();
+      clearAuthSessionCookies(cookieStore);
+      cookieStore.set(CLIENT_SESSION_COOKIE, user.id, opts);
       return NextResponse.json({ success: true, verified: true }, { status: 200 });
     }
 
@@ -121,4 +304,10 @@ export async function POST(req: Request) {
     console.error("Auth error:", error);
     return NextResponse.json({ error: "Authentication failed" }, { status: 500 });
   }
+}
+
+export async function DELETE() {
+  const cookieStore = await cookies();
+  clearAuthSessionCookies(cookieStore);
+  return NextResponse.json({ success: true });
 }

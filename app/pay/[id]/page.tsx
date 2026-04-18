@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import BrandLogo from "@/components/BrandLogo";
 import { CheckCircle, CreditCard, Receipt, MapPin, Package, ShieldCheck } from "lucide-react";
+import { createInvoicePaymentToken } from "@/lib/payToken";
 
 export const dynamic = "force-dynamic";
 
@@ -25,6 +26,14 @@ export default async function ClientPaymentPage({ params }: { params: Promise<{ 
 
   const isPaid = invoice.status === "PAID";
   const trackingNumber = invoice.request.package?.trackingId;
+
+  let payToken = "";
+  try {
+    payToken = createInvoicePaymentToken(invoice.id);
+  } catch {
+    payToken = "";
+  }
+  const payUnavailable = process.env.NODE_ENV === "production" && !payToken;
 
   return (
     <div className="min-h-dvh bg-gray-50 flex flex-col items-center py-8 sm:py-12 px-3 sm:px-6 lg:px-8 font-sans">
@@ -77,6 +86,18 @@ export default async function ClientPaymentPage({ params }: { params: Promise<{ 
               <p className="text-sm text-green-700 mt-3 flex items-center justify-center gap-1 font-medium">
                 <ShieldCheck size={16} /> Save this number to track your package
               </p>
+              {invoice.paidVia && (
+                <p className="mt-3 text-xs font-bold uppercase tracking-wide text-green-800/90">
+                  Payment method recorded:{" "}
+                  {invoice.paidVia === "NATCASH"
+                    ? "NatCash"
+                    : invoice.paidVia === "MONCASH"
+                      ? "MonCash"
+                      : invoice.paidVia === "CARD"
+                        ? "Card / online"
+                        : invoice.paidVia}
+                </p>
+              )}
             </div>
           )}
 
@@ -98,15 +119,55 @@ export default async function ClientPaymentPage({ params }: { params: Promise<{ 
 
           {/* IF UNPAID: SHOW PAYMENT BUTTON */}
           {!isPaid && (
-            <form action="/api/pay" method="POST" className="pt-4">
-              <input type="hidden" name="invoiceId" value={invoice.id} />
-              <button type="submit" className="w-full bg-mex-orange text-white font-black text-lg px-8 py-5 rounded-2xl hover:bg-orange-700 transition-all shadow-lg shadow-orange-500/30 flex items-center justify-center gap-3 hover:gap-4">
-                <CreditCard size={24} /> Pay Securely Now
-              </button>
-              <p className="text-center text-xs text-gray-400 mt-4 font-medium flex items-center justify-center gap-1">
-                <ShieldCheck size={14}/> 256-bit Secure Encryption (Simulation Mode)
+            <div className="space-y-4 pt-4">
+              {payUnavailable && (
+                <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-center text-sm font-bold text-red-700">
+                  Payments are temporarily unavailable (missing server configuration). Contact support.
+                </div>
+              )}
+              <p className="text-center text-sm font-bold text-gray-600">Choose how you pay</p>
+              <div className="grid gap-3">
+                <form action="/api/pay" method="POST">
+                  <input type="hidden" name="invoiceId" value={invoice.id} />
+                  <input type="hidden" name="payToken" value={payToken} />
+                  <input type="hidden" name="paidVia" value="CARD" />
+                  <button
+                    type="submit"
+                    disabled={payUnavailable}
+                    className="flex w-full items-center justify-center gap-3 rounded-2xl bg-mex-orange px-8 py-4 text-lg font-black text-white shadow-lg shadow-orange-500/30 transition-all hover:bg-orange-700 disabled:pointer-events-none disabled:opacity-50"
+                  >
+                    <CreditCard size={24} /> Card / online (simulated)
+                  </button>
+                </form>
+                <form action="/api/pay" method="POST">
+                  <input type="hidden" name="invoiceId" value={invoice.id} />
+                  <input type="hidden" name="payToken" value={payToken} />
+                  <input type="hidden" name="paidVia" value="NATCASH" />
+                  <button
+                    type="submit"
+                    disabled={payUnavailable}
+                    className="flex w-full items-center justify-center gap-3 rounded-2xl border-2 border-emerald-600 bg-emerald-50 px-8 py-4 text-lg font-black text-emerald-900 transition-all hover:bg-emerald-100 disabled:pointer-events-none disabled:opacity-50"
+                  >
+                    NatCash
+                  </button>
+                </form>
+                <form action="/api/pay" method="POST">
+                  <input type="hidden" name="invoiceId" value={invoice.id} />
+                  <input type="hidden" name="payToken" value={payToken} />
+                  <input type="hidden" name="paidVia" value="MONCASH" />
+                  <button
+                    type="submit"
+                    disabled={payUnavailable}
+                    className="flex w-full items-center justify-center gap-3 rounded-2xl border-2 border-sky-600 bg-sky-50 px-8 py-4 text-lg font-black text-sky-900 transition-all hover:bg-sky-100 disabled:pointer-events-none disabled:opacity-50"
+                  >
+                    MonCash
+                  </button>
+                </form>
+              </div>
+              <p className="flex items-center justify-center gap-1 text-center text-xs font-medium text-gray-400">
+                <ShieldCheck size={14} /> All options mark this invoice paid in the portal (demo — confirm funds offline for mobile money).
               </p>
-            </form>
+            </div>
           )}
 
         </div>

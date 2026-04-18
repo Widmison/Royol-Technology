@@ -35,6 +35,9 @@ model User {
   isVerified       Boolean           @default(false)
   verificationCode String?
 
+  passwordResetToken   String?
+  passwordResetExpires DateTime?
+
   createdAt        DateTime          @default(now())
   requests         ShipmentRequest[] // A client can have many pre-registered shipments
 }
@@ -84,6 +87,8 @@ model Invoice {
   status           InvoiceStatus   @default(UNPAID)
   createdAt        DateTime        @default(now())
   paidAt           DateTime?
+  /** e.g. CARD, NATCASH, MONCASH — set when marked paid */
+  paidVia          String?
 }
 
 enum InvoiceStatus {
@@ -109,6 +114,18 @@ enum PackageStatus {
   CUSTOMS
   READY_FOR_PICKUP
   DELIVERED
+  RECEIVED_USA_WAREHOUSE
+  PROCESSING_SORTING_USA
+  IN_TRANSIT_USA_TO_DR
+  CUSTOMS_DR_ENTRY
+  ARRIVED_RD_WAREHOUSE
+  PREPARING_HAITI_TRANSFER
+  IN_TRANSIT_RD_TO_HT
+  CUSTOMS_HT_ENTRY
+  ARRIVED_HT_MAIN_WAREHOUSE
+  EN_ROUTE_CAP_HAITIEN
+  EN_ROUTE_HINCHE
+  EN_ROUTE_PORT_AU_PRINCE
 }
 
 // 5. TRACKING EVENTS (Updates added by Admin that trigger emails)

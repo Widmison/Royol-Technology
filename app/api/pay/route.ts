@@ -1,13 +1,22 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { allocateMexTrackingId } from "@/lib/trackingId";
+import { verifyInvoicePaymentToken } from "@/lib/payToken";
 
 export async function POST(req: Request) {
   try {
     const formData = await req.formData();
     const invoiceId = formData.get("invoiceId") as string;
+    const payTokenRaw = formData.get("payToken");
+    const payToken = typeof payTokenRaw === "string" ? payTokenRaw : "";
+    const paidViaRaw = (formData.get("paidVia") as string) || "CARD";
+    const paidVia = ["CARD", "NATCASH", "MONCASH"].includes(paidViaRaw) ? paidViaRaw : "CARD";
 
     if (!invoiceId) throw new Error("Missing Invoice ID");
+
+    if (!verifyInvoicePaymentToken(invoiceId, payToken)) {
+      return NextResponse.json({ error: "Invalid or expired payment confirmation." }, { status: 403 });
+    }
 
     const existingInvoice = await prisma.invoice.findUnique({
       where: { id: invoiceId },
@@ -22,7 +31,7 @@ export async function POST(req: Request) {
 
     const invoice = await prisma.invoice.update({
       where: { id: invoiceId },
-      data: { status: "PAID", paidAt: new Date() },
+      data: { status: "PAID", paidAt: new Date(), paidVia },
       include: { request: true },
     });
 

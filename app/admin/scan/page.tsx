@@ -3,11 +3,14 @@
 import { useState, useRef, useEffect } from "react";
 import { Scanner } from "@yudiel/react-qr-scanner";
 import { ScanBarcode, CheckCircle, XCircle, Camera, Keyboard } from "lucide-react";
+import { ALL_ADMIN_SCAN_STATUS_OPTIONS, optionForStatus } from "@/lib/adminTrackingStatusOptions";
 
 export default function AdminScanHubPage() {
   const [trackingId, setTrackingId] = useState("");
-  const [status, setStatus] = useState("READY_FOR_PICKUP");
-  const [location, setLocation] = useState("St Marc Rue louverture #336 Bon jean Market");
+  const [status, setStatus] = useState("RECEIVED_USA_WAREHOUSE");
+  const [location, setLocation] = useState(
+    () => optionForStatus("RECEIVED_USA_WAREHOUSE")?.defaultLocation ?? "1962 NW 82nd Ave Doral, FL 33126"
+  );
 
   const [hubTitle, setHubTitle] = useState("Barcode Scanner Hub");
   const [themeColor, setThemeColor] = useState("text-mex-blue");
@@ -28,15 +31,17 @@ export default function AdminScanHubPage() {
 
     if (mode === "us") {
       setHubTitle("US Dispatch Hub (Scan Out)");
-      setLocation("1962 NW 82nd Ave Doral, FL 33126");
-      setStatus("IN_TRANSIT");
+      setStatus("RECEIVED_USA_WAREHOUSE");
+      setLocation(optionForStatus("RECEIVED_USA_WAREHOUSE")?.defaultLocation ?? "1962 NW 82nd Ave Doral, FL 33126");
       setThemeColor("text-mex-blue");
       setThemeBg("bg-blue-100");
       setHeaderAvatar("US");
     } else if (mode === "haiti") {
       setHubTitle("Haiti Receiving Hub (Scan In)");
-      setLocation("St Marc Rue louverture #336 Bon jean Market");
-      setStatus("READY_FOR_PICKUP");
+      setStatus("ARRIVED_HT_MAIN_WAREHOUSE");
+      setLocation(
+        optionForStatus("ARRIVED_HT_MAIN_WAREHOUSE")?.defaultLocation ?? "St Marc Rue louverture #336 Bon jean Market"
+      );
       setThemeColor("text-mex-orange");
       setThemeBg("bg-orange-100");
       setHeaderAvatar("HT");
@@ -57,7 +62,12 @@ export default function AdminScanHubPage() {
       const res = await fetch("/api/admin/scan", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ trackingId: currentScan, status, location }),
+        body: JSON.stringify({
+          trackingId: currentScan,
+          status,
+          location,
+          description: optionForStatus(status)?.detail,
+        }),
       });
 
       const data = await res.json();
@@ -141,12 +151,13 @@ export default function AdminScanHubPage() {
             <select
               value={status}
               onChange={(e) => setStatus(e.target.value)}
-              className="w-full border-2 border-gray-200 rounded-xl px-3 sm:px-4 py-3 focus:border-mex-blue outline-none font-bold text-mex-dark bg-gray-50 text-sm sm:text-base"
+              className="w-full border-2 border-gray-200 rounded-xl px-3 sm:px-4 py-3 focus:border-mex-blue outline-none font-bold text-mex-dark bg-gray-50 text-sm sm:text-base max-h-48"
             >
-              <option value="IN_TRANSIT">Shipped (in transit to Haiti)</option>
-              <option value="CUSTOMS">Held at customs</option>
-              <option value="READY_FOR_PICKUP">Ready for pickup (email)</option>
-              <option value="DELIVERED">Delivered / picked up</option>
+              {ALL_ADMIN_SCAN_STATUS_OPTIONS.map((o) => (
+                <option key={o.value} value={o.value}>
+                  {o.label}
+                </option>
+              ))}
             </select>
           </div>
         </div>

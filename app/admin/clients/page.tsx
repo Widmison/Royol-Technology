@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { Users } from "lucide-react";
 
 import AdminUserManager from "@/components/AdminUserManager";
+import AdminAddClientPackageForm from "@/components/admin/AdminAddClientPackageForm";
 
 export const dynamic = "force-dynamic";
 
@@ -25,6 +26,15 @@ export default async function AdminClientsPage() {
           </p>
         </div>
       </div>
+
+      <AdminAddClientPackageForm
+        clients={allClients.map((c) => ({
+          id: c.id,
+          email: c.email,
+          firstName: c.firstName,
+          lastName: c.lastName,
+        }))}
+      />
 
       <div className="overflow-x-hidden min-w-0">
         <AdminUserManager initialUsers={allClients} />

@@ -1,14 +1,20 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { calculateFreightTotal } from "@/lib/freightRates";
+import { normalizeQuoteShippingMethod } from "@/lib/shippingMethods";
 import { allocateMexTrackingId } from "@/lib/trackingId";
+import { requireAdminApiUser } from "@/lib/requireApiSession";
 
 export async function POST(req: Request) {
   try {
+    const auth = await requireAdminApiUser();
+    if (auth instanceof NextResponse) return auth;
+
     const body = await req.json();
     const requestId = body.requestId as string | undefined;
     const weightRaw = body.weight;
     const priceRaw = body.price;
+    const shippingMethodRaw = body.shippingMethod;
 
     if (!requestId) {
       return NextResponse.json({ error: "requestId is required" }, { status: 400 });
@@ -50,7 +56,12 @@ export async function POST(req: Request) {
       );
     }
 
-    const autoTotal = calculateFreightTotal(weight, request.shippingMethod);
+    const shippingMethod = normalizeQuoteShippingMethod(
+      shippingMethodRaw,
+      request.shippingMethod
+    );
+
+    const autoTotal = calculateFreightTotal(weight, shippingMethod);
     let totalAmount = autoTotal;
     if (priceRaw !== undefined && priceRaw !== null && `${priceRaw}`.trim() !== "") {
       const override =
@@ -90,7 +101,7 @@ export async function POST(req: Request) {
 
       await tx.shipmentRequest.update({
         where: { id: request.id },
-        data: { status: "INVOICED" },
+        data: { status: "INVOICED", shippingMethod },
       });
 
       return { invoice, trackingId };
@@ -99,10 +110,31 @@ export async function POST(req: Request) {
     return NextResponse.json(
       {
         success: true,
-        invoice,
+        invoice: {
+          id: invoice.id,
+          createdAt: invoice.createdAt,
+          totalAmount,
+          actualWeightLbs: weight,
+          status: invoice.status,
+        },
         trackingId,
+        requestId: request.id,
+        shippingMethod,
         totalAmount,
         autoQuote: autoTotal,
+        recipient: {
+          firstName: request.firstName,
+          lastName: request.lastName,
+          phone: request.phone,
+          address: request.address,
+          city: request.city,
+          state: request.state,
+          zipCode: request.zipCode,
+          destinationCountry: request.destinationCountry,
+          departure: request.departure,
+          category: request.category,
+          description: request.description,
+        },
       },
       { status: 201 }
     );

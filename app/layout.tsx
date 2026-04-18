@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Montserrat } from "next/font/google";
 import "./globals.css";
 import ConditionalLayout from "@/components/ConditionalLayout";
+import { ShippingCalculatorProvider } from "@/components/ShippingCalculatorProvider";
 import { getSiteUrlString } from "@/lib/site";
 import { sharePreviewOgImage } from "@/lib/share-image";
 
@@ -63,10 +64,7 @@ export const metadata: Metadata = {
     follow: true,
     googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1, "max-video-preview": -1 },
   },
-  icons: {
-    icon: "/logo.jpg",
-    apple: "/logo.jpg",
-  },
+  /** Favicon + Apple touch icon: `app/icon.jpg` + `app/apple-icon.jpg` (Next.js metadata file conventions). */
   ...(process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION
     ? { verification: { google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION } }
     : {}),
@@ -81,10 +79,10 @@ export default function RootLayout({
     <html lang="en" className={montserrat.variable}>
       <body className="font-sans antialiased text-mex-dark bg-white">
         
-        {/* We wrap the whole app in our Smart Layout to handle Admin vs Public views */}
-        <ConditionalLayout>
-          {children}
-        </ConditionalLayout>
+        {/* Global shipping calculator modal (Navbar + client dashboard triggers) */}
+        <ShippingCalculatorProvider>
+          <ConditionalLayout>{children}</ConditionalLayout>
+        </ShippingCalculatorProvider>
         
       </body>
     </html>

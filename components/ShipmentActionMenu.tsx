@@ -4,6 +4,8 @@ import { useMemo, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ScanLine, ScanBarcode, CheckCircle, Edit2, X, Save } from "lucide-react";
+import AdminPrintDocumentLinks from "@/components/admin/AdminPrintDocumentLinks";
+import { ALL_ADMIN_SCAN_STATUS_OPTIONS, optionForStatus } from "@/lib/adminTrackingStatusOptions";
 
 const LOCATION_PRESETS = [
   "MEX509 — Miami hub (1962 NW 82nd Ave, Doral, FL)",
@@ -22,6 +24,7 @@ const LOCATION_PRESETS = [
 const CUSTOM_KEY = "__custom__";
 
 type PkgShape = {
+  requestId: string;
   trackingId: string;
   status: string;
   events?: { location: string; description: string | null; date: Date; status: string }[];
@@ -52,8 +55,24 @@ export default function ShipmentActionMenu({ pkg }: { pkg: PkgShape }) {
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState("");
 
+  const usHubStatuses = new Set([
+    "PROCESSING",
+    "RECEIVED_USA_WAREHOUSE",
+    "PROCESSING_SORTING_USA",
+    "IN_TRANSIT_USA_TO_DR",
+    "CUSTOMS_DR_ENTRY",
+    "ARRIVED_RD_WAREHOUSE",
+    "PREPARING_HAITI_TRANSFER",
+  ]);
+
   let ScanButton: ReactNode;
-  if (pkg.status === "PROCESSING") {
+  if (pkg.status === "DELIVERED") {
+    ScanButton = (
+      <span className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-gray-200 bg-gray-50 px-4 py-2.5 text-xs font-bold text-gray-400">
+        <CheckCircle size={16} /> Done
+      </span>
+    );
+  } else if (usHubStatuses.has(pkg.status)) {
     ScanButton = (
       <Link
         href="/admin/scan?mode=us"
@@ -62,7 +81,7 @@ export default function ShipmentActionMenu({ pkg }: { pkg: PkgShape }) {
         <ScanLine size={16} /> Scan out (US)
       </Link>
     );
-  } else if (pkg.status === "IN_TRANSIT" || pkg.status === "CUSTOMS") {
+  } else {
     ScanButton = (
       <Link
         href="/admin/scan?mode=haiti"
@@ -70,21 +89,6 @@ export default function ShipmentActionMenu({ pkg }: { pkg: PkgShape }) {
       >
         <ScanBarcode size={16} /> Scan in (HT)
       </Link>
-    );
-  } else if (pkg.status === "READY_FOR_PICKUP") {
-    ScanButton = (
-      <Link
-        href="/admin/scan?mode=haiti"
-        className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-green-600 px-4 py-2.5 text-xs font-bold text-white shadow-sm transition-colors hover:bg-green-700"
-      >
-        <CheckCircle size={16} /> Deliver
-      </Link>
-    );
-  } else {
-    ScanButton = (
-      <span className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-gray-200 bg-gray-50 px-4 py-2.5 text-xs font-bold text-gray-400">
-        <CheckCircle size={16} /> Done
-      </span>
     );
   }
 
@@ -110,7 +114,10 @@ export default function ShipmentActionMenu({ pkg }: { pkg: PkgShape }) {
           trackingId: pkg.trackingId,
           status,
           location: resolvedLocation,
-          description: description.trim() || `Status: ${String(status).replace(/_/g, " ")} — ${resolvedLocation}`,
+          description:
+            description.trim() ||
+            optionForStatus(status)?.detail ||
+            `Status: ${String(status).replace(/_/g, " ")} — ${resolvedLocation}`,
         }),
       });
       const data = await res.json().catch(() => ({}));
@@ -129,6 +136,7 @@ export default function ShipmentActionMenu({ pkg }: { pkg: PkgShape }) {
 
   return (
     <div className="relative flex w-full flex-wrap items-center justify-end gap-2 md:w-auto">
+      <AdminPrintDocumentLinks requestId={pkg.requestId} layout="row" />
       {ScanButton}
 
       {pkg.status !== "DELIVERED" && (
@@ -179,11 +187,11 @@ export default function ShipmentActionMenu({ pkg }: { pkg: PkgShape }) {
                   onChange={(e) => setStatus(e.target.value)}
                   className="w-full rounded-xl border-2 border-gray-200 bg-gray-50 px-4 py-3 font-bold text-mex-dark outline-none focus:border-mex-blue"
                 >
-                  <option value="PROCESSING">Processing — US hub</option>
-                  <option value="IN_TRANSIT">In transit — to Haiti</option>
-                  <option value="CUSTOMS">Customs / inspection</option>
-                  <option value="READY_FOR_PICKUP">Ready for pickup</option>
-                  <option value="DELIVERED">Delivered</option>
+                  {ALL_ADMIN_SCAN_STATUS_OPTIONS.map((o) => (
+                    <option key={o.value} value={o.value}>
+                      {o.label}
+                    </option>
+                  ))}
                 </select>
               </div>
 

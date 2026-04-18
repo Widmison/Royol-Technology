@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
@@ -8,13 +7,17 @@ import {
   Package, Receipt, MapPin, LogOut, LayoutDashboard, Plus, Settings, 
   CheckCircle, AlertCircle, DollarSign, Plane, Ship, 
   Smartphone, Laptop, Tablet, Router, TriangleAlert, Scale,
-  ArrowRight, ShoppingCart, Warehouse, MapPinned
+  ArrowRight, ShoppingCart, Warehouse, MapPinned, Search
 } from "lucide-react";
 
 import DashboardNewBox from "@/components/DashboardNewBox";
 import ClientProfileForm from "@/components/ClientProfileForm";
 import PendingDropoffHelp from "@/components/PendingDropoffHelp";
 import MobileClientNav from "@/components/MobileClientNav";
+import ClientSignOutButton from "@/components/ClientSignOutButton";
+import DashboardShippingCalcTrigger from "@/components/DashboardShippingCalcTrigger";
+import { getClientSessionUser } from "@/lib/serverSession";
+import ClientDashboardTracking from "@/components/ClientDashboardTracking";
 import { CguLegalSections, CguPageHeader } from "@/components/CguDocument";
 import { LOGISTICS_SERVICES, type LogisticsServiceId } from "@/lib/logistics-services";
 
@@ -45,15 +48,13 @@ function PricingServiceIcon({ id }: { id: LogisticsServiceId }) {
 
 export default async function ClientDashboardPage({ searchParams }: { searchParams: Promise<{ tab?: string }> }) {
   const resolvedParams = await searchParams;
-  const currentTab = resolvedParams.tab || "overview";
+  const currentTab = resolvedParams.tab || "tracking";
 
-  const cookieStore = await cookies();
-  const clientId = cookieStore.get("clientId")?.value;
-
-  if (!clientId) redirect("/login");
+  const sessionUser = await getClientSessionUser();
+  if (!sessionUser) redirect("/login");
 
   const user = await prisma.user.findUnique({
-    where: { id: clientId },
+    where: { id: sessionUser.id },
     include: {
       requests: {
         include: { invoice: true, package: true },
@@ -84,6 +85,9 @@ export default async function ClientDashboardPage({ searchParams }: { searchPara
         </div>
 
         <nav className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-4 py-4 space-y-1.5">
+          <Link href="/dashboard?tab=tracking" className={`flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-colors ${currentTab === 'tracking' ? 'bg-mex-orange text-white font-bold shadow-lg shadow-orange-900/50' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}>
+            <Search size={20} /> Live tracking
+          </Link>
           <Link href="/dashboard?tab=overview" className={`flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-colors ${currentTab === 'overview' ? 'bg-mex-blue text-white font-bold shadow-lg shadow-blue-900/50' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}>
             <LayoutDashboard size={20} /> My Overview
           </Link>
@@ -115,11 +119,12 @@ export default async function ClientDashboardPage({ searchParams }: { searchPara
             </Link>
           </div>
         </nav>
-        
-        <div className="p-4 border-t border-gray-800 shrink-0 bg-mex-dark">
-          <Link href="/login" className="flex justify-center items-center gap-2 w-full bg-white/10 text-white hover:bg-red-500 hover:text-white px-4 py-3 rounded-xl font-bold transition-colors">
+
+        <div className="shrink-0 space-y-2 border-t border-gray-800 bg-mex-dark p-4">
+          <DashboardShippingCalcTrigger variant="sidebar" />
+          <ClientSignOutButton className="flex justify-center items-center gap-2 w-full bg-white/10 text-white hover:bg-red-500 hover:text-white px-4 py-3 rounded-xl font-bold transition-colors">
             <LogOut size={18} /> Sign Out
-          </Link>
+          </ClientSignOutButton>
         </div>
       </aside>
 
@@ -131,20 +136,25 @@ export default async function ClientDashboardPage({ searchParams }: { searchPara
       {/* ============================== */}
       <main className="flex-1 flex flex-col min-w-0 min-h-dvh relative">
         <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-gray-100 flex items-center justify-between gap-3 px-4 py-3 md:hidden">
-          <div className="flex items-center gap-2 min-w-0">
+          <BrandLogo href="/" width={200} height={64} alt="MEX509" className="h-7 w-auto object-left min-w-0 shrink" prefetch={false} />
+          <div className="flex items-center gap-1 shrink-0">
+            <ClientSignOutButton
+              className="p-2 rounded-xl text-gray-500 hover:bg-gray-100"
+              aria-label="Sign out"
+            >
+              <LogOut size={22} />
+            </ClientSignOutButton>
             <MobileClientNav
               user={{ firstName: user.firstName, lastName: user.lastName, email: user.email }}
               currentTab={currentTab}
               unpaidCount={unpaidInvoices.length}
             />
-            <BrandLogo href="/" width={200} height={64} alt="MEX509" className="h-7 w-auto object-left" prefetch={false} />
           </div>
-          <Link href="/login" className="p-2 rounded-xl text-gray-500 hover:bg-gray-100 shrink-0" aria-label="Sign out">
-            <LogOut size={22} />
-          </Link>
         </header>
 
         <div className="flex-1 overflow-y-auto overflow-x-hidden p-4 sm:p-6 lg:p-10 bg-gray-50">
+
+          {currentTab === "tracking" && <ClientDashboardTracking />}
 
           {/* TAB: OVERVIEW */}
           {currentTab === "overview" && (

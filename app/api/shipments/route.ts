@@ -1,20 +1,12 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { cookies } from "next/headers";
+import { requireClientApiUser } from "@/lib/requireApiSession";
 
 export async function POST(req: Request) {
   try {
-    const cookieStore = await cookies();
-    const clientId = cookieStore.get("clientId")?.value;
-
-    if (!clientId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const user = await prisma.user.findUnique({ where: { id: clientId } });
-    if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const userOrRes = await requireClientApiUser();
+    if (userOrRes instanceof NextResponse) return userOrRes;
+    const user = userOrRes;
 
     const body = await req.json();
 

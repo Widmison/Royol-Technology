@@ -2,23 +2,61 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { CheckCircle, Info } from "lucide-react";
+import Link from "next/link";
+import {
+  CheckCircle,
+  Info,
+  Sparkles,
+  Package,
+  Copy,
+  ExternalLink,
+} from "lucide-react";
 import { calculateFreightTotal } from "@/lib/freightRates";
+import { QUOTE_SHIPPING_METHODS, normalizeQuoteShippingMethod } from "@/lib/shippingMethods";
+import AdminPrintDocumentLinks from "@/components/admin/AdminPrintDocumentLinks";
+
+type IntakeCreatedSummary = {
+  requestId: string;
+  invoiceId: string;
+  trackingId: string;
+  totalAmount: number;
+  weight: number;
+  shippingMethod: string;
+  recipient: {
+    firstName: string;
+    lastName: string;
+    phone: string;
+    address: string;
+    city: string;
+    state: string;
+    zipCode: string;
+    destinationCountry: string | null;
+    departure: string;
+    category: string;
+    description: string;
+  };
+};
 
 export default function QuoteTable({ quotes }: { quotes: any[] }) {
   const router = useRouter();
 
   const [selectedQuote, setSelectedQuote] = useState<any>(null);
+  const [createdSummary, setCreatedSummary] = useState<IntakeCreatedSummary | null>(null);
   const [weight, setWeight] = useState("");
   const [price, setPrice] = useState("");
+  const [intakeShippingMethod, setIntakeShippingMethod] = useState<string>("Air Freight");
   const priceTouched = useRef(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [copyPayHint, setCopyPayHint] = useState<string | null>(null);
 
   useEffect(() => {
     if (!selectedQuote) return;
     priceTouched.current = false;
     setWeight("");
     setPrice("");
+    setIntakeShippingMethod(
+      normalizeQuoteShippingMethod(selectedQuote.shippingMethod, "Air Freight")
+    );
   }, [selectedQuote?.id]);
 
   useEffect(() => {
@@ -28,8 +66,8 @@ export default function QuoteTable({ quotes }: { quotes: any[] }) {
       setPrice("");
       return;
     }
-    setPrice(calculateFreightTotal(w, selectedQuote.shippingMethod).toFixed(2));
-  }, [weight, selectedQuote]);
+    setPrice(calculateFreightTotal(w, intakeShippingMethod).toFixed(2));
+  }, [weight, intakeShippingMethod, selectedQuote]);
 
   const handleInvoice = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -43,18 +81,23 @@ export default function QuoteTable({ quotes }: { quotes: any[] }) {
           requestId: selectedQuote.id,
           weight,
           price,
+          shippingMethod: intakeShippingMethod,
         }),
       });
 
       const data = await res.json().catch(() => ({}));
 
       if (res.ok) {
-        const tid = data.trackingId as string | undefined;
-        if (tid) {
-          window.alert(
-            `Invoice created.\n\nOfficial tracking ID:\n${tid}\n\nShare /pay link with the client from Invoices.`
-          );
-        }
+        const summary: IntakeCreatedSummary = {
+          requestId: data.requestId as string,
+          invoiceId: data.invoice?.id as string,
+          trackingId: data.trackingId as string,
+          totalAmount: Number(data.totalAmount),
+          weight: Number(data.invoice?.actualWeightLbs ?? weight),
+          shippingMethod: (data.shippingMethod as string) || intakeShippingMethod,
+          recipient: data.recipient as IntakeCreatedSummary["recipient"],
+        };
+        setCreatedSummary(summary);
         setSelectedQuote(null);
         setWeight("");
         setPrice("");
@@ -73,8 +116,27 @@ export default function QuoteTable({ quotes }: { quotes: any[] }) {
 
   const autoPreview =
     selectedQuote && weight && parseFloat(weight) > 0
-      ? calculateFreightTotal(parseFloat(weight), selectedQuote.shippingMethod)
+      ? calculateFreightTotal(parseFloat(weight), intakeShippingMethod)
       : null;
+
+  const [absolutePayUrl, setAbsolutePayUrl] = useState("");
+
+  useEffect(() => {
+    if (!createdSummary) {
+      setAbsolutePayUrl("");
+      return;
+    }
+    setAbsolutePayUrl(`${window.location.origin}/pay/${createdSummary.invoiceId}`);
+  }, [createdSummary]);
+
+  const closeIntakeFlow = () => {
+    setSelectedQuote(null);
+    setCreatedSummary(null);
+    setCopyPayHint(null);
+    setAbsolutePayUrl("");
+  };
+
+  const payPath = createdSummary ? `/pay/${createdSummary.invoiceId}` : "#";
 
   const statusBadge = (status: string) => {
     if (status === "PENDING_DROPOFF") {
@@ -136,7 +198,10 @@ export default function QuoteTable({ quotes }: { quotes: any[] }) {
                   <td className="p-4 text-right">
                     {quote.status === "PENDING_DROPOFF" ? (
                       <button
-                        onClick={() => setSelectedQuote(quote)}
+                        onClick={() => {
+                          setCreatedSummary(null);
+                          setSelectedQuote(quote);
+                        }}
                         className="bg-mex-dark text-white text-xs font-bold px-4 py-2 rounded-lg shadow hover:bg-gray-800 transition-colors"
                       >
                         Weigh & Invoice
@@ -154,35 +219,208 @@ export default function QuoteTable({ quotes }: { quotes: any[] }) {
         </table>
       </div>
 
-      {selectedQuote && (
-        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in duration-200">
-            <div className="bg-mex-dark p-5 flex justify-between items-center">
-              <h3 className="text-white font-bold text-lg">Warehouse intake</h3>
-              <button
-                type="button"
-                onClick={() => setSelectedQuote(null)}
-                className="text-gray-400 hover:text-white font-bold text-xl"
-              >
-                &times;
-              </button>
-            </div>
+      {(selectedQuote || createdSummary) && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+          <div className="max-h-[92vh] w-full max-w-lg overflow-y-auto overscroll-contain rounded-2xl bg-white shadow-2xl animate-in zoom-in duration-200">
+            {createdSummary ? (
+              <>
+                <div className="relative overflow-hidden bg-gradient-to-br from-mex-dark via-[#1a1f4a] to-mex-blue px-6 pb-8 pt-7 text-white">
+                  <div className="pointer-events-none absolute -right-8 -top-8 h-40 w-40 rounded-full bg-mex-orange/25 blur-2xl" />
+                  <div className="pointer-events-none absolute bottom-0 left-1/4 h-24 w-48 rounded-full bg-white/10 blur-2xl" />
+                  <button
+                    type="button"
+                    onClick={closeIntakeFlow}
+                    className="absolute right-4 top-4 rounded-lg p-1.5 text-white/70 transition hover:bg-white/10 hover:text-white"
+                    aria-label="Close"
+                  >
+                    <span className="text-xl font-bold leading-none">&times;</span>
+                  </button>
+                  <div className="relative flex items-center gap-2 text-mex-orange">
+                    <Sparkles className="h-6 w-6 shrink-0" aria-hidden />
+                    <span className="text-xs font-black uppercase tracking-[0.2em]">Intake complete</span>
+                  </div>
+                  <h3 className="relative mt-2 text-2xl font-black leading-tight">
+                    Package &amp; invoice are live
+                  </h3>
+                  <p className="relative mt-2 max-w-md text-sm font-medium text-white/80">
+                    Official tracking is active. Print a carrier-style label for the box and a
+                    professional invoice for your files or the client.
+                  </p>
+                </div>
 
-            <form onSubmit={handleInvoice} className="p-6 space-y-5">
-              <div className="bg-gray-50 p-4 rounded-xl border border-gray-100 space-y-1">
+                <div className="space-y-5 px-6 py-6">
+                  <div className="rounded-2xl border border-gray-100 bg-gray-50 p-4 shadow-inner">
+                    <p className="text-[10px] font-black uppercase tracking-wider text-gray-400">
+                      Tracking ID
+                    </p>
+                    <p className="mt-1 break-all font-mono text-xl font-black tracking-wider text-mex-blue">
+                      {createdSummary.trackingId}
+                    </p>
+                    <div className="mt-4 grid gap-3 border-t border-gray-200 pt-4 text-sm">
+                      <div className="flex justify-between gap-4">
+                        <span className="text-gray-500">Invoice total</span>
+                        <span className="font-black text-mex-orange">
+                          ${createdSummary.totalAmount.toFixed(2)} USD
+                        </span>
+                      </div>
+                      <div className="flex justify-between gap-4">
+                        <span className="text-gray-500">Billed weight</span>
+                        <span className="font-bold text-mex-dark">{createdSummary.weight} lbs</span>
+                      </div>
+                      <div className="flex justify-between gap-4">
+                        <span className="text-gray-500">Method</span>
+                        <span className="font-bold text-mex-dark">{createdSummary.shippingMethod}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <p className="text-[10px] font-black uppercase tracking-wider text-gray-400">
+                      Deliver to
+                    </p>
+                    <p className="mt-1 font-bold text-mex-dark">
+                      {createdSummary.recipient.firstName} {createdSummary.recipient.lastName}
+                    </p>
+                    <p className="text-sm text-gray-600">{createdSummary.recipient.phone}</p>
+                    <p className="mt-2 text-sm leading-relaxed text-gray-800">
+                      {createdSummary.recipient.address}
+                      <br />
+                      {createdSummary.recipient.city}, {createdSummary.recipient.state}{" "}
+                      {createdSummary.recipient.zipCode}
+                      {createdSummary.recipient.destinationCountry ? (
+                        <>
+                          <br />
+                          {createdSummary.recipient.destinationCountry}
+                        </>
+                      ) : null}
+                    </p>
+                  </div>
+
+                  <div className="rounded-2xl border-2 border-gray-200/90 bg-gradient-to-br from-slate-50 via-white to-orange-50/30 p-5 shadow-inner">
+                    <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                      <div>
+                        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">
+                          Saved in admin
+                        </p>
+                        <p className="mt-1 text-sm font-black text-mex-dark">Invoice &amp; warehouse label</p>
+                        <p className="mt-1 max-w-md text-xs leading-relaxed text-gray-600">
+                          These links stay available on{" "}
+                          <Link
+                            href="/admin/invoices"
+                            className="font-bold text-mex-blue underline decoration-mex-blue/30 underline-offset-2"
+                          >
+                            Invoices &amp; billing
+                          </Link>{" "}
+                          and on each shipment row. Open anytime — use{" "}
+                          <strong className="text-mex-dark">Print → Save as PDF</strong> to download.
+                        </p>
+                      </div>
+                      <AdminPrintDocumentLinks
+                        requestId={createdSummary.requestId}
+                        layout="stack"
+                        className="sm:items-end"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="rounded-2xl border border-dashed border-mex-blue/30 bg-blue-50/50 p-4">
+                    <p className="text-xs font-bold text-mex-dark">Client payment link</p>
+                    <p className="mt-1 break-all font-mono text-[11px] text-gray-700">
+                      {absolutePayUrl || payPath}
+                    </p>
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          try {
+                            const toCopy = absolutePayUrl || `${window.location.origin}${payPath}`;
+                            await navigator.clipboard.writeText(toCopy);
+                            setCopyPayHint("Copied to clipboard.");
+                            setTimeout(() => setCopyPayHint(null), 2500);
+                          } catch {
+                            setCopyPayHint("Copy failed — select the link above.");
+                          }
+                        }}
+                        className="inline-flex items-center gap-2 rounded-xl bg-mex-dark px-4 py-2.5 text-xs font-bold text-white transition hover:bg-gray-800"
+                      >
+                        <Copy className="h-4 w-4 shrink-0" aria-hidden />
+                        Copy pay link
+                      </button>
+                      <a
+                        href={payPath}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2 rounded-xl border-2 border-gray-200 bg-white px-4 py-2.5 text-xs font-bold text-mex-dark transition hover:bg-gray-50"
+                      >
+                        <ExternalLink className="h-4 w-4 shrink-0" aria-hidden />
+                        Open pay page
+                      </a>
+                    </div>
+                    {copyPayHint ? (
+                      <p className="mt-2 text-xs font-medium text-green-700">{copyPayHint}</p>
+                    ) : null}
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={closeIntakeFlow}
+                    className="flex w-full items-center justify-center gap-2 rounded-xl bg-gray-100 py-3.5 text-sm font-black text-gray-700 transition hover:bg-gray-200"
+                  >
+                    <Package className="h-5 w-5 shrink-0" aria-hidden />
+                    Done — back to queue
+                  </button>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="flex items-center justify-between bg-mex-dark p-5">
+                  <h3 className="text-lg font-bold text-white">Warehouse intake</h3>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedQuote(null)}
+                    className="text-xl font-bold text-gray-400 transition hover:text-white"
+                    aria-label="Close"
+                  >
+                    &times;
+                  </button>
+                </div>
+
+                <form onSubmit={handleInvoice} className="space-y-5 p-6">
+              <div className="space-y-3 rounded-xl border border-gray-100 bg-gray-50 p-4">
                 <p className="text-sm text-gray-600">
                   Client:{" "}
                   <strong className="text-mex-dark">
                     {selectedQuote.firstName} {selectedQuote.lastName}
                   </strong>
                 </p>
-                <p className="text-sm text-gray-600">
-                  Method:{" "}
-                  <strong className="text-mex-dark">{selectedQuote.shippingMethod}</strong>
-                </p>
+                <div>
+                  <label htmlFor="intake-shipping-method" className="mb-1.5 block text-sm font-bold text-gray-700">
+                    Shipping method *
+                  </label>
+                  <select
+                    id="intake-shipping-method"
+                    value={intakeShippingMethod}
+                    onChange={(e) => {
+                      priceTouched.current = false;
+                      setIntakeShippingMethod(e.target.value);
+                    }}
+                    className="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-sm font-bold text-mex-dark outline-none focus:ring-2 focus:ring-mex-orange"
+                  >
+                    {QUOTE_SHIPPING_METHODS.map((m) => (
+                      <option key={m} value={m}>
+                        {m}
+                      </option>
+                    ))}
+                  </select>
+                  <p className="mt-1 text-[11px] font-medium text-gray-500">
+                    Requested online:{" "}
+                    <span className="text-mex-dark">{selectedQuote.shippingMethod}</span>. You can
+                    correct it here before invoicing; it is saved on the shipment record.
+                  </p>
+                </div>
                 <p className="text-sm text-gray-600">
                   Contents:{" "}
-                  <strong className="text-mex-dark">{selectedQuote.description}</strong>
+                  <strong className="text-mex-dark">{selectedQuote.description || "—"}</strong>
                 </p>
               </div>
 
@@ -215,7 +453,7 @@ export default function QuoteTable({ quotes }: { quotes: any[] }) {
 
               {autoPreview != null && (
                 <p className="text-xs text-gray-500 font-medium -mt-2">
-                  Auto rate from published pricing:{" "}
+                  Auto total (same per-lb rates as the shipping calculator):{" "}
                   <span className="text-mex-dark font-black">${autoPreview.toFixed(2)}</span>
                 </p>
               )}
@@ -243,23 +481,25 @@ export default function QuoteTable({ quotes }: { quotes: any[] }) {
                 </p>
               </div>
 
-              <div className="pt-2 flex gap-3">
-                <button
-                  type="button"
-                  onClick={() => setSelectedQuote(null)}
-                  className="flex-1 bg-gray-100 text-gray-600 font-bold py-3 rounded-xl hover:bg-gray-200 transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={isProcessing}
-                  className="flex-1 bg-mex-orange text-white font-bold py-3 rounded-xl hover:bg-orange-700 transition-colors shadow-lg disabled:opacity-50"
-                >
-                  {isProcessing ? "Saving..." : "Create package & invoice"}
-                </button>
-              </div>
-            </form>
+                  <div className="flex gap-3 pt-2">
+                    <button
+                      type="button"
+                      onClick={() => setSelectedQuote(null)}
+                      className="flex-1 rounded-xl bg-gray-100 py-3 font-bold text-gray-600 transition-colors hover:bg-gray-200"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={isProcessing}
+                      className="flex-1 rounded-xl bg-mex-orange py-3 font-bold text-white shadow-lg transition-colors hover:bg-orange-700 disabled:opacity-50"
+                    >
+                      {isProcessing ? "Saving..." : "Create package & invoice"}
+                    </button>
+                  </div>
+                </form>
+              </>
+            )}
           </div>
         </div>
       )}

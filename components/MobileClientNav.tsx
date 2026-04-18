@@ -6,6 +6,7 @@ import Link from "next/link";
 import BrandLogo from "@/components/BrandLogo";
 import {
   Menu,
+  Search,
   X,
   LayoutDashboard,
   Plus,
@@ -16,6 +17,8 @@ import {
   Scale,
   LogOut,
 } from "lucide-react";
+import DashboardShippingCalcTrigger from "@/components/DashboardShippingCalcTrigger";
+import ClientSignOutButton from "@/components/ClientSignOutButton";
 
 type Props = {
   user: { firstName?: string | null; lastName?: string | null; email: string };
@@ -112,6 +115,7 @@ export default function MobileClientNav({ user, currentTab, unpaidCount }: Props
           <p className="truncate text-xs text-gray-400">{user.email}</p>
         </div>
         <nav className="min-h-0 flex-1 space-y-1 overflow-y-auto overscroll-contain px-3 py-3">
+          {link("tracking", "Live tracking", <Search size={20} />)}
           {link("overview", "My overview", <LayoutDashboard size={20} />)}
           {link("new-box", "Pre-register box", <Plus size={20} />)}
           {link("shipments", "All shipments", <Package size={20} />)}
@@ -123,14 +127,14 @@ export default function MobileClientNav({ user, currentTab, unpaidCount }: Props
             {link("terms", "CGU / legal", <Scale size={20} />)}
           </div>
         </nav>
-        <div className="shrink-0 border-t border-gray-800 bg-mex-dark p-4">
-          <Link
-            href="/login"
-            onClick={() => setOpen(false)}
+        <div className="shrink-0 space-y-2 border-t border-gray-800 bg-mex-dark p-4">
+          <DashboardShippingCalcTrigger variant="drawer" />
+          <ClientSignOutButton
+            onBeforeNavigate={() => setOpen(false)}
             className="flex w-full items-center justify-center gap-2 rounded-xl bg-white/10 px-4 py-3 font-bold text-white transition-colors hover:bg-red-500 hover:text-white"
           >
             <LogOut size={18} /> Sign out
-          </Link>
+          </ClientSignOutButton>
         </div>
       </div>
     </div>

@@ -1,8 +1,14 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { allowAuthAttempt, clientIp } from "@/lib/authRateLimit";
 
 export async function POST(req: Request) {
   try {
+    const ip = clientIp(req);
+    if (!allowAuthAttempt(`quote:${ip}`)) {
+      return NextResponse.json({ error: "Too many submissions. Try again later." }, { status: 429 });
+    }
+
     // 1. Grab the data from the frontend form
     const body = await req.json();
 

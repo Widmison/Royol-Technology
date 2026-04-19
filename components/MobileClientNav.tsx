@@ -16,6 +16,7 @@ import {
   Settings,
   Scale,
   LogOut,
+  ShoppingBag,
 } from "lucide-react";
 import DashboardShippingCalcTrigger from "@/components/DashboardShippingCalcTrigger";
 import ClientSignOutButton from "@/components/ClientSignOutButton";
@@ -120,6 +121,7 @@ export default function MobileClientNav({ user, currentTab, unpaidCount }: Props
           {link("new-box", "Pre-register box", <Plus size={20} />)}
           {link("shipments", "All shipments", <Package size={20} />)}
           {link("invoices", "Billing & invoices", <Receipt size={20} />, unpaidCount)}
+          {link("external", "Add tracking", <ShoppingBag size={20} />)}
           <div className="mt-4 space-y-1 border-t border-gray-800 pt-4">
             <p className="mb-2 px-4 text-[10px] font-bold uppercase tracking-wider text-gray-500">Info</p>
             {link("pricing", "Pricing & services", <DollarSign size={20} />)}

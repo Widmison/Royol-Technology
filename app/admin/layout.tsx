@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { ExternalTrackingStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import AdminShell, { type AdminShellStats } from "@/components/admin/AdminShell";
+import AdminSessionProvider from "@/components/admin/AdminSessionProvider";
 import { getAdminSessionUser } from "@/lib/serverSession";
 
 export const metadata: Metadata = {
@@ -15,6 +17,7 @@ const emptyStats: AdminShellStats = {
   unpaidInvoices: 0,
   activeShipments: 0,
   clientCount: 0,
+  pendingExternalTracking: 0,
 };
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -24,7 +27,9 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     pathname === "/login" ||
     pathname === "/admin/login" ||
     pathname.startsWith("/admin/login?") ||
-    pathname.startsWith("/login?");
+    pathname.startsWith("/login?") ||
+    pathname === "/admin/access-denied" ||
+    pathname.startsWith("/admin/access-denied?");
   const isPrint = pathname.startsWith("/admin/print");
 
   const adminUser = await getAdminSessionUser();
@@ -35,14 +40,20 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
   let stats = emptyStats;
   if (adminUser && !isLoginSurface && !isPrint) {
-    const [pendingQuotes, unpaidInvoices, activeShipments, clientCount] = await Promise.all([
-      prisma.shipmentRequest.count({ where: { status: "PENDING_DROPOFF" } }),
-      prisma.invoice.count({ where: { status: "UNPAID" } }),
-      prisma.package.count({ where: { status: { not: "DELIVERED" } } }),
-      prisma.user.count({ where: { role: "CLIENT" } }),
-    ]);
-    stats = { pendingQuotes, unpaidInvoices, activeShipments, clientCount };
+    const [pendingQuotes, unpaidInvoices, activeShipments, clientCount, pendingExternalTracking] =
+      await Promise.all([
+        prisma.shipmentRequest.count({ where: { status: "PENDING_DROPOFF" } }),
+        prisma.invoice.count({ where: { status: "UNPAID" } }),
+        prisma.package.count({ where: { status: { not: "DELIVERED" } } }),
+        prisma.user.count({ where: { role: "CLIENT" } }),
+        prisma.clientExternalTracking.count({ where: { status: ExternalTrackingStatus.PENDING_REVIEW } }),
+      ]);
+    stats = { pendingQuotes, unpaidInvoices, activeShipments, clientCount, pendingExternalTracking };
   }
 
-  return <AdminShell stats={stats}>{children}</AdminShell>;
+  return (
+    <AdminSessionProvider>
+      <AdminShell stats={stats}>{children}</AdminShell>
+    </AdminSessionProvider>
+  );
 }

@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import BrandLogo from "@/components/BrandLogo";
+import ClientTrackingIdLink from "@/components/ClientTrackingIdLink";
 import { CheckCircle, CreditCard, Receipt, MapPin, Package, ShieldCheck } from "lucide-react";
 import { createInvoicePaymentToken } from "@/lib/payToken";
 
@@ -72,7 +73,12 @@ export default async function ClientPaymentPage({ params }: { params: Promise<{ 
               <p className="text-amber-900 font-bold mb-2 uppercase text-sm tracking-widest">
                 Your tracking number
               </p>
-              <div className="text-3xl font-black text-amber-800 tracking-wider py-2">{trackingNumber}</div>
+              <div className="py-2">
+                <ClientTrackingIdLink
+                  trackingId={trackingNumber}
+                  className="text-3xl text-amber-800 tracking-wider block text-center"
+                />
+              </div>
               <p className="text-sm text-amber-900/80 mt-3 flex items-center justify-center gap-1 font-medium">
                 <ShieldCheck size={16} /> Pay below to clear your invoice; you can already use this ID on /track.
               </p>
@@ -82,7 +88,12 @@ export default async function ClientPaymentPage({ params }: { params: Promise<{ 
           {isPaid && trackingNumber && (
             <div className="bg-green-50 border-2 border-green-200 rounded-2xl p-6 text-center animate-in zoom-in duration-500">
               <p className="text-green-800 font-bold mb-2 uppercase text-sm tracking-widest">Official Tracking Number</p>
-              <div className="text-4xl font-black text-green-600 tracking-wider py-2">{trackingNumber}</div>
+              <div className="py-2">
+                <ClientTrackingIdLink
+                  trackingId={trackingNumber}
+                  className="text-4xl text-green-600 tracking-wider block text-center"
+                />
+              </div>
               <p className="text-sm text-green-700 mt-3 flex items-center justify-center gap-1 font-medium">
                 <ShieldCheck size={16} /> Save this number to track your package
               </p>

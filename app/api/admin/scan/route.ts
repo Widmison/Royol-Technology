@@ -3,6 +3,8 @@ import { $Enums, type PackageStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { requireAdminApiUser } from "@/lib/requireApiSession";
 import { sendTrackingUpdateEmail } from "@/lib/sendTrackingUpdateEmail";
+import { pushUserNotification } from "@/lib/pushAppNotification";
+import { packageStatusShortLabel } from "@/lib/packageStatusDisplay";
 
 const ALLOWED_STATUSES = new Set(Object.values($Enums.PackageStatus));
 
@@ -70,6 +72,16 @@ export async function POST(req: Request) {
       }
     } else {
       console.warn(`[tracking] No portal client email on shipment; skipping tracking email for ${trackingId}.`);
+    }
+
+    const cid = pkg.request.clientId;
+    if (cid) {
+      await pushUserNotification(cid, {
+        type: "PACKAGE_TRACKING_UPDATE",
+        title: `Shipment update · ${String(trackingId).toUpperCase()}`,
+        body: `${packageStatusShortLabel(status)} — ${location}`,
+        link: `/dashboard?tab=tracking&open=${encodeURIComponent(String(trackingId).toUpperCase())}`,
+      });
     }
 
     return NextResponse.json({ 

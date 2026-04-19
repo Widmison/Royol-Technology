@@ -1,5 +1,6 @@
 "use client";
 
+import { signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 
 type Props = {
@@ -24,9 +25,9 @@ export default function AdminSignOutButton({
       aria-label={ariaLabel}
       onClick={async () => {
         if (!window.confirm("Sign out of the admin dashboard?")) return;
-        await fetch("/api/auth", { method: "DELETE", credentials: "include" });
+        await fetch("/api/admin/signout", { method: "POST", credentials: "include" });
         onBeforeNavigate?.();
-        router.push("/admin/login");
+        await signOut({ callbackUrl: "/admin/login" });
         router.refresh();
       }}
     >

@@ -18,16 +18,19 @@ import {
   ExternalLink,
   Search,
   LogOut,
+  ShoppingBag,
 } from "lucide-react";
 import AdminSearchBar from "@/components/AdminSearchBar";
 import DashboardShippingCalcTrigger from "@/components/DashboardShippingCalcTrigger";
 import AdminSignOutButton from "@/components/AdminSignOutButton";
+import PortalNotificationBell from "@/components/PortalNotificationBell";
 
 export type AdminShellStats = {
   pendingQuotes: number;
   unpaidInvoices: number;
   activeShipments: number;
   clientCount: number;
+  pendingExternalTracking: number;
 };
 
 function NavLink({
@@ -93,6 +96,7 @@ function SidebarNav({
   const isSearch = pathname.startsWith("/admin/search");
   const isScan = pathname.startsWith("/admin/scan");
   const isSettings = pathname.startsWith("/admin/settings");
+  const isExternalTracking = pathname.startsWith("/admin/external-tracking");
   const scanUs = isScan && pathname.includes("mode=us");
   const scanHt = isScan && pathname.includes("mode=haiti");
 
@@ -176,6 +180,15 @@ function SidebarNav({
         </NavLink>
         <NavLink href="/admin/clients" active={isClients} onNavigate={onNavigate} compact={compactSidebar}>
           <Users size={navIcon} /> Clients
+        </NavLink>
+        <NavLink
+          href="/admin/external-tracking"
+          active={isExternalTracking}
+          badge={stats.pendingExternalTracking}
+          onNavigate={onNavigate}
+          compact={compactSidebar}
+        >
+          <ShoppingBag size={navIcon} /> External tracking
         </NavLink>
         <NavLink href="/admin/search" active={isSearch} onNavigate={onNavigate} compact={compactSidebar}>
           <Search size={navIcon} /> CRM search
@@ -338,6 +351,7 @@ export default function AdminShell({
               <AdminSearchBar />
             </div>
             <div className="hidden sm:flex items-center gap-2 shrink-0">
+              <PortalNotificationBell variant="admin" />
               <Link
                 href="/admin/settings"
                 className="inline-flex items-center justify-center gap-2 rounded-xl border border-gray-200 px-3 py-2 text-sm font-bold text-gray-700 hover:bg-gray-50"

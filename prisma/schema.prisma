@@ -40,6 +40,8 @@ model User {
 
   createdAt        DateTime          @default(now())
   requests         ShipmentRequest[] // A client can have many pre-registered shipments
+  externalTrackings ClientExternalTracking[]
+  appNotifications AppNotification[]
 }
 
 enum Role {
@@ -104,6 +106,7 @@ model Package {
   request       ShipmentRequest @relation(fields: [requestId], references: [id])
   status        PackageStatus   @default(PROCESSING)
   events        TrackingEvent[] // The history timeline
+  linkedExternalTracking ClientExternalTracking?
   createdAt     DateTime        @default(now())
   updatedAt     DateTime        @updatedAt
 }
@@ -137,4 +140,48 @@ model TrackingEvent {
   location    String        // e.g., "Miami Warehouse", "Port-au-Prince"
   description String?       // e.g., "Cleared customs, ready for delivery"
   date        DateTime      @default(now())
+}
+
+/** Third-party ecommerce tracking numbers clients add from Amazon, Shein, etc. — staff can link to internal MEX packages. */
+model ClientExternalTracking {
+  id              String                   @id @default(cuid())
+  userId          String
+  user            User                     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  storeLabel      String?
+  carrier         String?
+  trackingNumber  String
+  notes           String?
+  status          ExternalTrackingStatus   @default(PENDING_REVIEW)
+  linkedPackageId String?                  @unique
+  linkedPackage   Package?                 @relation(fields: [linkedPackageId], references: [id])
+  adminNote       String?
+  createdAt       DateTime                 @default(now())
+  updatedAt       DateTime                 @updatedAt
+
+  @@index([userId])
+  @@index([status])
+}
+
+enum ExternalTrackingStatus {
+  PENDING_REVIEW
+  LINKED
+  NEEDS_INFO
+  CLOSED
+}
+
+/** In-app notifications for clients (userId set) and staff (forStaff true). */
+model AppNotification {
+  id        String    @id @default(cuid())
+  userId    String?
+  user      User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  forStaff  Boolean   @default(false)
+  type      String
+  title     String
+  body      String
+  link      String?
+  readAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId, createdAt])
+  @@index([forStaff, createdAt])
 }

@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { getToken } from "next-auth/jwt";
+import type { JWT } from "next-auth/jwt";
 import {
   ADMIN_SESSION_COOKIE,
   CLIENT_SESSION_COOKIE,
@@ -59,8 +61,26 @@ function hasSessionCookie(req: NextRequest, name: string): boolean {
   return typeof v === "string" && v.trim().length > 0;
 }
 
+function adminLoginRedirectUrl(req: NextRequest): URL {
+  const hostname = req.headers.get("host") || "";
+  const hostNoPort = hostname.split(":")[0] ?? hostname;
+  if (isAdminDashboardHost(hostNoPort)) {
+    return new URL("/login", req.url);
+  }
+  return new URL("/admin/login", req.url);
+}
+
+function pathnameIsPublicAdminAuthSurface(pathname: string): boolean {
+  return (
+    pathname === "/admin/login" ||
+    pathname.startsWith("/admin/login?") ||
+    pathname === "/admin/access-denied" ||
+    pathname.startsWith("/admin/access-denied?")
+  );
+}
+
 function adminHostRequiresAdminSession(pathname: string): boolean {
-  if (pathname.startsWith("/admin/print") || pathname === "/admin/login" || pathname.startsWith("/admin/login?")) {
+  if (pathname.startsWith("/admin/print") || pathnameIsPublicAdminAuthSurface(pathname)) {
     return false;
   }
   if (pathname.startsWith("/admin")) {
@@ -75,11 +95,26 @@ function adminHostRequiresAdminSession(pathname: string): boolean {
   return false;
 }
 
-export function middleware(req: NextRequest) {
+export default async function middleware(req: NextRequest) {
   const url = req.nextUrl.clone();
   const pathname = url.pathname;
   const hostname = req.headers.get("host") || "";
   const hostNoPort = hostname.split(":")[0] ?? hostname;
+
+  const secret = process.env.AUTH_SECRET;
+  const jwtToken = secret
+    ? await getToken({
+        req,
+        secret,
+        secureCookie: process.env.NODE_ENV === "production",
+      })
+    : null;
+  const adminJwt = jwtToken as JWT | null;
+  const hasGoogleAdmin = !!adminJwt?.sub && adminJwt.role === "admin";
+
+  function hasAdminAccess(): boolean {
+    return hasGoogleAdmin || hasSessionCookie(req, ADMIN_SESSION_COOKIE);
+  }
 
   /** Skip host routing / auth for static assets (safe even when matcher hits file-like paths). */
   if (/\.(?:ico|png|jpg|jpeg|gif|webp|svg|woff2?)$/i.test(pathname)) {
@@ -127,20 +162,20 @@ export function middleware(req: NextRequest) {
   }
 
   /**
-   * Admin UI (`/admin/*`) — enforced on localhost and all hosts without relying on admin.* hostname.
+   * Admin UI (`/admin/*`) — NextAuth JWT session or legacy admin cookie.
    */
   if (
     pathname.startsWith("/admin") &&
-    !pathname.startsWith("/admin/login") &&
     !pathname.startsWith("/admin/print") &&
-    !hasSessionCookie(req, ADMIN_SESSION_COOKIE)
+    !pathnameIsPublicAdminAuthSurface(pathname) &&
+    !hasAdminAccess()
   ) {
-    return NextResponse.redirect(new URL("/admin/login", req.url));
+    return NextResponse.redirect(adminLoginRedirectUrl(req));
   }
 
   if (isAdminDashboardHost(hostNoPort)) {
-    if (adminHostRequiresAdminSession(pathname) && !hasSessionCookie(req, ADMIN_SESSION_COOKIE)) {
-      return NextResponse.redirect(new URL("/admin/login", req.url));
+    if (adminHostRequiresAdminSession(pathname) && !hasAdminAccess()) {
+      return NextResponse.redirect(adminLoginRedirectUrl(req));
     }
 
     if (pathname === "/") {

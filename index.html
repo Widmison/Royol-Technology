@@ -3,55 +3,201 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Royol Technology | Official Links</title>
+    <title>Royol Technology | Digital Marketing & Technology</title>
+    <meta name="description" content="Royol Technology — digital marketing, AI video advertising, web and app development. Official links, social channels, and business contact.">
+    <meta name="theme-color" content="#030712">
     <link rel="icon" type="image/png" href="https://royoltechnology.com/favicon.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #38bdf8; /* Tech Blue */
-            --bg: #0f172a;
-            --card: #1e293b;
+            --primary: #38bdf8;
+            --primary-deep: #0ea5e9;
+            --bg: #030712;
+            --bg-elevated: #0f172a;
+            --card: rgba(30, 41, 59, 0.75);
             --text: #f8fafc;
             --text-muted: #94a3b8;
+            --border: rgba(148, 163, 184, 0.2);
+            --glow: rgba(56, 189, 248, 0.35);
         }
+
+        * { box-sizing: border-box; }
 
         body {
-            font-family: 'Inter', -apple-system, sans-serif;
-            background-color: var(--bg);
+            font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg);
             color: var(--text);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 50px 20px;
             margin: 0;
-            line-height: 1.5;
+            min-height: 100vh;
+            line-height: 1.55;
+            overflow-x: hidden;
         }
 
-        .container {
-            width: 100%;
-            max-width: 450px;
+        .bg-grid {
+            position: fixed;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(56, 189, 248, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(56, 189, 248, 0.03) 1px, transparent 1px);
+            background-size: 48px 48px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .bg-orb {
+            position: fixed;
+            width: min(90vw, 520px);
+            height: min(90vw, 520px);
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.45;
+            pointer-events: none;
+            z-index: 0;
+        }
+        .bg-orb--1 {
+            top: -120px;
+            right: -80px;
+            background: radial-gradient(circle, #0ea5e9 0%, transparent 70%);
+        }
+        .bg-orb--2 {
+            bottom: -100px;
+            left: -100px;
+            background: radial-gradient(circle, #6366f1 0%, transparent 70%);
+        }
+
+        .wrap {
+            position: relative;
+            z-index: 1;
+            max-width: 540px;
+            margin: 0 auto;
+            padding: 24px 20px 56px;
+        }
+
+        .masthead {
+            text-align: center;
+            margin-bottom: 22px;
+            padding-bottom: 18px;
+            border-bottom: 1px solid rgba(148, 163, 184, 0.12);
+        }
+        .masthead .service-line {
+            margin: 0;
+            font-size: 0.7rem;
+            font-weight: 600;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        .hero {
+            position: relative;
+            isolation: isolate;
+            margin-bottom: 28px;
+            border-radius: 22px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            box-shadow:
+                0 0 0 1px rgba(56, 189, 248, 0.12),
+                0 28px 56px -16px rgba(0, 0, 0, 0.65),
+                0 0 100px -28px var(--glow);
+            min-height: clamp(300px, 62vmin, 420px);
+            background-color: #0b1224;
+            background-image:
+                radial-gradient(120% 90% at 85% 15%, rgba(56, 189, 248, 0.12) 0%, transparent 55%),
+                linear-gradient(165deg, rgba(3, 7, 18, 0.55) 0%, transparent 42%),
+                linear-gradient(to top, rgba(3, 7, 18, 0.94) 0%, rgba(3, 7, 18, 0.45) 36%, transparent 62%),
+                linear-gradient(95deg, rgba(3, 7, 18, 0.1) 0%, rgba(3, 7, 18, 0.55) 48%, rgba(3, 7, 18, 0.92) 100%),
+                url("assets/hero.png");
+            background-size: cover;
+            background-position: 28% 22%;
+            background-repeat: no-repeat;
+        }
+
+        .hero__inner {
+            position: relative;
+            z-index: 1;
+            min-height: clamp(300px, 62vmin, 420px);
+            display: flex;
+            align-items: flex-end;
+            justify-content: flex-end;
+            padding: 22px 20px 24px;
+        }
+
+        .hero-copy {
+            width: min(100%, 19.5rem);
+            text-align: right;
+        }
+
+        .hero-copy h1 {
+            font-size: clamp(1.6rem, 4.8vw, 2.05rem);
+            font-weight: 700;
+            letter-spacing: -0.03em;
+            margin: 0 0 6px;
+            line-height: 1.12;
+            text-shadow: 0 2px 28px rgba(0, 0, 0, 0.55);
+        }
+        .hero-copy .tagline {
+            color: var(--primary);
+            font-weight: 600;
+            font-size: 0.95rem;
+            display: block;
+            margin-bottom: 12px;
+            text-shadow: 0 1px 18px rgba(0, 0, 0, 0.45);
+        }
+        .section-label {
+            font-size: 0.72rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.14em;
+            color: var(--text-muted);
+            margin: 28px 0 12px;
             text-align: center;
         }
 
-        .profile-pic {
-            width: 100px;
-            height: 100px;
-            border-radius: 50%;
-            border: 3px solid var(--primary);
-            margin-bottom: 20px;
-            object-fit: cover;
+        .social-row {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 8px;
         }
 
-        h1 { font-size: 1.5rem; margin-bottom: 5px; letter-spacing: -0.5px; }
-        .tagline { color: var(--primary); font-weight: 500; margin-bottom: 20px; display: block; }
-
-        .about-section {
-            background: rgba(56, 189, 248, 0.05);
-            border: 1px border solid rgba(56, 189, 248, 0.1);
-            padding: 15px;
-            border-radius: 12px;
-            font-size: 0.9rem;
-            color: var(--text-muted);
-            margin-bottom: 30px;
+        .social-btn {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 56px;
+            height: 56px;
+            border-radius: 16px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            color: inherit;
+            text-decoration: none;
+            transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+            backdrop-filter: blur(10px);
+        }
+        .social-btn:hover {
+            transform: translateY(-4px);
+            border-color: rgba(56, 189, 248, 0.45);
+            box-shadow: 0 12px 28px -8px rgba(0, 0, 0, 0.45);
+        }
+        .social-btn svg {
+            width: 28px;
+            height: 28px;
+        }
+        .social-btn span {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
         }
 
         .links-container { width: 100%; }
@@ -63,70 +209,129 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 18px;
-            margin-bottom: 14px;
-            border-radius: 12px;
+            gap: 10px;
+            padding: 17px 18px;
+            margin-bottom: 12px;
+            border-radius: 14px;
             font-weight: 600;
-            transition: all 0.25s ease;
-            border: 1px solid #334155;
-            position: relative;
-            overflow: hidden;
+            font-size: 0.95rem;
+            transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+            border: 1px solid var(--border);
+            backdrop-filter: blur(10px);
         }
-
         .link-card:hover {
-            transform: translateY(-3px);
-            background: #2d3a4f;
-            border-color: var(--primary);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+            transform: translateY(-2px);
+            background: rgba(45, 58, 79, 0.9);
+            border-color: rgba(56, 189, 248, 0.35);
+            box-shadow: 0 10px 24px -6px rgba(0, 0, 0, 0.35);
         }
 
         .featured {
-            border: 1px solid var(--primary);
-            background: linear-gradient(45deg, #1e293b, #1e3a8a);
+            border-color: rgba(56, 189, 248, 0.55);
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.95), rgba(30, 58, 138, 0.55));
+        }
+
+        .divider {
+            border: 0;
+            border-top: 1px solid var(--border);
+            margin: 22px 0;
         }
 
         .footer {
-            margin-top: 40px;
+            margin-top: 36px;
             font-size: 0.8rem;
             color: var(--text-muted);
+            text-align: center;
         }
 
-        /* Animation for the featured button */
         @keyframes pulse {
-            0% { box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.4); }
-            70% { box-shadow: 0 0 0 10px rgba(56, 189, 248, 0); }
+            0% { box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.35); }
+            70% { box-shadow: 0 0 0 12px rgba(56, 189, 248, 0); }
             100% { box-shadow: 0 0 0 0 rgba(56, 189, 248, 0); }
         }
-        .pulse { animation: pulse 2s infinite; }
+        .pulse { animation: pulse 2.2s ease-in-out infinite; }
+
+        @media (prefers-reduced-motion: reduce) {
+            .pulse { animation: none; }
+        }
+
+        @media (max-width: 479px) {
+            .hero {
+                background-position: 42% 18%;
+            }
+            .hero__inner {
+                justify-content: stretch;
+            }
+            .hero-copy {
+                width: 100%;
+                text-align: left;
+            }
+        }
+
+        @media (min-width: 560px) {
+            .hero {
+                background-position: 24% 20%;
+            }
+        }
     </style>
 </head>
 <body>
+    <div class="bg-grid" aria-hidden="true"></div>
+    <div class="bg-orb bg-orb--1" aria-hidden="true"></div>
+    <div class="bg-orb bg-orb--2" aria-hidden="true"></div>
 
-    <div class="container">
-        <img src="https://royoltechnology.com/logo.png" alt="Royol Technology" class="profile-pic">
-        <h1>Royol Technology</h1>
-        <span class="tagline">Web Development & Digital Innovation</span>
+    <div class="wrap">
+        <header class="masthead">
+            <p class="service-line">Digital marketing · Web &amp; apps · AI video ads</p>
+        </header>
 
-        <div class="about-section">
-            Royol Technology specializes in high-performance web development and creative content. We bridge the gap between complex code and engaging digital experiences.
+        <section class="hero" aria-labelledby="hero-heading">
+            <div class="hero__inner">
+                <div class="hero-copy">
+                    <h1 id="hero-heading">Performance creative that scales</h1>
+                    <span class="tagline">Strategy, content, and engineering—one partner</span>
+                </div>
+            </div>
+        </section>
+
+        <p class="section-label">Social channels</p>
+        <div class="social-row" role="list">
+            <a class="social-btn" role="listitem" href="https://www.youtube.com/@royoltechnology" target="_blank" rel="noopener noreferrer" title="YouTube">
+                <span>YouTube</span>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#FF0000" d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+            </a>
+            <a class="social-btn" role="listitem" href="https://www.facebook.com/royoltechnology" target="_blank" rel="noopener noreferrer" title="Facebook">
+                <span>Facebook</span>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#1877F2" d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+            </a>
+            <a class="social-btn" role="listitem" href="https://www.tiktok.com/@royoltechnology" target="_blank" rel="noopener noreferrer" title="TikTok">
+                <span>TikTok</span>
+                <svg viewBox="0 0 448 512" aria-hidden="true" width="26" height="26"><path fill="#fff" d="M448 209.9a210.2 210.2 0 0 1-122.8-39.2V349.4A162.6 162.6 0 1 1 185 188.3V278a74.6 74.6 0 1 0 52.8 71.2V0h88a121.2 121.2 0 0 0 1.9 22.2 122.2 122.2 0 0 0 44.9 80.2 121.4 121.4 0 0 0 67 20.1z"/></svg>
+            </a>
+            <a class="social-btn" role="listitem" href="https://www.instagram.com/royoltechnology" target="_blank" rel="noopener noreferrer" title="Instagram">
+                <span>Instagram</span>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><defs><linearGradient id="ig" x1="0%" y1="100%" x2="100%" y2="0%"><stop offset="0%" stop-color="#F58529"/><stop offset="50%" stop-color="#DD2A7B"/><stop offset="100%" stop-color="#8134AF"/></linearGradient></defs><path fill="url(#ig)" d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z"/></svg>
+            </a>
         </div>
 
+        <p class="section-label">Work with us</p>
         <div class="links-container">
-            <a href="https://www.royoltechnology.com/contact" class="link-card featured pulse">🚀 Start a Project (Hire Us)</a>
-            <a href="https://www.royoltechnology.com" class="link-card">Official Website</a>
-            <a href="https://www.royoltechnology.com/about" class="link-card">About Our Mission</a>
-            
-            <hr style="border: 0; border-top: 1px solid #334155; margin: 25px 0;">
+            <a href="https://www.royoltechnology.com/contact" class="link-card featured pulse">Request a consultation</a>
+            <a href="mailto:widmisonfrancois@royoltechnology.com" class="link-card">Business email</a>
+            <a href="https://www.royoltechnology.com" class="link-card">Corporate website</a>
+            <a href="https://www.royoltechnology.com/about" class="link-card">About Royol Technology</a>
 
-            <a href="mailto:widmisonfrancois@royoltechnology.com" class="link-card">📧 Business Email</a>
-            <a href="https://www.tiktok.com/@royoltechnology" class="link-card">TikTok (500k+ Followers)</a>
-            <a href="https://www.youtube.com/@royoltechnology" class="link-card">YouTube</a>
+            <hr class="divider">
+
+            <a href="https://www.youtube.com/@royoltechnology" class="link-card" target="_blank" rel="noopener noreferrer">YouTube — long-form &amp; case studies</a>
+            <a href="https://www.facebook.com/royoltechnology" class="link-card" target="_blank" rel="noopener noreferrer">Facebook — updates &amp; community</a>
+            <a href="https://www.tiktok.com/@royoltechnology" class="link-card" target="_blank" rel="noopener noreferrer">TikTok — creative &amp; motion</a>
+            <a href="https://www.instagram.com/royoltechnology" class="link-card" target="_blank" rel="noopener noreferrer">Instagram — campaigns &amp; reels</a>
         </div>
 
         <div class="footer">
-            &copy; 2026 Royol Technology. Built with precision.
+            &copy; 2026 Royol Technology. Digital marketing &amp; technology.
         </div>
     </div>
-
 </body>
 </html>

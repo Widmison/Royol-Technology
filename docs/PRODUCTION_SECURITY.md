@@ -8,7 +8,7 @@ Use this before and after each deploy.
 |----------|---------|
 | `DATABASE_URL` | Postgres connection (never commit; use Vercel / Neon secrets). |
 | `MEX509_ADMIN_PASSWORD` | Admin portal password (long random string; rotate periodically). |
-| `MEX509_PAYMENT_SECRET` | **Required in production** — random 32+ bytes (e.g. `openssl rand -hex 32`). Signs hidden `payToken` on `/pay/[id]` so arbitrary requests cannot mark invoices paid. |
+| `MEX509_PAYMENT_SECRET` | Optional legacy — client `/pay` pages no longer self-confirm; staff records payment in Admin → Invoices. Keep unset unless you reuse signed pay tokens elsewhere. |
 | `RESEND_API_KEY` / `EMAIL_FROM` | Transactional email (verification, password reset, tracking). |
 | `NEXT_PUBLIC_SITE_URL` | Optional; Used in reset emails as a link to the portal login. Password reset sends a **6-digit code** (same channel as signup verification). |
 | `AUTH_COOKIE_DOMAIN` | Optional; set when sharing cookies across subdomains (e.g. `.yourdomain.com`). |
@@ -36,7 +36,7 @@ Host routing (if split domains): `MEX509_MAIN_HOST`, `MEX509_PORTAL_HOST`, `MEX5
 
 ## 6. Payment flow (`/api/pay`)
 
-- Confirms requests only when `payToken` matches an HMAC of the invoice id using `MEX509_PAYMENT_SECRET`.
+- Public `POST /api/pay` is disabled; marking paid is staff-only via `POST /api/admin/invoices/[id]/mark-paid`.
 - Without the secret in **production**, payment buttons stay disabled and the API rejects forged posts.
 
 ## 7. Operational hygiene

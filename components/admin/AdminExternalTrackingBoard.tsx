@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { Loader2, RefreshCw } from "lucide-react";
+import { externalTrackingStatusLabel } from "@/lib/externalTrackingStatusDisplay";
 
 type Entry = {
   id: string;
@@ -17,7 +18,7 @@ type Entry = {
   linkedPackage: { id: string; trackingId: string; status: string } | null;
 };
 
-const STATUSES = ["PENDING_REVIEW", "LINKED", "NEEDS_INFO", "CLOSED"] as const;
+const STATUSES = ["PENDING_REVIEW", "PACKED_RECEIVED"] as const;
 
 export default function AdminExternalTrackingBoard({ highlightId }: { highlightId?: string | null }) {
   const [entries, setEntries] = useState<Entry[]>([]);
@@ -77,8 +78,8 @@ export default function AdminExternalTrackingBoard({ highlightId }: { highlightI
         <div>
           <h1 className="text-3xl font-black text-mex-dark">External tracking inbox</h1>
           <p className="mt-1 font-medium text-gray-500">
-            Third-party ecommerce tracking clients add from other stores. Link to an internal MEX509 package when it
-            matches.
+            Third-party ecommerce tracking clients add from other stores. Link entries to an internal MEX tracking ID —
+            multiple external lines can reference the same MEX509 shipment when needed.
           </p>
         </div>
         <button
@@ -135,7 +136,7 @@ export default function AdminExternalTrackingBoard({ highlightId }: { highlightI
                     </td>
                     <td className="p-4 align-top">
                       <span className="rounded-full border border-gray-200 bg-gray-50 px-2 py-0.5 text-[10px] font-black uppercase">
-                        {e.status.replace(/_/g, " ")}
+                        {externalTrackingStatusLabel(e.status)}
                       </span>
                     </td>
                     <td className="p-4 align-top font-mono text-xs">
@@ -180,7 +181,7 @@ export default function AdminExternalTrackingBoard({ highlightId }: { highlightI
                 >
                   {STATUSES.map((s) => (
                     <option key={s} value={s}>
-                      {s.replace(/_/g, " ")}
+                      {externalTrackingStatusLabel(s)}
                     </option>
                   ))}
                 </select>

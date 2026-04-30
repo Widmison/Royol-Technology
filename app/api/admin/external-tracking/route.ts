@@ -1,11 +1,15 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAdminApiUser } from "@/lib/requireApiSession";
+import { canPerformStaffCapability } from "@/lib/staffAccess";
 
 export async function GET() {
   try {
     const adminOrRes = await requireAdminApiUser();
     if (adminOrRes instanceof NextResponse) return adminOrRes;
+    if (!canPerformStaffCapability(adminOrRes, "tracking:external-review")) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
 
     const entries = await prisma.clientExternalTracking.findMany({
       include: {

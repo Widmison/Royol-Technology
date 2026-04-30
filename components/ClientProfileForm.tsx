@@ -168,7 +168,7 @@ export default function ClientProfileForm({ user }: { user: any }) {
                     </div>
                     <div className="col-span-3 md:col-span-2">
                       <label className="block text-sm font-bold text-gray-500 mb-2">Zip Code</label>
-                      <input type="text" readOnly={!isEditing} value={zipCode} onChange={(e) => setZipCode(e.target.value)} className={inputStyle} placeholder="33101" />
+                      <input type="text" readOnly={!isEditing} value={zipCode} onChange={(e) => setZipCode(e.target.value)} className={inputStyle} placeholder="33191" />
                     </div>
                   </div>
                 </div>

@@ -255,7 +255,7 @@ export default function AdminUserManager({ initialUsers }: { initialUsers: any[]
                   </div>
                   <div>
                     <label className="block text-sm font-bold text-gray-500 mb-2">Zip</label>
-                    <input type="text" value={formData.zipCode} onChange={(e) => setFormData({...formData, zipCode: e.target.value})} className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-mex-blue outline-none font-bold text-mex-dark" placeholder="33101" />
+                    <input type="text" value={formData.zipCode} onChange={(e) => setFormData({...formData, zipCode: e.target.value})} className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-mex-blue outline-none font-bold text-mex-dark" placeholder="33191" />
                   </div>
                 </div>
 

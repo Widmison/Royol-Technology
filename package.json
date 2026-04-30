@@ -5,25 +5,33 @@
   "scripts": {
     "dev": "next dev --hostname 127.0.0.1 --webpack",
     "dev:turbo": "next dev --hostname 127.0.0.1",
-    "build": "next build",
+    "build": "prisma migrate deploy && next build",
+    "build:next": "next build",
     "start": "next start",
     "lint": "eslint",
     "deploy:check": "npm run build",
     "postinstall": "prisma generate",
     "db:migrate": "prisma migrate deploy",
     "db:migrate:dev": "prisma migrate dev",
-    "db:push": "prisma db push"
+    "db:push": "prisma db push",
+    "db:seed-staff": "node --env-file=.env scripts/create-staff-user.cjs"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.7.0",
     "@prisma/client": "^7.7.0",
+    "@vercel/analytics": "^2.0.1",
+    "@vercel/blob": "^2.3.3",
+    "@vercel/speed-insights": "^2.0.0",
     "@yudiel/react-qr-scanner": "^2.5.1",
     "bcryptjs": "^3.0.3",
     "clsx": "^2.1.1",
     "lucide-react": "^1.7.0",
     "next": "16.2.2",
     "next-auth": "^5.0.0-beta.31",
+    "next-intl": "^4.11.0",
+    "otplib": "^13.4.0",
     "pg": "^8.20.0",
+    "prisma": "^7.7.0",
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "resend": "^4.8.0",
@@ -38,7 +46,6 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.2.2",
-    "prisma": "^7.7.0",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

@@ -4,7 +4,7 @@ import { useState } from "react";
 import { MapPin, Navigation, Copy, Check, Warehouse } from "lucide-react";
 
 const ADDRESS_LINE1 = "1962 NW 82nd Ave";
-const ADDRESS_LINE2 = "Doral, FL 33126";
+const ADDRESS_LINE2 = "Doral, FL 33191";
 const ADDRESS_SINGLE = `${ADDRESS_LINE1}, ${ADDRESS_LINE2}`;
 
 const GOOGLE_MAPS_URL = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(ADDRESS_SINGLE)}`;

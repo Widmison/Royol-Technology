@@ -18,6 +18,7 @@ import {
   regionFieldForCountry,
   type RegionField,
 } from "@/lib/address-options";
+import { destinationCountryLabel } from "@/lib/shipmentRouteLabel";
 
 export default function QuotePage() {
   const [step, setStep] = useState(1);
@@ -38,6 +39,15 @@ export default function QuotePage() {
     city: "",
     zipCode: "",
   });
+
+  const [successSnapshot, setSuccessSnapshot] = useState<typeof formData | null>(null);
+
+  const countryOptions = useMemo(() => {
+    const prefer = new Set(["HT", "DO", "US"]);
+    const first = DESTINATION_COUNTRIES.filter((c) => prefer.has(c.code));
+    const rest = DESTINATION_COUNTRIES.filter((c) => !prefer.has(c.code));
+    return [...first, ...rest];
+  }, []);
 
   const regionField: RegionField = useMemo(
     () => regionFieldForCountry(formData.destinationCountry),
@@ -68,6 +78,7 @@ export default function QuotePage() {
         body: JSON.stringify(formData),
       });
       if (res.ok) {
+        setSuccessSnapshot({ ...formData });
         setIsSuccess(true);
       } else {
         alert("Something went wrong. Please try again.");
@@ -99,9 +110,27 @@ export default function QuotePage() {
                 <CheckCircle className="h-12 w-12 text-green-600" />
               </div>
               <h2 className="text-xl font-black text-mex-dark">You&apos;re on the list!</h2>
+              {successSnapshot ? (
+                <div className="max-w-md text-sm text-gray-600 space-y-2">
+                  <p>
+                    <strong className="text-mex-dark">Route:</strong> {successSnapshot.departure} ·{" "}
+                    {successSnapshot.shippingMethod} · Deliver to{" "}
+                    <strong>{destinationCountryLabel(successSnapshot.destinationCountry)}</strong>
+                    {successSnapshot.city ? (
+                      <>
+                        {" "}
+                        ({successSnapshot.city})
+                      </>
+                    ) : null}
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    Submitted {new Date().toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" })}
+                  </p>
+                </div>
+              ) : null}
               <p className="max-w-sm text-sm text-gray-600">
                 We received your details. Visit{" "}
-                <strong className="text-mex-dark">1962 NW 82nd Ave, Doral, FL 33126</strong> with your package to
+                <strong className="text-mex-dark">1962 NW 82nd Ave, Doral, FL 33191</strong> with your package to
                 weigh and pay.
               </p>
               <Link
@@ -293,7 +322,7 @@ export default function QuotePage() {
                           required
                           className="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-sm font-medium outline-none focus:ring-2 focus:ring-mex-orange"
                         >
-                          {DESTINATION_COUNTRIES.map((c) => (
+                          {countryOptions.map((c) => (
                             <option key={c.code} value={c.code}>
                               {c.name}
                             </option>

@@ -1,16 +1,25 @@
-/** Only this identity may use the admin portal login (`/api/admin/auth`). */
-export const ADMIN_PORTAL_LOGIN_EMAIL = "widmisonfrancois@royoltechnology.com";
+import { isStaffEmailAllowed } from "@/lib/adminStaffRegistry";
 
 export function normalizeEmail(email: string) {
   return email.trim().toLowerCase();
 }
 
+/** Backward-compatible name — any email in the staff registry is reserved from the client portal. */
 export function isAdminPortalLoginEmail(email: string) {
-  return normalizeEmail(email) === normalizeEmail(ADMIN_PORTAL_LOGIN_EMAIL);
+  return isStaffEmailAllowed(email);
 }
 
-/** Set `MEX509_ADMIN_PASSWORD` in production (e.g. Vercel) and locally in `.env.local`. Never commit real passwords. */
+/**
+ * Bootstrap password for approved staff (first-time email/password admin login).
+ * Prefer `MEX509_ADMIN_DEFAULT_PASSWORD`; falls back to `MEX509_ADMIN_PASSWORD`.
+ */
+export function defaultAdminBootstrapPassword(): string | undefined {
+  const d = process.env.MEX509_ADMIN_DEFAULT_PASSWORD?.trim();
+  const legacy = process.env.MEX509_ADMIN_PASSWORD?.trim();
+  return d || legacy || undefined;
+}
+
+/** @deprecated use defaultAdminBootstrapPassword — kept for any external imports */
 export function configuredAdminPassword(): string | undefined {
-  const p = process.env.MEX509_ADMIN_PASSWORD?.trim();
-  return p || undefined;
+  return defaultAdminBootstrapPassword();
 }

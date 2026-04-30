@@ -1,8 +1,5 @@
 "use client";
 
-import { signOut } from "next-auth/react";
-import { useRouter } from "next/navigation";
-
 type Props = {
   className?: string;
   children: React.ReactNode;
@@ -16,8 +13,6 @@ export default function AdminSignOutButton({
   "aria-label": ariaLabel,
   onBeforeNavigate,
 }: Props) {
-  const router = useRouter();
-
   return (
     <button
       type="button"
@@ -25,10 +20,14 @@ export default function AdminSignOutButton({
       aria-label={ariaLabel}
       onClick={async () => {
         if (!window.confirm("Sign out of the admin dashboard?")) return;
-        await fetch("/api/admin/signout", { method: "POST", credentials: "include" });
+        try {
+          await fetch("/api/admin/signout", { method: "POST", credentials: "include" });
+        } catch {
+          /* continue */
+        }
         onBeforeNavigate?.();
-        await signOut({ callbackUrl: "/admin/login" });
-        router.refresh();
+        /** Clears NextAuth session (Google sign-in) and returns to login. */
+        window.location.href = `/api/auth/signout?callbackUrl=${encodeURIComponent("/admin/login")}`;
       }}
     >
       {children}

@@ -14,13 +14,13 @@ export const ADMIN_TRACKING_STATUS_OPTIONS: AdminTrackingStatusOption[] = [
     value: "RECEIVED_USA_WAREHOUSE",
     label: "1 — Received in USA Warehouse",
     detail: "Received in USA Warehouse — Colis resevwa nan depo USA ✅",
-    defaultLocation: "1962 NW 82nd Ave Doral, FL 33126",
+    defaultLocation: "1962 NW 82nd Ave Doral, FL 33191",
   },
   {
     value: "PROCESSING_SORTING_USA",
     label: "2 — Processing & sorting (USA)",
     detail: "Processing & sorting (USA) — Colis ap prepare pou shipment 🚚",
-    defaultLocation: "1962 NW 82nd Ave Doral, FL 33126",
+    defaultLocation: "1962 NW 82nd Ave Doral, FL 33191",
   },
   {
     value: "IN_TRANSIT_USA_TO_DR",

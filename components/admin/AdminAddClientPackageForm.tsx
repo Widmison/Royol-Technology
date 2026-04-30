@@ -1,20 +1,29 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Plus, Loader2 } from "lucide-react";
 
 type ClientRow = { id: string; email: string; firstName: string | null; lastName: string | null };
+
+const HAITI_CITIES = ["Port-au-Prince", "Cap-Haitien", "Saint-Marc", "Hinche"] as const;
+const DR_CITIES = ["Santo Domingo", "Santiago", "Puerto Plata", "La Romana"] as const;
 
 export default function AdminAddClientPackageForm({ clients }: { clients: ClientRow[] }) {
   const [clientId, setClientId] = useState(clients[0]?.id ?? "");
   const [weightLbs, setWeightLbs] = useState("");
   const [shippingMethod, setShippingMethod] = useState("Air Freight");
   const [serviceFee, setServiceFee] = useState("0");
-  const [destinationCity, setDestinationCity] = useState("Port-au-Prince");
+  const [destinationCountry, setDestinationCountry] = useState<"HT" | "DO">("HT");
+  const [destinationCity, setDestinationCity] = useState<string>(HAITI_CITIES[0]);
   const [priceOverride, setPriceOverride] = useState("");
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
   const [err, setErr] = useState<string | null>(null);
+
+  useEffect(() => {
+    const list = destinationCountry === "HT" ? HAITI_CITIES : DR_CITIES;
+    setDestinationCity(list[0]);
+  }, [destinationCountry]);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,6 +40,7 @@ export default function AdminAddClientPackageForm({ clients }: { clients: Client
           weightLbs: weightLbs,
           shippingMethod,
           serviceFee: serviceFee === "" ? 0 : parseFloat(serviceFee),
+          destinationCountry,
           destinationCity,
           priceOverride: priceOverride.trim() === "" ? undefined : parseFloat(priceOverride),
         }),
@@ -55,6 +65,8 @@ export default function AdminAddClientPackageForm({ clients }: { clients: Client
   if (clients.length === 0) {
     return null;
   }
+
+  const cityOptions = destinationCountry === "HT" ? HAITI_CITIES : DR_CITIES;
 
   return (
     <div className="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm">
@@ -129,16 +141,31 @@ export default function AdminAddClientPackageForm({ clients }: { clients: Client
         </div>
         <div>
           <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-gray-400">
-            Destination office city
+            Destination country
+          </label>
+          <select
+            value={destinationCountry}
+            onChange={(e) => setDestinationCountry(e.target.value as "HT" | "DO")}
+            className="w-full rounded-xl border-2 border-gray-200 px-4 py-3 font-bold outline-none focus:border-mex-blue"
+          >
+            <option value="HT">Haiti</option>
+            <option value="DO">Dominican Republic</option>
+          </select>
+        </div>
+        <div>
+          <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-gray-400">
+            Destination office / city
           </label>
           <select
             value={destinationCity}
             onChange={(e) => setDestinationCity(e.target.value)}
             className="w-full rounded-xl border-2 border-gray-200 px-4 py-3 font-bold outline-none focus:border-mex-blue"
           >
-            <option value="Port-au-Prince">Port-au-Prince</option>
-            <option value="Cap-Haitien">Cap-Haïtien</option>
-            <option value="Hinche">Hinche</option>
+            {cityOptions.map((c) => (
+              <option key={c} value={c}>
+                {c}
+              </option>
+            ))}
           </select>
         </div>
         <div className="sm:col-span-2">

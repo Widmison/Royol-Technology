@@ -25,10 +25,10 @@ import {
   TriangleAlert,
   Scale,
   ArrowRight,
+  Search,
   ShoppingCart,
   Warehouse,
   MapPinned,
-  Search,
   ShoppingBag,
   Phone,
   Mail,
@@ -46,9 +46,16 @@ import { getClientSessionUser } from "@/lib/serverSession";
 import ClientDashboardTracking from "@/components/ClientDashboardTracking";
 import ClientExternalTrackingPanel from "@/components/ClientExternalTrackingPanel";
 import PortalNotificationBell from "@/components/PortalNotificationBell";
+import LanguageSelector from "@/components/LanguageSelector";
 import { CguLegalSections, CguPageHeader } from "@/components/CguDocument";
-import { LOGISTICS_SERVICES, type LogisticsServiceId } from "@/lib/logistics-services";
+import MarketingBrandGallery from "@/components/MarketingBrandGallery";
 import { packageStatusShortLabel } from "@/lib/packageStatusDisplay";
+import { shipmentRouteLabel } from "@/lib/shipmentRouteLabel";
+import { LOGISTICS_SERVICES, type LogisticsServiceId } from "@/lib/logistics-services";
+import { getTranslations } from "next-intl/server";
+import DashboardPricingVisualStrip from "@/components/dashboard/DashboardPricingVisualStrip";
+import DashboardReferralShareCard from "@/components/dashboard/DashboardReferralShareCard";
+import ClientPickupRequestPanel from "@/components/dashboard/ClientPickupRequestPanel";
 
 export const metadata: Metadata = {
   title: "Client dashboard",
@@ -99,6 +106,8 @@ export default async function ClientDashboardPage({
 
   if (!user) redirect("/login");
 
+  const tSidebar = await getTranslations("Dashboard.sidebar");
+
   const unpaidInvoices = user.requests.filter((req: any) => req.invoice?.status === "UNPAID");
 
   const requests = user.requests as Array<
@@ -106,6 +115,7 @@ export default async function ClientDashboardPage({
       id: string;
       createdAt: Date;
       departure: string;
+      destinationCountry?: string | null;
       category: string;
       status: string;
       invoice?: { id: string; status: string; totalAmount: number } | null;
@@ -194,7 +204,7 @@ export default async function ClientDashboardPage({
         
         <div className="flex shrink-0 items-start justify-between gap-3 border-b border-gray-800 p-5">
           <div className="min-w-0 flex-1">
-            <p className="mb-1 text-xs font-bold uppercase tracking-widest text-gray-400">Client Portal</p>
+            <p className="mb-1 text-xs font-bold uppercase tracking-widest text-gray-400">{tSidebar("clientPortal")}</p>
             <h3 className="truncate font-black text-lg">
               {user.firstName || "Valued"} {user.lastName || "Customer"}
             </h3>
@@ -207,19 +217,19 @@ export default async function ClientDashboardPage({
 
         <nav className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-4 py-4 space-y-1.5">
           <Link href="/dashboard?tab=tracking" className={`flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-colors ${currentTab === 'tracking' ? 'bg-mex-orange text-white font-bold shadow-lg shadow-orange-900/50' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}>
-            <Search size={20} /> Live tracking
+            <Search size={20} /> {tSidebar("tracking")}
           </Link>
           <Link href="/dashboard?tab=overview" className={`flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-colors ${currentTab === 'overview' ? 'bg-mex-blue text-white font-bold shadow-lg shadow-blue-900/50' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}>
-            <LayoutDashboard size={20} /> My Overview
+            <LayoutDashboard size={20} /> {tSidebar("overview")}
           </Link>
           <Link href="/dashboard?tab=new-box" className={`flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-colors ${currentTab === 'new-box' ? 'bg-mex-orange text-white font-bold shadow-lg shadow-orange-900/50' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}>
-            <Plus size={20} /> Pre-Register Box
+            <Plus size={20} /> {tSidebar("newBox")}
           </Link>
           <Link href="/dashboard?tab=shipments" className={`flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-colors ${currentTab === 'shipments' ? 'bg-mex-blue text-white font-bold shadow-lg shadow-blue-900/50' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}>
-            <Package size={20} /> All Shipments
+            <Package size={20} /> {tSidebar("shipments")}
           </Link>
           <Link href="/dashboard?tab=invoices" className={`flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-colors ${currentTab === 'invoices' ? 'bg-mex-blue text-white font-bold shadow-lg shadow-blue-900/50' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}>
-            <Receipt size={20} /> Billing & Invoices
+            <Receipt size={20} /> {tSidebar("invoices")}
             {unpaidInvoices.length > 0 && (
               <span className="ml-auto bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full animate-pulse">
                 {unpaidInvoices.length}
@@ -234,19 +244,29 @@ export default async function ClientDashboardPage({
                 : "text-gray-400 hover:bg-white/5 hover:text-white"
             }`}
           >
-            <ShoppingBag size={20} /> Add tracking
+            <ShoppingBag size={20} /> {tSidebar("external")}
+          </Link>
+          <Link
+            href="/dashboard?tab=pickup"
+            className={`flex items-center gap-3 rounded-xl px-4 py-3 font-medium transition-colors ${
+              currentTab === "pickup"
+                ? "bg-mex-orange font-bold text-white shadow-lg shadow-orange-900/50"
+                : "text-gray-400 hover:bg-white/5 hover:text-white"
+            }`}
+          >
+            <Package size={20} /> Pickup request
           </Link>
 
           <div className="pt-4 mt-4 border-t border-gray-800">
-            <p className="px-4 text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Information</p>
+            <p className="px-4 text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">{tSidebar("info")}</p>
             <Link href="/dashboard?tab=pricing" className={`flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-colors ${currentTab === 'pricing' ? 'bg-white/10 text-white font-bold' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}>
-              <DollarSign size={20} /> Pricing & Services
+              <DollarSign size={20} /> {tSidebar("pricing")}
             </Link>
             <Link href="/dashboard?tab=profile" className={`flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-colors ${currentTab === 'profile' ? 'bg-white/10 text-white font-bold' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}>
-              <Settings size={20} /> Profile Settings
+              <Settings size={20} /> {tSidebar("profile")}
             </Link>
             <Link href="/dashboard?tab=terms" className={`flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-colors ${currentTab === 'terms' ? 'bg-white/10 text-white font-bold' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}>
-              <Scale size={20} /> CGU / Legal Terms
+              <Scale size={20} /> {tSidebar("terms")}
             </Link>
           </div>
         </nav>
@@ -278,6 +298,7 @@ export default async function ClientDashboardPage({
             />
           </div>
           <div className="flex shrink-0 items-center gap-1">
+            <LanguageSelector compact />
             <PortalNotificationBell variant="client" />
             <MobileClientNav
               user={{ firstName: user.firstName, lastName: user.lastName, email: user.email }}
@@ -302,6 +323,7 @@ export default async function ClientDashboardPage({
           )}
 
           {currentTab === "external" && <ClientExternalTrackingPanel />}
+          {currentTab === "pickup" && <ClientPickupRequestPanel />}
 
           {/* TAB: OVERVIEW */}
           {currentTab === "overview" && (
@@ -491,6 +513,8 @@ export default async function ClientDashboardPage({
                 </div>
               </div>
 
+              {user.referralCode ? <DashboardReferralShareCard referralCode={user.referralCode} /> : null}
+
               {unpaidInvoices.length > 0 && (
                 <div className="mb-8">
                   <h2 className="text-lg font-black text-mex-dark mb-4 flex items-center gap-2"><AlertCircle className="text-red-500" /> Action Required: Unpaid Invoices</h2>
@@ -498,7 +522,7 @@ export default async function ClientDashboardPage({
                     {unpaidInvoices.map((req: any) => (
                       <div key={req.id} className="bg-white border-l-4 border-l-red-500 rounded-2xl p-6 flex flex-col sm:flex-row justify-between sm:items-center gap-4 shadow-sm">
                         <div>
-                          <h3 className="font-bold text-mex-dark">{req.departure} &rarr; Haiti</h3>
+                          <h3 className="font-bold text-mex-dark">{shipmentRouteLabel(req.departure, req.destinationCountry)}</h3>
                           {req.package?.trackingId && (
                             <p className="mt-1 text-xs font-bold uppercase tracking-wide text-gray-400">
                               Tracking{" "}
@@ -566,7 +590,7 @@ export default async function ClientDashboardPage({
                               </span>
                             </td>
                             <td className="p-4 font-bold text-mex-dark">
-                              {req.departure} &rarr; Haiti
+                              {shipmentRouteLabel(req.departure, req.destinationCountry)}
                               <span className="mt-1 block text-xs font-semibold text-gray-400">{req.shippingMethod}</span>
                             </td>
                             <td className="p-4 text-gray-700">
@@ -632,7 +656,7 @@ export default async function ClientDashboardPage({
                       >
                         <div className="flex justify-between gap-3">
                           <div className="min-w-0">
-                            <p className="font-black text-mex-dark">{req.departure} &rarr; Haiti</p>
+                            <p className="font-black text-mex-dark">{shipmentRouteLabel(req.departure, req.destinationCountry)}</p>
                             <p className="mt-1 text-xs font-semibold text-gray-500">{req.category}</p>
                           </div>
                           {requestStatusBadge(req.status)}
@@ -742,7 +766,7 @@ export default async function ClientDashboardPage({
                       shipmentsToShow.map((req: any) => (
                         <tr key={req.id} className="hover:bg-gray-50 transition-colors align-top">
                           <td className="p-5">
-                            <div className="font-bold text-mex-dark">{req.departure} &rarr; Haiti</div>
+                            <div className="font-bold text-mex-dark">{shipmentRouteLabel(req.departure, req.destinationCountry)}</div>
                             <div className="text-xs text-gray-400 mt-1">{new Date(req.createdAt).toLocaleDateString()}</div>
                             {req.status === "PENDING_DROPOFF" && (
                               <div className="mt-3 lg:hidden">
@@ -857,18 +881,28 @@ export default async function ClientDashboardPage({
           {/* ============================== */}
           {currentTab === "pricing" && (
             <div className="animate-in fade-in duration-500 max-w-6xl mx-auto pb-10 px-1 sm:px-0">
+              <DashboardPricingVisualStrip />
 
-              <section className="mb-12 sm:mb-16">
-                <div className="text-center max-w-3xl mx-auto mb-8 sm:mb-10 px-2">
-                  <h2 className="text-2xl sm:text-4xl font-black italic text-mex-blue uppercase tracking-tight">
+              <section className="mb-14 sm:mb-16">
+                <div className="mx-auto mb-8 max-w-3xl px-2 text-center sm:mb-10">
+                  <h2 className="text-2xl font-black italic uppercase tracking-tight text-mex-blue sm:text-4xl">
                     Our services
                   </h2>
-                  <p className="text-gray-600 font-medium mt-3 text-base sm:text-lg leading-relaxed">
-                    Comprehensive logistics solutions tailored for speed, security, and peace of mind.
+                  <p className="mt-3 text-base font-medium leading-relaxed text-gray-600 sm:text-lg">
+                    Comprehensive logistics solutions tailored for speed, security, and peace of mind. More detail on{" "}
+                    <Link
+                      href="/services"
+                      className="font-black text-mex-blue underline decoration-mex-orange/40 underline-offset-4 hover:text-mex-orange"
+                    >
+                      mex509.com/services
+                    </Link>
+                    .
                   </p>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 sm:gap-6">
+                <MarketingBrandGallery compact className="mb-10 sm:mb-12 px-2 sm:px-0" />
+
+                <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3 md:gap-6">
                   {LOGISTICS_SERVICES.map((service) => (
                     <div
                       key={service.id}
@@ -877,22 +911,20 @@ export default async function ClientDashboardPage({
                       <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-xl bg-blue-50 ring-1 ring-mex-blue/10 transition-transform group-hover:scale-105">
                         <PricingServiceIcon id={service.id} />
                       </div>
-                      <h3 className="text-lg font-black text-mex-dark leading-snug">{service.title}</h3>
-                      <p className="mt-2 flex-1 text-sm text-gray-600 font-medium leading-relaxed">
-                        {service.description}
-                      </p>
-                      <div className="mt-5 pt-4 border-t border-gray-50">
+                      <h3 className="text-lg font-black leading-snug text-mex-dark">{service.title}</h3>
+                      <p className="mt-2 flex-1 text-sm font-medium leading-relaxed text-gray-600">{service.description}</p>
+                      <div className="mt-5 border-t border-gray-50 pt-4">
                         {service.external ? (
                           <a
                             href={service.actionHref}
-                            className="inline-flex items-center gap-2 font-black text-mex-orange text-sm uppercase tracking-wide hover:gap-3 transition-all"
+                            className="inline-flex items-center gap-2 text-sm font-black uppercase tracking-wide text-mex-orange transition-all hover:gap-3"
                           >
                             Start Now <ArrowRight size={18} strokeWidth={2.5} />
                           </a>
                         ) : (
                           <Link
                             href={service.actionHref}
-                            className="inline-flex items-center gap-2 font-black text-mex-orange text-sm uppercase tracking-wide hover:gap-3 transition-all"
+                            className="inline-flex items-center gap-2 text-sm font-black uppercase tracking-wide text-mex-orange transition-all hover:gap-3"
                           >
                             Start Now <ArrowRight size={18} strokeWidth={2.5} />
                           </Link>
@@ -902,6 +934,15 @@ export default async function ClientDashboardPage({
                   ))}
                 </div>
               </section>
+
+              <div className="mx-auto mb-10 max-w-2xl px-2 text-center sm:mb-12">
+                <h2 className="text-2xl font-black italic uppercase tracking-tight text-mex-blue sm:text-4xl">
+                  Rates &amp; pricing
+                </h2>
+                <p className="mt-3 text-base font-medium leading-relaxed text-gray-600 sm:text-lg">
+                  Lane pricing for shipments you pre-register in the portal.
+                </p>
+              </div>
 
               {/* SAAS TIER CARDS */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12 px-2 sm:px-4 md:px-10">

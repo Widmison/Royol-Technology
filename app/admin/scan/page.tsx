@@ -2,19 +2,18 @@
 
 import { useState, useRef, useEffect } from "react";
 import { Scanner } from "@yudiel/react-qr-scanner";
-import { ScanBarcode, CheckCircle, XCircle, Camera, Keyboard } from "lucide-react";
+import { CheckCircle, XCircle, Camera, Keyboard } from "lucide-react";
 import { ALL_ADMIN_SCAN_STATUS_OPTIONS, optionForStatus } from "@/lib/adminTrackingStatusOptions";
 
 export default function AdminScanHubPage() {
   const [trackingId, setTrackingId] = useState("");
   const [status, setStatus] = useState("RECEIVED_USA_WAREHOUSE");
   const [location, setLocation] = useState(
-    () => optionForStatus("RECEIVED_USA_WAREHOUSE")?.defaultLocation ?? "1962 NW 82nd Ave Doral, FL 33126"
+    () => optionForStatus("RECEIVED_USA_WAREHOUSE")?.defaultLocation ?? "1962 NW 82nd Ave Doral, FL 33191"
   );
 
   const [hubTitle, setHubTitle] = useState("Barcode Scanner Hub");
   const [themeColor, setThemeColor] = useState("text-mex-blue");
-  const [themeBg, setThemeBg] = useState("bg-blue-100");
   const [headerAvatar, setHeaderAvatar] = useState("WH");
 
   const [isScanning, setIsScanning] = useState(false);
@@ -32,9 +31,8 @@ export default function AdminScanHubPage() {
     if (mode === "us") {
       setHubTitle("US Dispatch Hub (Scan Out)");
       setStatus("RECEIVED_USA_WAREHOUSE");
-      setLocation(optionForStatus("RECEIVED_USA_WAREHOUSE")?.defaultLocation ?? "1962 NW 82nd Ave Doral, FL 33126");
+      setLocation(optionForStatus("RECEIVED_USA_WAREHOUSE")?.defaultLocation ?? "1962 NW 82nd Ave Doral, FL 33191");
       setThemeColor("text-mex-blue");
-      setThemeBg("bg-blue-100");
       setHeaderAvatar("US");
     } else if (mode === "haiti") {
       setHubTitle("Haiti Receiving Hub (Scan In)");
@@ -43,7 +41,6 @@ export default function AdminScanHubPage() {
         optionForStatus("ARRIVED_HT_MAIN_WAREHOUSE")?.defaultLocation ?? "St Marc Rue louverture #336 Bon jean Market"
       );
       setThemeColor("text-mex-orange");
-      setThemeBg("bg-orange-100");
       setHeaderAvatar("HT");
     }
   }, []);
@@ -139,7 +136,7 @@ export default function AdminScanHubPage() {
               onChange={(e) => setLocation(e.target.value)}
               className="w-full border-2 border-gray-200 rounded-xl px-3 sm:px-4 py-3 focus:border-mex-blue outline-none font-bold text-mex-dark bg-gray-50 text-sm sm:text-base max-w-full"
             >
-              <option>1962 NW 82nd Ave Doral, FL 33126</option>
+              <option>1962 NW 82nd Ave Doral, FL 33191</option>
               <option>St Marc Rue louverture #336 Bon jean Market</option>
               <option>Haiti Customs Port</option>
             </select>

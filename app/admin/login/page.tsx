@@ -1,12 +1,114 @@
 "use client";
 
-import { signIn } from "next-auth/react";
 import { useSearchParams } from "next/navigation";
-import { Suspense } from "react";
+import { Suspense, useState } from "react";
+import { SessionProvider } from "next-auth/react";
+import GoogleAdminSignInButton from "@/components/admin/GoogleAdminSignInButton";
+
+type Step = "choose" | "otp" | "totp";
 
 function AdminLoginInner() {
   const searchParams = useSearchParams();
   const error = searchParams.get("error");
+
+  const [step, setStep] = useState<Step>("choose");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [otp, setOtp] = useState("");
+  const [totp, setTotp] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+  const [devOtp, setDevOtp] = useState<string | undefined>();
+
+  function redirectAfterSignIn(needsProfile: boolean) {
+    const next = needsProfile ? "/admin/complete-profile" : "/admin/dashboard";
+    window.location.assign(next);
+  }
+
+  async function submitCredentials(e: React.FormEvent) {
+    e.preventDefault();
+    setErr(null);
+    setLoading(true);
+    setDevOtp(undefined);
+    try {
+      const res = await fetch("/api/admin/auth", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ step: "credentials", email, password }),
+      });
+      const data = (await res.json().catch(() => ({}))) as {
+        error?: string;
+        step?: string;
+        needsProfile?: boolean;
+        devOtp?: string;
+      };
+      if (!res.ok) {
+        setErr(typeof data.error === "string" ? data.error : "Sign-in failed.");
+        return;
+      }
+      if (data.step === "signed_in") {
+        redirectAfterSignIn(data.needsProfile === true);
+        return;
+      }
+      if (data.devOtp && typeof data.devOtp === "string") {
+        setDevOtp(data.devOtp);
+      }
+      setStep("otp");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function submitOtp(e: React.FormEvent) {
+    e.preventDefault();
+    setErr(null);
+    setLoading(true);
+    try {
+      const res = await fetch("/api/admin/auth", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ step: "otp", email, code: otp }),
+      });
+      const data = (await res.json().catch(() => ({}))) as {
+        error?: string;
+        step?: string;
+        needsProfile?: boolean;
+      };
+      if (!res.ok) {
+        setErr(typeof data.error === "string" ? data.error : "Invalid code.");
+        return;
+      }
+      if (data.step === "totp_required") {
+        setStep("totp");
+        setTotp("");
+        return;
+      }
+      redirectAfterSignIn(data.needsProfile === true);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function submitTotp(e: React.FormEvent) {
+    e.preventDefault();
+    setErr(null);
+    setLoading(true);
+    try {
+      const res = await fetch("/api/admin/auth", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ step: "totp", email, totp }),
+      });
+      const data = (await res.json().catch(() => ({}))) as { error?: string; needsProfile?: boolean };
+      if (!res.ok) {
+        setErr(typeof data.error === "string" ? data.error : "Invalid code.");
+        return;
+      }
+      redirectAfterSignIn(data.needsProfile === true);
+    } finally {
+      setLoading(false);
+    }
+  }
 
   return (
     <div className="relative min-h-screen overflow-x-hidden bg-gray-50 px-4 py-10 font-sans sm:py-14">
@@ -17,53 +119,145 @@ function AdminLoginInner() {
         <div className="mb-8 text-center sm:mb-10">
           <h2 className="text-2xl font-black tracking-tight text-mex-dark sm:text-3xl">Admin sign in</h2>
           <p className="mx-auto mt-2 max-w-sm text-sm font-medium text-gray-600">
-            Staff dashboard — sign in with an approved Google workspace account.
+            Staff: work email and password. Full admins: email code (and authenticator if 2FA is on). Google is optional when
+            enabled.
           </p>
         </div>
 
         <div className="rounded-3xl border border-gray-100 bg-white px-6 py-8 shadow-2xl sm:px-10 sm:py-10">
-          {error === "AccessDenied" && (
-            <div className="mb-6 rounded-xl bg-red-50 p-4 text-center text-sm font-bold text-red-600">
-              That Google account is not authorized for admin access.
-            </div>
-          )}
-          {error && error !== "AccessDenied" && (
+          {error && (
             <div className="mb-6 rounded-xl bg-red-50 p-4 text-center text-sm font-bold text-red-600">
               Sign-in failed. Please try again.
             </div>
           )}
+          {err && (
+            <div className="mb-6 rounded-xl bg-red-50 p-4 text-center text-sm font-bold text-red-700">{err}</div>
+          )}
 
-          <button
-            type="button"
-            onClick={() => signIn("google", { callbackUrl: "/admin/dashboard" })}
-            className="flex w-full items-center justify-center gap-3 rounded-xl border border-gray-200 bg-white px-4 py-4 text-base font-bold text-gray-800 shadow-sm transition hover:bg-gray-50"
-          >
-            <svg className="h-5 w-5" viewBox="0 0 24 24" aria-hidden>
-              <path
-                fill="#4285F4"
-                d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-              />
-              <path
-                fill="#34A853"
-                d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-              />
-              <path
-                fill="#FBBC05"
-                d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-              />
-              <path
-                fill="#EA4335"
-                d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-              />
-            </svg>
-            Sign in with Google
-          </button>
+          {step === "choose" && (
+            <>
+              <form onSubmit={submitCredentials} className="space-y-4">
+                <label className="block text-sm font-bold text-gray-700">
+                  Work email
+                  <input
+                    type="email"
+                    autoComplete="username"
+                    required
+                    className="mt-1 w-full rounded-xl border border-gray-200 px-3 py-3 font-medium outline-none ring-mex-blue/30 focus:ring-2"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="you@company.com"
+                  />
+                </label>
+                <label className="block text-sm font-bold text-gray-700">
+                  Password
+                  <input
+                    type="password"
+                    autoComplete="current-password"
+                    required
+                    className="mt-1 w-full rounded-xl border border-gray-200 px-3 py-3 font-medium outline-none ring-mex-blue/30 focus:ring-2"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                  />
+                </label>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full rounded-xl bg-mex-blue px-4 py-3.5 text-base font-bold text-white shadow-lg shadow-blue-500/25 hover:bg-blue-900 disabled:opacity-60"
+                >
+                  {loading ? "Working…" : "Continue — email me a code (admins)"}
+                </button>
+              </form>
+              <GoogleAdminSignInButton />
+            </>
+          )}
 
-          <p className="mt-6 text-center text-xs font-medium text-gray-500">
-            Only emails listed in{" "}
-            <code className="rounded bg-gray-100 px-1 py-0.5 text-[10px]">MEX509_ADMIN_GOOGLE_ALLOWLIST</code>{" "}
-            can access this dashboard.
-          </p>
+          {step === "otp" && (
+            <form onSubmit={submitOtp} className="space-y-4">
+              <p className="text-sm font-medium text-gray-600">
+                Enter the 6-digit code sent to <span className="font-bold text-mex-dark">{email}</span>.
+              </p>
+              <p className="text-xs font-medium text-gray-500">
+                If you haven’t finished staff registration yet, you’ll continue there to set your permanent password.
+              </p>
+              {devOtp && (
+                <div className="rounded-xl bg-amber-50 px-4 py-3 text-sm font-bold text-amber-900">
+                  Dev only: code <span className="tracking-widest">{devOtp}</span>
+                </div>
+              )}
+              <label className="block text-sm font-bold text-gray-700">
+                Email verification code
+                <input
+                  inputMode="numeric"
+                  autoComplete="one-time-code"
+                  required
+                  className="mt-1 w-full rounded-xl border border-gray-200 px-3 py-3 text-center text-2xl font-black tracking-[0.3em] outline-none ring-mex-blue/30 focus:ring-2"
+                  value={otp}
+                  onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                  placeholder="000000"
+                  maxLength={6}
+                />
+              </label>
+              <button
+                type="submit"
+                disabled={loading || otp.length !== 6}
+                className="w-full rounded-xl bg-mex-blue px-4 py-3.5 text-base font-bold text-white shadow-lg shadow-blue-500/25 hover:bg-blue-900 disabled:opacity-60"
+              >
+                {loading ? "Verifying…" : "Verify code"}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setStep("choose");
+                  setOtp("");
+                  setErr(null);
+                  setDevOtp(undefined);
+                }}
+                className="w-full rounded-xl border border-gray-200 py-3 text-sm font-bold text-gray-700 hover:bg-gray-50"
+              >
+                Back
+              </button>
+            </form>
+          )}
+
+          {step === "totp" && (
+            <form onSubmit={submitTotp} className="space-y-4">
+              <p className="text-sm font-medium text-gray-600">
+                Open your authenticator app and enter the 6-digit code for <span className="font-bold text-mex-dark">{email}</span>.
+              </p>
+              <label className="block text-sm font-bold text-gray-700">
+                Authenticator code
+                <input
+                  inputMode="numeric"
+                  autoComplete="one-time-code"
+                  required
+                  className="mt-1 w-full rounded-xl border border-gray-200 px-3 py-3 text-center text-2xl font-black tracking-[0.3em] outline-none ring-mex-blue/30 focus:ring-2"
+                  value={totp}
+                  onChange={(e) => setTotp(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                  placeholder="000000"
+                  maxLength={6}
+                />
+              </label>
+              <button
+                type="submit"
+                disabled={loading || totp.length !== 6}
+                className="w-full rounded-xl bg-mex-blue px-4 py-3.5 text-base font-bold text-white shadow-lg shadow-blue-500/25 hover:bg-blue-900 disabled:opacity-60"
+              >
+                {loading ? "Signing in…" : "Verify and sign in"}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setStep("otp");
+                  setTotp("");
+                  setErr(null);
+                }}
+                className="w-full rounded-xl border border-gray-200 py-3 text-sm font-bold text-gray-700 hover:bg-gray-50"
+              >
+                Back to email code
+              </button>
+            </form>
+          )}
         </div>
       </div>
     </div>
@@ -72,8 +266,10 @@ function AdminLoginInner() {
 
 export default function AdminLoginPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-gray-50" />}>
-      <AdminLoginInner />
-    </Suspense>
+    <SessionProvider refetchInterval={0} refetchOnWindowFocus={false}>
+      <Suspense fallback={<div className="min-h-screen bg-gray-50" />}>
+        <AdminLoginInner />
+      </Suspense>
+    </SessionProvider>
   );
 }

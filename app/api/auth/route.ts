@@ -5,6 +5,8 @@ import { cookies } from "next/headers";
 import { validateSignupPassword } from "@/lib/passwordPolicy";
 import { sendSignupVerificationEmail } from "@/lib/sendVerificationEmail";
 import { sendPasswordResetEmail } from "@/lib/sendPasswordResetEmail";
+import { sendClientWelcomeEmail } from "@/lib/sendNotificationEmails";
+import { getPortalSiteUrl } from "@/lib/siteUrl";
 import {
   CLIENT_SESSION_COOKIE,
   clearAuthSessionCookies,
@@ -16,6 +18,21 @@ import { allowAuthAttempt, clientIp } from "@/lib/authRateLimit";
 
 // Helper function to generate a random 6-digit code
 const generateCode = () => Math.floor(100000 + Math.random() * 900000).toString();
+
+function normalizeReferralCode(raw: unknown): string | null {
+  if (typeof raw !== "string") return null;
+  const cleaned = raw.trim().toUpperCase().replace(/[^A-Z0-9]/g, "");
+  return cleaned.length >= 5 ? cleaned : null;
+}
+
+async function generateUniqueReferralCode(): Promise<string> {
+  for (let i = 0; i < 10; i += 1) {
+    const code = `MEX${Math.random().toString(36).slice(2, 10).toUpperCase()}`;
+    const existing = await prisma.user.findUnique({ where: { referralCode: code } });
+    if (!existing) return code;
+  }
+  return `MEX${Date.now().toString(36).toUpperCase()}`;
+}
 
 function normalizeResetCode(raw: string): string | null {
   const digits = raw.replace(/\D/g, "");
@@ -74,6 +91,7 @@ export async function POST(req: Request) {
       city,
       state,
       zipCode,
+      referredBy,
       code,
       token,
       newPassword,
@@ -179,6 +197,19 @@ export async function POST(req: Request) {
       if (existingUser) return NextResponse.json({ error: "Email already in use." }, { status: 400 });
 
       const newCode = generateCode();
+      const referralCode = await generateUniqueReferralCode();
+      const referredByCode = normalizeReferralCode(referredBy);
+      let referredById: string | null = null;
+      if (referredByCode) {
+        const referrer = await prisma.user.findUnique({
+          where: { referralCode: referredByCode },
+          select: { id: true, role: true },
+        });
+        if (!referrer || referrer.role !== "CLIENT") {
+          return NextResponse.json({ error: "Referral code is invalid." }, { status: 400 });
+        }
+        referredById = referrer.id;
+      }
 
       user = await prisma.user.create({
         data: {
@@ -191,6 +222,8 @@ export async function POST(req: Request) {
           city,
           state,
           zipCode,
+          referralCode,
+          referredById,
           isVerified: false,
           verificationCode: newCode,
         },
@@ -234,7 +267,7 @@ export async function POST(req: Request) {
         });
       }
 
-      if (user.role === "ADMIN") {
+      if (user.role === "ADMIN" || user.role === "STAFF") {
         return NextResponse.json(
           { error: "This account is for the admin dashboard. Sign in on the admin portal instead." },
           { status: 403 }
@@ -281,10 +314,19 @@ export async function POST(req: Request) {
         where: { id: user.id },
         data: { isVerified: true, verificationCode: null }
       });
+
+      if (user.role === "CLIENT") {
+        await sendClientWelcomeEmail({
+          to: user.email,
+          firstName: user.firstName,
+          referralCode: user.referralCode,
+          portalUrl: `${getPortalSiteUrl()}/dashboard?tab=overview`,
+        });
+      }
     }
 
     if (user && user.isVerified) {
-      if (user.role === "ADMIN") {
+      if (user.role === "ADMIN" || user.role === "STAFF") {
         return NextResponse.json(
           { error: "Admin accounts must sign in through the admin portal." },
           { status: 403 }

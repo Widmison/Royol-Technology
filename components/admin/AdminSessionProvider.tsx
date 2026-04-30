@@ -1,11 +1,8 @@
 "use client";
 
-import { SessionProvider } from "next-auth/react";
-
-export default function AdminSessionProvider({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  return <SessionProvider>{children}</SessionProvider>;
+/**
+ * Admin uses `/api/admin/auth` + cookie session — no NextAuth SessionProvider (avoids polling `/api/auth/session`).
+ */
+export default function AdminSessionProvider({ children }: { children: React.ReactNode }) {
+  return <>{children}</>;
 }

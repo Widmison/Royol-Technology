@@ -21,6 +21,10 @@ export async function POST(req: Request) {
       );
     }
 
+    const destRaw = typeof body.destinationCountry === "string" ? body.destinationCountry.trim().toUpperCase() : "";
+    const destinationCountry =
+      destRaw === "DO" ? "DO" : "HT";
+
     await prisma.shipmentRequest.create({
       data: {
         clientId: user.id,
@@ -31,6 +35,7 @@ export async function POST(req: Request) {
         category: (body.category as string) || "Standard Box",
         description: ((body.description as string) || "").trim() || "—",
         shippingMethod: (body.shippingMethod as string)?.trim() || "Air Freight",
+        destinationCountry,
         address: user.address?.trim() || "—",
         state: user.state?.trim() || "—",
         city: user.city?.trim() || "—",

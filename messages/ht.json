@@ -1,0 +1,198 @@
+{
+  "Nav": {
+    "home": "Akèy",
+    "track": "Swiv pake",
+    "services": "Sèvis",
+    "calc": "Kalkile frè voye",
+    "login": "Kliyan",
+    "quote": "Mande yon pri"
+  },
+  "Footer": {
+    "slogan": "Konfyab. Vit. An sekirite.",
+    "slogan_ht": "Sèvis rapid e sekirize. Livrezon garanti!",
+    "contact": "Kontak & enfò",
+    "addressLine1": "1962 NW 82nd Ave",
+    "addressLine2": "Doral, FL 33191",
+    "partner": "Envesti avè nou (fòm Google)",
+    "partnerSub": "Envesti avè nou — ranpli fòm patnè a isit la.",
+    "servicePointsTitle": "Pwen sèvis",
+    "stMarcName": "MelschyElectronic's St Marc",
+    "stMarcAddress": "Rue Louverture, Saint-Marc",
+    "santiagoName": "Pwen resepsyon Villa Olimpica",
+    "santiagoAddress": "Villa Olimpica Manzana M Casa 8B, Repiblik Dominikèn",
+    "santiagoPhone": "+1 809 407 5020",
+    "navHome": "Akèy",
+    "navReceipts": "Resevwa",
+    "navSent": "Voye",
+    "navServicePoint": "Pwen sèvis",
+    "rights": "Tout dwa rezève.",
+    "cgu": "Kondisyon itilizasyon (CGU)",
+    "lastUpdated": "Dènye mete ajou: 01/04/2026",
+    "designedBy": "Konsepsyon & dev",
+    "company": "MEX509 SHIPPING SERVICES"
+  },
+  "WhatsApp": {
+    "label": "WhatsApp",
+    "aria": "Pale ak sipò MEX509 sou WhatsApp"
+  },
+  "Dashboard": {
+    "overview": {
+      "addressHelpCta": "Tutoriel adrès US pou acha anliy"
+    },
+    "sidebar": {
+      "clientPortal": "Pòtay kliyan",
+      "tracking": "Swiv an tan reyèl",
+      "overview": "Resime kont",
+      "newBox": "Anrejistre yon bwat",
+      "shipments": "Tout ekspedisyon",
+      "invoices": "Fakti & peyman",
+      "external": "Ajoute swiv (lòt sit)",
+      "info": "Enfò",
+      "pricing": "Pri & sèvis",
+      "addressHelp": "Èd adrès US",
+      "profile": "Pwofil",
+      "terms": "CGU / lwa"
+    },
+    "referral": {
+      "title": "Kòd referans ou",
+      "hint": "Pataje li avè zanmi. Yo antre l lè y ap kreye kont.",
+      "copyCode": "Kopye kòd",
+      "copyLink": "Kopye lyen",
+      "copied": "Kopye",
+      "shareText": "Voye ak MEX509. Sèvis {code} nan enskripsyon: {link}",
+      "shareButton": "Pataje"
+    },
+    "addressTutorial": {
+      "title": "Kijan pou itilize adrès US ou sou entènèt",
+      "intro": "Lè w achte sou Amazon, Shein, oswa lòt magazen US, mete adrès MEX509 Miami w egzakteman jan li parèt nan pwofil. Mete non ak telefòn pou n ka matche kolis la.",
+      "cardTitle": "Fòma adrès pou kopye lè w peye",
+      "stepLabel": "Gid vizyèl",
+      "altMain": "Livrezon MEX509",
+      "altBox": "Branding MEX509",
+      "altTrusted": "Sèvis kago konfyab"
+    },
+    "pricing": {
+      "visualsTitle": "Fòs sèvis",
+      "visualsSub": "Yon kout zye sou liy, konfyans, ak livrezon—epi pri konplè anba a."
+    }
+  },
+  "Home": {
+    "heroImageAlt": "Kourye MEX509",
+    "heroTitleLine1": "Voye vit,",
+    "heroTitleLine2": "resevwa vit!",
+    "heroSubtitle": "Lojistik rapid ak sekirize soti USA, RD ak Lachin pou Ayiti.",
+    "trackPlaceholder": "Antre nimewo tracking (egzanp: MEX1234)",
+    "trackButton": "Swiv pake",
+    "cards": {
+      "learnMore": "Aprann plis",
+      "air": { "title": "Fret avyon", "body": "Livrezon rapid 5-7 jou pou pake ijan." },
+      "quote": { "title": "Voye yon pake", "body": "Kalkile pri epi mande ranmasaj sou fòm nan.", "cta": "Mande yon pri" },
+      "ocean": { "title": "Fret bato", "body": "Opsyon ekonomik pou kago lou ak gwo bwat." }
+    },
+    "groundIntroBold": "Fret tè ak rejyonal",
+    "groundIntro1": "disponib tou -",
+    "browseServices": "gade tout sèvis",
+    "or": "oswa",
+    "startQuote": "kòmanse yon pri",
+    "how": {
+      "title": "Kijan sa mache",
+      "subtitle": "Depi premye pri a jouk livrezon an Ayiti - etap senp, klè.",
+      "steps": {
+        "1": { "title": "Pre-anrejistre sou entènèt", "body": "Di nou sa w ap voye, kote l ale, ak metòd transpò a." },
+        "2": { "title": "Depoze nan Doral", "body": "Nou peze, verifye epi prepare chaj la." },
+        "3": { "title": "Peye epi nou voye", "body": "Apre peze, ou resevwa fakti epi kago a pati." },
+        "4": { "title": "Swiv jouk livrezon", "body": "Sèvi ak tracking ID pou tout mizajou jouk moun nan resevwa." }
+      },
+      "ctaQuote": "Kòmanse pri w",
+      "ctaLogin": "Ou deja kliyan? Konekte"
+    },
+    "visit": {
+      "title": "Vizite nou nan Doral",
+      "subtitle": "Nou resevwa kliyan san randevou pou depoze ak kestyon.",
+      "maps": "Louvri nan Google Maps",
+      "cardTitle": "Ranmasaj ak orè",
+      "cardBody": "Orè avyon ak bato chanje chak semèn. Nou konfime detay yo apre pri a.",
+      "cardLink": "Li detay sèvis yo"
+    },
+    "testimonials": {
+      "title": "Sa kliyan yo di",
+      "subtitle": "Men poukisa anpil kliyan fè MEX509 konfyans.",
+      "items": {
+        "1": { "quote": "Sèvis la vrèman rapid. Pake mwen rive san pwoblèm.", "name": "Jean Michel", "city": "Miami, FL" },
+        "2": { "quote": "Yo pwofesyonèl, e livrezon yo rive alè.", "name": "Sarah L.", "city": "Orlando, FL" },
+        "3": { "quote": "Yo reponn sou WhatsApp epi tracking lan fasil.", "name": "Patrick D.", "city": "Repiblik Dominikèn" }
+      }
+    },
+    "faq": {
+      "title": "Kesyon komen",
+      "subtitle": "Repons rapid pou nouvo kliyan.",
+      "items": {
+        "1": { "q": "Èske mwen bezwen kont pou mande pri?", "a": "Non. Ou ka ranpli fòm pri a anvan." },
+        "2": { "q": "Kisa k rive apre mwen mande pri?", "a": "Ou pote machandiz nan Doral pou peze epi faktirasyon." },
+        "3": { "q": "Konbyen tan avyon ak bato pran?", "a": "Anjeneral 5-7 jou (avyon) ak 14-21 jou (bato)." },
+        "4": { "q": "Nou ka ede ak acha sou entènèt ak livrezon lokal?", "a": "Wi, sèvis sa yo disponib." },
+        "5": { "q": "Kisa pou mwen pote lè m ap depoze?", "a": "Pake pare, dokiman nesesè, ak yon pyès idantite." }
+      }
+    },
+    "trust": {
+      "title": "Livrezon san tèt fè mal!",
+      "fastTitle": "Rapid",
+      "fastBody": "Mwayèn delè livrezon anviwon 10 jou pou Ayiti.",
+      "secureTitle": "100% Sekirize",
+      "secureBody": "Atik ou yo anrejistre epi swiv nan chak etap.",
+      "localTitle": "Livrezon lokal",
+      "localBody": "Pwen ranmasaj ak opsyon pòt-a-pòt disponib."
+    }
+  },
+  "Services": {
+    "capabilitiesTitle": "Kapasite",
+    "capabilitiesSub": "Chwazi liy ki bon pou kago ou a ak ekip Doral la ak tracking klè.",
+    "startNow": "Kòmanse",
+    "notSureTitle": "Ou pa fin sèten ki opsyon ki bon?",
+    "notSureSub": "Mande yon pri, nou ede w chwazi avyon oswa bato.",
+    "startQuote": "Kòmanse pri w",
+    "swipeAllThree": "Glise pou wè tout twa yo",
+    "catalog": {
+      "us-ht": {
+        "title": "Voye USA pou Ayiti",
+        "description": "Fret avyon ak bato ki fyab soti Miami rive Pòtoprens."
+      },
+      "dr-ht": {
+        "title": "Voye RD pou Ayiti",
+        "description": "Lojistik fwontyè RD-Ayiti ak manyen an sekirite."
+      },
+      "shopping": {
+        "title": "Asistans acha sou entènèt",
+        "description": "Nou ka achte pou ou nan gwo magazen epi voye pou Ayiti."
+      },
+      "local": {
+        "title": "Livrezon lokal",
+        "description": "Ranmasaj sekirize oswa livrezon pòt-a-pòt selon zòn nan."
+      },
+      "warehouse": {
+        "title": "Sèvis depo",
+        "description": "Depo ak konsolidasyon pou diminye frè fret."
+      }
+    },
+    "promo": {
+      "aria": "Pwen fò sèvis yo",
+      "eyebrow": "Poukisa yo chwazi MEX509",
+      "title": "Livrezon, transpò ak kago konfyab - menm kalite sèvis tout kote."
+    },
+    "hero": {
+      "badge": "Liy USA - RD - Ayiti",
+      "title1": "Fret ak lojistik",
+      "title2": "Vit ak konfyab",
+      "subtitle": "Avyon, bato, konsolidasyon ak depo depi nan sant Doral la.",
+      "chip1": "Express - avyon 5-7 jou",
+      "chip2": "Manyen sekirize ak mizajou",
+      "chip3": "1962 NW 82nd Ave, Doral, FL",
+      "ctaQuote": "Mande yon pri",
+      "ctaBox": "Pre-anrejistre yon bwat",
+      "tagline": "Voye vit - Resevwa vit",
+      "intakeLabel": "Resepsyon sant lan",
+      "intakeBody": "Miami - Kago pare pou kontenè",
+      "track": "Swiv"
+    }
+  }
+}

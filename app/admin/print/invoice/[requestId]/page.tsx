@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { MEX509_WAREHOUSE } from "@/lib/mex509Warehouse";
 import { getSiteUrlString } from "@/lib/site";
 import PrintChrome from "@/components/print/PrintChrome";
+import { shipmentRouteLabel } from "@/lib/shipmentRouteLabel";
 
 export const dynamic = "force-dynamic";
 
@@ -37,7 +38,15 @@ export default async function AdminPrintInvoicePage({
     : getSiteUrlString();
 
   return (
-    <div className="relative min-h-screen bg-white text-mex-dark print:min-h-0 print:bg-white">
+    <>
+      <style>{`
+        @page { size: letter portrait; margin: 0.35in; }
+        @media print {
+          html, body { height: auto !important; background: white !important; }
+          .print-one-page { page-break-after: avoid; page-break-inside: avoid; max-height: 100vh; }
+        }
+      `}</style>
+    <div className="print-one-page relative min-h-screen bg-white text-mex-dark print:min-h-0 print:bg-white">
       <PrintChrome />
 
       <div className="pointer-events-none absolute inset-0 overflow-hidden print:hidden">
@@ -109,9 +118,7 @@ export default async function AdminPrintInvoicePage({
             </div>
             <div>
               <dt className="text-xs font-bold text-gray-500">Route</dt>
-              <dd className="font-bold text-mex-dark">
-                {r.departure} → Haiti
-              </dd>
+              <dd className="font-bold text-mex-dark">{shipmentRouteLabel(r.departure, r.destinationCountry)}</dd>
             </div>
             <div>
               <dt className="text-xs font-bold text-gray-500">Method</dt>
@@ -171,5 +178,6 @@ export default async function AdminPrintInvoicePage({
         </footer>
       </div>
     </div>
+    </>
   );
 }

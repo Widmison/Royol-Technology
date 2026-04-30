@@ -24,7 +24,8 @@ export default function PrintChrome() {
         </button>
       </div>
       <p className="mx-auto mt-2 max-w-lg text-center text-[11px] text-gray-500">
-        Tip: in the print dialog, choose <strong>Save as PDF</strong> to download a file.
+        Tip: each document is laid out as <strong>one page</strong>. In the print dialog, choose <strong>Save as PDF</strong>{" "}
+        to download.
       </p>
     </div>
   );

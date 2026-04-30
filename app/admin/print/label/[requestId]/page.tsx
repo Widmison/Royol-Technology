@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { MEX509_WAREHOUSE } from "@/lib/mex509Warehouse";
 import { getSiteUrlString } from "@/lib/site";
 import PrintChrome from "@/components/print/PrintChrome";
+import { destinationCountryLabel } from "@/lib/shipmentRouteLabel";
 
 export const dynamic = "force-dynamic";
 
@@ -32,11 +33,12 @@ export default async function AdminPrintLabelPage({
       <style>{`
         @page { size: 4in 6in; margin: 0.2in; }
         @media print {
-          html, body { background: white !important; }
+          html, body { background: white !important; height: auto !important; }
+          .label-print-root { page-break-after: avoid; page-break-inside: avoid; break-inside: avoid; }
         }
       `}</style>
 
-      <div className="min-h-screen bg-slate-100 print:min-h-0 print:bg-white">
+      <div className="label-print-root min-h-screen bg-slate-100 print:min-h-0 print:bg-white">
         <PrintChrome />
 
         <div className="mx-auto flex min-h-[576px] max-w-[384px] flex-col bg-white p-4 shadow-xl print:mx-0 print:max-w-none print:min-h-0 print:shadow-none print:p-0">
@@ -101,7 +103,7 @@ export default async function AdminPrintLabelPage({
           </div>
 
           <div className="mt-auto border-t border-gray-200 pt-3 text-center text-[9px] font-bold uppercase tracking-widest text-gray-400">
-            Handle with care · Haiti bound
+            Handle with care · {destinationCountryLabel(r.destinationCountry)}
           </div>
         </div>
       </div>

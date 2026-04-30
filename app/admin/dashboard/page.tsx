@@ -1,16 +1,32 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
+import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
+import { redirectToAdminLogin } from "@/lib/adminLoginRedirect";
+import { getAdminSessionUser } from "@/lib/serverSession";
+
+type RecentPackageRow = Prisma.PackageGetPayload<{ include: { request: true } }>;
 import { Package as PackageIcon, FileText, Plus, MapPin, CheckCircle } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminDashboardPage() {
+  if (!(await getAdminSessionUser())) {
+    await redirectToAdminLogin();
+  }
+
   const weekAgo = new Date();
   weekAgo.setDate(weekAgo.getDate() - 7);
 
-  const [pendingQuotesCount, activeShipmentsCount, deliveredWeekCount, customsCount, recentPackages] =
-    await Promise.all([
+  let pendingQuotesCount = 0;
+  let activeShipmentsCount = 0;
+  let deliveredWeekCount = 0;
+  let customsCount = 0;
+  let recentPackages: RecentPackageRow[] = [];
+  let loadError: string | null = null;
+
+  try {
+    const rows = await Promise.all([
       prisma.shipmentRequest.count({ where: { status: "PENDING_DROPOFF" } }),
       prisma.package.count({ where: { status: { not: "DELIVERED" } } }),
       prisma.package.count({
@@ -23,6 +39,29 @@ export default async function AdminDashboardPage() {
         include: { request: true },
       }),
     ]);
+    pendingQuotesCount = rows[0];
+    activeShipmentsCount = rows[1];
+    deliveredWeekCount = rows[2];
+    customsCount = rows[3];
+    recentPackages = rows[4];
+  } catch (err) {
+    console.error("[admin/dashboard] metrics query failed — verify Postgres connectivity and `prisma migrate deploy`.", err);
+    loadError =
+      "Could not load dashboard metrics from the database. Check Vercel function logs, DATABASE_URL / DIRECT_URL, and that production has run pending migrations.";
+  }
+
+  if (loadError) {
+    return (
+      <div className="space-y-4 rounded-2xl border border-amber-200 bg-amber-50 p-6 text-left shadow-sm">
+        <h1 className="text-xl font-black text-mex-dark">Operations overview unavailable</h1>
+        <p className="text-sm font-medium text-gray-700">{loadError}</p>
+        <p className="text-xs font-medium text-gray-500">
+          Typical fix: run <code className="rounded bg-white px-1 py-0.5 font-mono">npx prisma migrate deploy</code>{" "}
+          against production, then redeploy.
+        </p>
+      </div>
+    );
+  }
 
   const statCard = (
     href: string,
@@ -136,7 +175,7 @@ export default async function AdminDashboardPage() {
                   </td>
                 </tr>
               ) : (
-                recentPackages.map((pkg: any) => (
+                recentPackages.map((pkg) => (
                   <tr key={pkg.id} className="hover:bg-gray-50">
                     <td className="whitespace-nowrap p-4 font-black tracking-wide text-mex-dark">
                       <Link

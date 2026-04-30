@@ -19,8 +19,10 @@ import {
   Search,
   LogOut,
   ShoppingBag,
+  UsersRound,
 } from "lucide-react";
 import AdminSearchBar from "@/components/AdminSearchBar";
+import PortalIdleGuard from "@/components/PortalIdleGuard";
 import DashboardShippingCalcTrigger from "@/components/DashboardShippingCalcTrigger";
 import AdminSignOutButton from "@/components/AdminSignOutButton";
 import PortalNotificationBell from "@/components/PortalNotificationBell";
@@ -81,12 +83,18 @@ function SidebarNav({
   stats,
   onNavigate,
   compactSidebar = false,
+  canAccessStaffDirectory = true,
+  canAccessRestrictedAdminPages = true,
 }: {
   pathname: string;
   stats: AdminShellStats;
   onNavigate?: () => void;
   /** Desktop: fit in viewport without inner scroll */
   compactSidebar?: boolean;
+  /** Full admins only — STAFF cannot open /admin/staff */
+  canAccessStaffDirectory?: boolean;
+  /** Full admins only — STAFF cannot access analytics/CRM/settings/quote queue */
+  canAccessRestrictedAdminPages?: boolean;
 }) {
   const isDash = pathname === "/admin/dashboard";
   const isQuotes = pathname.startsWith("/admin/quotes");
@@ -97,6 +105,8 @@ function SidebarNav({
   const isScan = pathname.startsWith("/admin/scan");
   const isSettings = pathname.startsWith("/admin/settings");
   const isExternalTracking = pathname.startsWith("/admin/external-tracking");
+  const isPickups = pathname.startsWith("/admin/pickups");
+  const isStaff = pathname.startsWith("/admin/staff");
   const scanUs = isScan && pathname.includes("mode=us");
   const scanHt = isScan && pathname.includes("mode=haiti");
 
@@ -127,22 +137,26 @@ function SidebarNav({
             <div className="text-base font-black leading-none text-white">{stats.activeShipments}</div>
             <div className="mt-0.5 text-[8px] font-bold uppercase text-gray-500">Active</div>
           </Link>
-          <Link
-            href="/admin/quotes"
-            onClick={onNavigate}
-            className="block rounded-lg bg-white/5 px-1.5 py-1.5 transition hover:bg-white/10 hover:ring-1 hover:ring-mex-orange/40"
-          >
-            <div className="text-base font-black leading-none text-mex-orange">{stats.pendingQuotes}</div>
-            <div className="mt-0.5 text-[8px] font-bold uppercase text-gray-500">Pending</div>
-          </Link>
-          <Link
-            href="/admin/invoices"
-            onClick={onNavigate}
-            className="block rounded-lg bg-white/5 px-1.5 py-1.5 transition hover:bg-white/10 hover:ring-1 hover:ring-red-400/30"
-          >
-            <div className="text-base font-black leading-none text-red-400">{stats.unpaidInvoices}</div>
-            <div className="mt-0.5 text-[8px] font-bold uppercase text-gray-500">Unpaid</div>
-          </Link>
+          {canAccessRestrictedAdminPages && (
+            <>
+              <Link
+                href="/admin/quotes"
+                onClick={onNavigate}
+                className="block rounded-lg bg-white/5 px-1.5 py-1.5 transition hover:bg-white/10 hover:ring-1 hover:ring-mex-orange/40"
+              >
+                <div className="text-base font-black leading-none text-mex-orange">{stats.pendingQuotes}</div>
+                <div className="mt-0.5 text-[8px] font-bold uppercase text-gray-500">Pending</div>
+              </Link>
+              <Link
+                href="/admin/invoices"
+                onClick={onNavigate}
+                className="block rounded-lg bg-white/5 px-1.5 py-1.5 transition hover:bg-white/10 hover:ring-1 hover:ring-red-400/30"
+              >
+                <div className="text-base font-black leading-none text-red-400">{stats.unpaidInvoices}</div>
+                <div className="mt-0.5 text-[8px] font-bold uppercase text-gray-500">Unpaid</div>
+              </Link>
+            </>
+          )}
           <Link
             href="/admin/clients"
             onClick={onNavigate}
@@ -159,12 +173,16 @@ function SidebarNav({
           compactSidebar ? "text-[13px] leading-snug" : "text-sm"
         }`}
       >
-        <NavLink href="/admin/dashboard" active={isDash && !isQuotes} onNavigate={onNavigate} compact={compactSidebar}>
-          <LayoutDashboard size={navIcon} /> Dashboard
-        </NavLink>
-        <NavLink href="/admin/quotes" active={isQuotes} badge={stats.pendingQuotes} onNavigate={onNavigate} compact={compactSidebar}>
-          <FileText size={navIcon} /> Quote queue
-        </NavLink>
+        {canAccessRestrictedAdminPages && (
+          <NavLink href="/admin/dashboard" active={isDash && !isQuotes} onNavigate={onNavigate} compact={compactSidebar}>
+            <LayoutDashboard size={navIcon} /> Dashboard
+          </NavLink>
+        )}
+        {canAccessRestrictedAdminPages && (
+          <NavLink href="/admin/quotes" active={isQuotes} badge={stats.pendingQuotes} onNavigate={onNavigate} compact={compactSidebar}>
+            <FileText size={navIcon} /> Quote queue
+          </NavLink>
+        )}
         <NavLink
           href="/admin/invoices"
           active={isInvoices}
@@ -178,9 +196,17 @@ function SidebarNav({
         <NavLink href="/admin/shipments" active={isShipments} onNavigate={onNavigate} compact={compactSidebar}>
           <PackageIcon size={navIcon} /> Shipments
         </NavLink>
+        <NavLink href="/admin/pickups" active={isPickups} onNavigate={onNavigate} compact={compactSidebar}>
+          <PackageIcon size={navIcon} /> Pickup requests
+        </NavLink>
         <NavLink href="/admin/clients" active={isClients} onNavigate={onNavigate} compact={compactSidebar}>
           <Users size={navIcon} /> Clients
         </NavLink>
+        {canAccessStaffDirectory && (
+          <NavLink href="/admin/staff" active={isStaff} onNavigate={onNavigate} compact={compactSidebar}>
+            <UsersRound size={navIcon} /> Staff accounts
+          </NavLink>
+        )}
         <NavLink
           href="/admin/external-tracking"
           active={isExternalTracking}
@@ -190,9 +216,11 @@ function SidebarNav({
         >
           <ShoppingBag size={navIcon} /> External tracking
         </NavLink>
-        <NavLink href="/admin/search" active={isSearch} onNavigate={onNavigate} compact={compactSidebar}>
-          <Search size={navIcon} /> CRM search
-        </NavLink>
+        {canAccessRestrictedAdminPages && (
+          <NavLink href="/admin/search" active={isSearch} onNavigate={onNavigate} compact={compactSidebar}>
+            <Search size={navIcon} /> CRM search
+          </NavLink>
+        )}
 
         <div className={`border-t border-gray-800 ${compactSidebar ? "mt-2 pt-2" : "mt-4 pt-4"}`}>
           <p className={`mb-1.5 px-3 text-[9px] font-bold uppercase tracking-wider text-gray-500`}>Scanner hubs</p>
@@ -223,9 +251,11 @@ function SidebarNav({
         <div className={`space-y-0.5 border-t border-gray-800 ${compactSidebar ? "mt-2 pt-2" : "mt-4 space-y-1 pt-4"}`}>
           <p className="mb-1.5 px-3 text-[9px] font-bold uppercase tracking-wider text-gray-500">Workspace</p>
           <DashboardShippingCalcTrigger variant={compactSidebar ? "admin" : "drawer"} />
-          <NavLink href="/admin/settings" active={isSettings} onNavigate={onNavigate} compact={compactSidebar}>
-            <Settings size={navIcon} /> Settings &amp; info
-          </NavLink>
+          {canAccessRestrictedAdminPages && (
+            <NavLink href="/admin/settings" active={isSettings} onNavigate={onNavigate} compact={compactSidebar}>
+              <Settings size={navIcon} /> Settings &amp; info
+            </NavLink>
+          )}
           <Link
             href="/quote"
             target="_blank"
@@ -263,15 +293,20 @@ function SidebarNav({
 export default function AdminShell({
   children,
   stats,
+  canAccessStaffDirectory = true,
+  canAccessRestrictedAdminPages = true,
 }: {
   children: React.ReactNode;
   stats: AdminShellStats;
+  canAccessStaffDirectory?: boolean;
+  canAccessRestrictedAdminPages?: boolean;
 }) {
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
   useEffect(() => {
-    setMenuOpen(false);
-  }, [pathname]);
+    if (!menuOpen) return;
+    queueMicrotask(() => setMenuOpen(false));
+  }, [pathname, menuOpen]);
 
   useEffect(() => {
     if (!menuOpen) return;
@@ -282,7 +317,7 @@ export default function AdminShell({
     };
   }, [menuOpen]);
 
-  if (pathname === "/admin/login") {
+  if (pathname === "/admin/login" || pathname === "/admin/access-denied") {
     return <>{children}</>;
   }
 
@@ -296,7 +331,13 @@ export default function AdminShell({
   return (
     <div className="flex h-dvh min-h-0 w-full max-w-[100vw] max-h-dvh overflow-hidden bg-gray-50 font-sans">
       <aside className="z-30 hidden h-full min-h-0 w-64 shrink-0 flex-col overflow-hidden bg-mex-dark text-white shadow-xl md:flex">
-        <SidebarNav pathname={pathname} stats={stats} compactSidebar />
+        <SidebarNav
+          pathname={pathname}
+          stats={stats}
+          compactSidebar
+          canAccessStaffDirectory={canAccessStaffDirectory}
+          canAccessRestrictedAdminPages={canAccessRestrictedAdminPages}
+        />
       </aside>
 
       {menuOpen && (
@@ -319,7 +360,13 @@ export default function AdminShell({
               </button>
             </div>
             <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
-              <SidebarNav pathname={pathname} stats={stats} onNavigate={closeMenu} />
+              <SidebarNav
+                pathname={pathname}
+                stats={stats}
+                onNavigate={closeMenu}
+                canAccessStaffDirectory={canAccessStaffDirectory}
+                canAccessRestrictedAdminPages={canAccessRestrictedAdminPages}
+              />
             </div>
           </div>
         </div>
@@ -352,12 +399,14 @@ export default function AdminShell({
             </div>
             <div className="hidden sm:flex items-center gap-2 shrink-0">
               <PortalNotificationBell variant="admin" />
-              <Link
-                href="/admin/settings"
-                className="inline-flex items-center justify-center gap-2 rounded-xl border border-gray-200 px-3 py-2 text-sm font-bold text-gray-700 hover:bg-gray-50"
-              >
-                <Settings size={18} /> Settings
-              </Link>
+              {canAccessRestrictedAdminPages && (
+                <Link
+                  href="/admin/settings"
+                  className="inline-flex items-center justify-center gap-2 rounded-xl border border-gray-200 px-3 py-2 text-sm font-bold text-gray-700 hover:bg-gray-50"
+                >
+                  <Settings size={18} /> Settings
+                </Link>
+              )}
               <AdminSignOutButton className="inline-flex items-center justify-center gap-2 rounded-xl border border-gray-200 px-3 py-2 text-sm font-bold text-gray-700 hover:bg-red-50 hover:border-red-200 hover:text-red-700">
                 <LogOut size={18} /> Sign out
               </AdminSignOutButton>
@@ -369,6 +418,8 @@ export default function AdminShell({
           <div className="max-w-[1600px] mx-auto w-full min-w-0">{children}</div>
         </div>
       </div>
+
+      <PortalIdleGuard variant="admin" />
     </div>
   );
 }

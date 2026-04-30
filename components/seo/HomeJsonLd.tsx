@@ -33,7 +33,7 @@ export default function HomeJsonLd() {
         streetAddress: "1962 NW 82nd Ave",
         addressLocality: "Doral",
         addressRegion: "FL",
-        postalCode: "33126",
+        postalCode: "33191",
         addressCountry: "US",
       },
       priceRange: "$$",
@@ -46,7 +46,7 @@ export default function HomeJsonLd() {
       description:
         "Fast, secure shipping and logistics from USA, Dominican Republic, and China to Haiti. Air, ocean, and ground freight.",
       publisher: { "@id": `${base}/#organization` },
-      inLanguage: ["en", "fr", "ht"],
+      inLanguage: ["en", "fr", "es"],
       potentialAction: {
         "@type": "SearchAction",
         target: {
@@ -66,7 +66,6 @@ export default function HomeJsonLd() {
   return (
     <script
       type="application/ld+json"
-      // eslint-disable-next-line react/no-danger
       dangerouslySetInnerHTML={{ __html: JSON.stringify(payload) }}
     />
   );

@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 import { sharePreviewOgImage } from "@/lib/share-image";
-import { Plane, Ship, ShoppingCart, MapPinned, Warehouse } from "lucide-react";
+import { ArrowRight, Plane, Ship, ShoppingCart, MapPinned, Warehouse } from "lucide-react";
+import ServicesHero from "@/components/services/ServicesHero";
+import ServicesPromoStrip from "@/components/services/ServicesPromoStrip";
 import { LOGISTICS_SERVICES, type LogisticsServiceId } from "@/lib/logistics-services";
 
 export const metadata: Metadata = {
@@ -22,7 +25,7 @@ export const metadata: Metadata = {
 };
 
 function ServiceIcon({ id }: { id: LogisticsServiceId }) {
-  const common = "h-10 w-10 text-mex-blue";
+  const common = "h-8 w-8 text-mex-blue";
   switch (id) {
     case "us-ht":
       return <Plane className={common} />;
@@ -39,45 +42,89 @@ function ServiceIcon({ id }: { id: LogisticsServiceId }) {
   }
 }
 
-export default function ServicesPage() {
+export default async function ServicesPage() {
+  const t = await getTranslations("Services");
   return (
-    <div className="bg-white min-h-screen py-16">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center max-w-3xl mx-auto mb-16">
-          <h1 className="text-3xl sm:text-4xl font-black italic text-mex-blue uppercase mb-4">Our Services</h1>
-          <p className="text-base sm:text-lg text-gray-600 font-medium">
-            Comprehensive logistics solutions tailored for speed, security, and peace of mind.
-          </p>
+    <div className="min-h-screen bg-[#fafbfc]">
+      <div className="border-b border-gray-100 bg-white">
+        <div className="mx-auto max-w-7xl px-4 pb-16 pt-10 sm:px-6 sm:pb-20 sm:pt-12 lg:px-8 lg:pb-24 lg:pt-14">
+          <ServicesHero />
+        </div>
+      </div>
+
+      <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-20 lg:px-8 lg:py-24">
+        <ServicesPromoStrip />
+
+        <div id="catalog" className="mt-20 scroll-mt-24 sm:mt-24">
+          <div className="mx-auto mb-12 max-w-3xl text-center">
+            <h2 className="text-3xl font-black uppercase italic tracking-tight text-mex-blue sm:text-4xl">{t("capabilitiesTitle")}</h2>
+            <p className="mt-4 text-base font-medium leading-relaxed text-gray-600 sm:text-lg">
+              {t("capabilitiesSub")}
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 lg:gap-8">
+            {LOGISTICS_SERVICES.map((service, index) => {
+              const sectionId =
+                service.id === "us-ht" ? "air" : service.id === "dr-ht" ? "ocean" : undefined;
+              return (
+              <article
+                key={service.id}
+                id={sectionId}
+                className="group relative flex flex-col overflow-hidden scroll-mt-28 rounded-3xl border border-gray-100 bg-white p-8 shadow-[0_2px_24px_-4px_rgba(15,23,42,0.08)] transition duration-300 hover:-translate-y-1 hover:border-mex-blue/15 hover:shadow-[0_24px_48px_-12px_rgba(29,59,142,0.15)]"
+              >
+                <span
+                  className="absolute right-6 top-6 font-black tabular-nums text-5xl leading-none text-gray-100 transition group-hover:text-blue-50"
+                  aria-hidden
+                >
+                  {String(index + 1).padStart(2, "0")}
+                </span>
+                <div className="relative mb-7 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-50 to-white shadow-inner ring-1 ring-mex-blue/10 transition group-hover:scale-105 group-hover:shadow-md">
+                  <ServiceIcon id={service.id} />
+                </div>
+                <h3 className="relative text-xl font-black leading-snug text-mex-dark sm:text-2xl">
+                  {t(`catalog.${service.id}.title`)}
+                </h3>
+                <p className="relative mt-4 flex-grow text-sm font-medium leading-relaxed text-gray-600 sm:text-[15px]">
+                  {t(`catalog.${service.id}.description`)}
+                </p>
+                <div className="relative mt-8 border-t border-gray-50 pt-6">
+                  {service.external ? (
+                    <a
+                      href={service.actionHref}
+                      className="inline-flex items-center gap-2 font-black text-mex-orange transition hover:gap-3"
+                    >
+                      {t("startNow")}
+                      <ArrowRight className="h-5 w-5" strokeWidth={2.5} aria-hidden />
+                    </a>
+                  ) : (
+                    <Link
+                      href={service.actionHref}
+                      className="inline-flex items-center gap-2 font-black text-mex-orange transition hover:gap-3"
+                    >
+                      {t("startNow")}
+                      <ArrowRight className="h-5 w-5" strokeWidth={2.5} aria-hidden />
+                    </Link>
+                  )}
+                </div>
+              </article>
+            );
+            })}
+          </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-          {LOGISTICS_SERVICES.map((service) => (
-            <div
-              key={service.id}
-              className="bg-gray-50 rounded-2xl p-6 sm:p-8 border border-gray-100 hover:shadow-xl hover:border-mex-orange/30 transition-all group flex flex-col h-full"
-            >
-              <div className="bg-white w-20 h-20 rounded-2xl shadow-sm flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                <ServiceIcon id={service.id} />
-              </div>
-              <h3 className="text-xl sm:text-2xl font-bold text-mex-dark mb-4">{service.title}</h3>
-              <p className="text-gray-600 leading-relaxed mb-8 flex-grow text-sm sm:text-base">{service.description}</p>
-              {service.external ? (
-                <a
-                  href={service.actionHref}
-                  className="text-mex-orange font-bold flex items-center gap-2 hover:gap-3 transition-all mt-auto w-fit"
-                >
-                  Start Now <span className="text-xl">&rarr;</span>
-                </a>
-              ) : (
-                <Link
-                  href={service.actionHref}
-                  className="text-mex-orange font-bold flex items-center gap-2 hover:gap-3 transition-all mt-auto w-fit"
-                >
-                  Start Now <span className="text-xl">&rarr;</span>
-                </Link>
-              )}
-            </div>
-          ))}
+        <div className="mx-auto mt-20 max-w-4xl rounded-3xl border border-mex-blue/10 bg-gradient-to-br from-mex-blue/[0.06] to-transparent px-8 py-12 text-center sm:mt-24 sm:px-12">
+          <p className="text-lg font-black text-mex-dark sm:text-xl">{t("notSureTitle")}</p>
+          <p className="mt-2 text-sm font-medium text-gray-600 sm:text-base">
+            {t("notSureSub")}
+          </p>
+          <Link
+            href="/quote"
+            className="mt-8 inline-flex items-center justify-center gap-2 rounded-2xl bg-mex-blue px-10 py-4 text-base font-black text-white shadow-lg shadow-blue-900/25 transition hover:bg-blue-950"
+          >
+            {t("startQuote")}
+            <ArrowRight className="h-5 w-5" strokeWidth={2.5} aria-hidden />
+          </Link>
         </div>
       </div>
     </div>

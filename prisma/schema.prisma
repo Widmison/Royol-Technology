@@ -38,15 +38,56 @@ model User {
   passwordResetToken   String?
   passwordResetExpires DateTime?
 
+  /** Admin portal: Web Dev vs Admin team (clients ignore this field). */
+  adminStaffRole        AdminStaffRole?
+  /** False until staff finish the onboarding profile form (email/password path). */
+  adminProfileComplete  Boolean           @default(true)
+
+  // ==========================
+  // PHASE 2: Admin TOTP (Google Authenticator) — ADMIN only in app logic
+  // ==========================
+  /** Base32 TOTP shared secret; null until enrolled or if 2FA disabled. */
+  twoFactorSecret    String?
+  twoFactorEnabled   Boolean           @default(false)
+
+  // ==========================
+  // PHASE 2: Referrals — clients get a shareable code; optional referrer link
+  // ==========================
+  /** Unique code for CLIENT users (share/rewards); null for ADMIN/STAFF until needed. */
+  referralCode       String?           @unique
+  referredById       String?
+  referrer           User?             @relation("UserReferrals", fields: [referredById], references: [id], onDelete: SetNull)
+  referredUsers      User[]            @relation("UserReferrals")
+  pickupRequests     PickupRequest[]
+
   createdAt        DateTime          @default(now())
   requests         ShipmentRequest[] // A client can have many pre-registered shipments
   externalTrackings ClientExternalTracking[]
   appNotifications AppNotification[]
+
+  @@index([referredById])
 }
 
 enum Role {
   ADMIN
+  STAFF
   CLIENT
+}
+
+enum AdminStaffRole {
+  WEB_DEV
+  ADMIN_TEAM
+}
+
+/** Single-use email codes for admin password sign-in (sent every login). */
+model AdminLoginOtp {
+  id        String   @id @default(cuid())
+  email     String
+  codeHash  String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([email])
 }
 
 // 2. PRE-REGISTRATION / QUOTE FORM (What they fill out online)
@@ -70,6 +111,8 @@ model ShipmentRequest {
   invoice          Invoice?      // Will be created when weighed at the office
   package          Package?      // Will be created after payment
   createdAt        DateTime      @default(now())
+  /** Optional 1:1 from home/office pickup after the package enters normal tracking. */
+  linkedFromPickup PickupRequest? @relation("ShipmentFromPickup")
 }
 
 enum RequestStatus {
@@ -106,7 +149,7 @@ model Package {
   request       ShipmentRequest @relation(fields: [requestId], references: [id])
   status        PackageStatus   @default(PROCESSING)
   events        TrackingEvent[] // The history timeline
-  linkedExternalTracking ClientExternalTracking?
+  linkedExternalTrackings ClientExternalTracking[]
   createdAt     DateTime        @default(now())
   updatedAt     DateTime        @updatedAt
 }
@@ -152,8 +195,10 @@ model ClientExternalTracking {
   trackingNumber  String
   notes           String?
   status          ExternalTrackingStatus   @default(PENDING_REVIEW)
-  linkedPackageId String?                  @unique
+  linkedPackageId String?
   linkedPackage   Package?                 @relation(fields: [linkedPackageId], references: [id])
+
+  @@index([linkedPackageId])
   adminNote       String?
   createdAt       DateTime                 @default(now())
   updatedAt       DateTime                 @updatedAt
@@ -164,9 +209,7 @@ model ClientExternalTracking {
 
 enum ExternalTrackingStatus {
   PENDING_REVIEW
-  LINKED
-  NEEDS_INFO
-  CLOSED
+  PACKED_RECEIVED
 }
 
 /** In-app notifications for clients (userId set) and staff (forStaff true). */
@@ -184,4 +227,56 @@ model AppNotification {
 
   @@index([userId, createdAt])
   @@index([forStaff, createdAt])
+}
+
+// ==========================
+// REQUEST PICKUP (client → admin review, optional distance-based price)
+// ==========================
+enum PickupRequestStatus {
+  PENDING    // received; admin sets/sends price
+  PRICE_SENT // client notified
+  CONFIRMED  // client accepted; pickup scheduled
+  PICKED_UP  // can link to ShipmentRequest for normal tracking
+  CANCELLED
+}
+
+/**
+ * Home/office pickup: name, address, phone, package photo; admin may override auto (per mile) price.
+ * After PICKED_UP, optionally create/link a ShipmentRequest for standard tracking.
+ */
+model PickupRequest {
+  id       String  @id @default(cuid())
+  clientId String?
+  client   User?   @relation(fields: [clientId], references: [id], onDelete: SetNull)
+
+  name     String
+  phone    String
+  address  String
+  city     String?
+  state    String?
+  zipCode  String?
+
+  /** Set after upload (Vercel Blob, etc.) in Phase 3. */
+  packagePhotoUrl String?
+
+  originLabel      String? // e.g. "Miami WH"
+  destinationLabel String? // e.g. "Orlando, FL"
+  distanceMiles    Float?
+  pricePerMile     Float?
+  autoTotalAmount  Float?
+  adminOverrideTotalAmount Float?
+  /** What was communicated to the client. */
+  finalQuotedAmount        Float?
+
+  status    PickupRequestStatus @default(PENDING)
+  adminNote String?
+
+  linkedShipmentRequestId String?  @unique
+  linkedShipmentRequest  ShipmentRequest? @relation("ShipmentFromPickup", fields: [linkedShipmentRequestId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([clientId])
+  @@index([status, createdAt])
 }

@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { requireAdminApiUser } from "@/lib/requireApiSession";
+import { requireAdminApiUser, requireSuperAdminApiUser } from "@/lib/requireApiSession";
 import { validateSignupPassword } from "@/lib/passwordPolicy";
 import { hashPassword } from "@/lib/passwordCrypto";
+import { canPerformStaffCapability } from "@/lib/staffAccess";
 
 export async function POST(req: Request) {
   try {
@@ -18,6 +19,9 @@ export async function POST(req: Request) {
     // ACTION 1: CREATE NEW CLIENT
     // ==========================================
     if (action === "create") {
+      if (!canPerformStaffCapability(adminOrRes, "clients:create")) {
+        return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+      }
       const existing = await prisma.user.findUnique({ where: { email } });
       if (existing) return NextResponse.json({ error: "Email already exists in the system." }, { status: 400 });
 
@@ -38,6 +42,7 @@ export async function POST(req: Request) {
         }
       });
       const { password: _pw, ...safeUser } = user;
+      void _pw;
       return NextResponse.json({ success: true, user: safeUser });
     }
 
@@ -45,12 +50,16 @@ export async function POST(req: Request) {
     // ACTION 2: UPDATE EXISTING CLIENT
     // ==========================================
     if (action === "update") {
+      if (!canPerformStaffCapability(adminOrRes, "clients:update")) {
+        return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+      }
       if (!id) return NextResponse.json({ error: "User ID required" }, { status: 400 });
       const user = await prisma.user.update({
         where: { id },
         data: { email, firstName, lastName, phone, address, city, state, zipCode } // Update address!
       });
       const { password: _pwU, ...safeUser } = user;
+      void _pwU;
       return NextResponse.json({ success: true, user: safeUser });
     }
 
@@ -58,6 +67,8 @@ export async function POST(req: Request) {
     // ACTION 3: DELETE CLIENT
     // ==========================================
     if (action === "delete") {
+      const superAdminOrRes = await requireSuperAdminApiUser();
+      if (superAdminOrRes instanceof NextResponse) return superAdminOrRes;
       if (!id) return NextResponse.json({ error: "User ID required" }, { status: 400 });
       
       // Safety Check: Unlink any shipment requests from this user so we don't break financial records!

@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { requireAdminApiUser } from "@/lib/requireApiSession";
 import { calculateFreightTotal } from "@/lib/freightRates";
 import { allocateMexTrackingId } from "@/lib/trackingId";
+import { canPerformStaffCapability } from "@/lib/staffAccess";
 
 /**
  * Create an intake shipment + package + unpaid invoice for a client (admin only).
@@ -11,6 +12,9 @@ export async function POST(req: Request) {
   try {
     const adminOrRes = await requireAdminApiUser();
     if (adminOrRes instanceof NextResponse) return adminOrRes;
+    if (!canPerformStaffCapability(adminOrRes, "packages:intake-create")) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
 
     const body = await req.json();
     const clientId = body.clientId as string | undefined;
@@ -19,6 +23,8 @@ export async function POST(req: Request) {
     const serviceFeeRaw = body.serviceFee;
     const priceOverrideRaw = body.priceOverride;
     const destinationCity = (body.destinationCity as string)?.trim() || "Port-au-Prince";
+    const destCountryRaw = typeof body.destinationCountry === "string" ? body.destinationCountry.trim().toUpperCase() : "";
+    const destinationCountry = destCountryRaw === "DO" ? "DO" : "HT";
 
     if (!clientId) {
       return NextResponse.json({ error: "clientId is required" }, { status: 400 });
@@ -68,7 +74,7 @@ export async function POST(req: Request) {
           category: "Admin intake",
           description: "Package added by admin — invoice sent to client portal.",
           shippingMethod,
-          destinationCountry: "Haiti",
+          destinationCountry,
           address: client.address?.trim() || "—",
           state: client.state?.trim() || "—",
           city: destinationCity,
@@ -87,7 +93,7 @@ export async function POST(req: Request) {
           events: {
             create: {
               status: "RECEIVED_USA_WAREHOUSE",
-              location: "1962 NW 82nd Ave Doral, FL 33126",
+              location: "1962 NW 82nd Ave Doral, FL 33191",
               description:
                 "Received in USA Warehouse — Colis resevwa nan depo USA ✅ (Admin intake — invoice pending payment)",
             },

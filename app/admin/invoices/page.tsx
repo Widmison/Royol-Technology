@@ -2,6 +2,8 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { Receipt, CheckCircle, Copy, AlertCircle, Info } from "lucide-react";
 import AdminPrintDocumentLinks from "@/components/admin/AdminPrintDocumentLinks";
+import MarkInvoicePaidButton from "@/components/admin/MarkInvoicePaidButton";
+import AdminDangerDeleteButton from "@/components/admin/AdminDangerDeleteButton";
 
 export const dynamic = "force-dynamic";
 
@@ -68,21 +70,29 @@ export default async function AdminInvoicesPage() {
                         ${inv.totalAmount.toFixed(2)}
                       </span>
                     </div>
-                    <div className="flex flex-wrap items-center gap-2 border-t border-gray-100 pt-3 sm:border-t-0 sm:pt-0 lg:border-l lg:border-t-0 lg:pl-4">
-                      {inv.request.package ? (
-                        <AdminPrintDocumentLinks requestId={inv.request.id} layout="row" />
-                      ) : (
-                        <span className="text-xs text-gray-400">—</span>
-                      )}
-                      <Link
-                        href={`/pay/${inv.id}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 rounded-lg bg-blue-50 px-3 py-2 text-xs font-bold text-mex-blue transition-colors hover:bg-blue-100"
-                      >
-                        <Copy className="h-4 w-4 shrink-0" aria-hidden />
-                        Pay link
-                      </Link>
+                    <div className="flex flex-col gap-3 border-t border-gray-100 pt-3 sm:border-t-0 sm:pt-0 lg:border-l lg:border-t-0 lg:pl-4">
+                      <div className="flex flex-wrap items-center gap-2">
+                        {inv.request.package ? (
+                          <AdminPrintDocumentLinks requestId={inv.request.id} layout="row" />
+                        ) : (
+                          <span className="text-xs text-gray-400">—</span>
+                        )}
+                        <Link
+                          href={`/pay/${inv.id}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 rounded-lg bg-blue-50 px-3 py-2 text-xs font-bold text-mex-blue transition-colors hover:bg-blue-100"
+                        >
+                          <Copy className="h-4 w-4 shrink-0" aria-hidden />
+                          Client pay page
+                        </Link>
+                      </div>
+                      <MarkInvoicePaidButton invoiceId={inv.id} amountLabel={`$${inv.totalAmount.toFixed(2)}`} />
+                      <AdminDangerDeleteButton
+                        endpoint={`/api/admin/invoices/${inv.id}`}
+                        title="Delete this invoice?"
+                        message={`This permanently removes invoice ${inv.id} and resets the linked shipment back to quote state.`}
+                      />
                     </div>
                   </div>
                 </div>
@@ -139,6 +149,11 @@ export default async function AdminInvoicesPage() {
                       ) : (
                         <span className="text-xs text-gray-400">—</span>
                       )}
+                      <AdminDangerDeleteButton
+                        endpoint={`/api/admin/invoices/${inv.id}`}
+                        title="Delete this paid invoice?"
+                        message="This permanently removes the paid invoice record and related shipment package data."
+                      />
                     </div>
                   </div>
                 </div>

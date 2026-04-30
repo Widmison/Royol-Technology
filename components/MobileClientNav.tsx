@@ -17,7 +17,9 @@ import {
   Scale,
   LogOut,
   ShoppingBag,
+  Truck,
 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import DashboardShippingCalcTrigger from "@/components/DashboardShippingCalcTrigger";
 import ClientSignOutButton from "@/components/ClientSignOutButton";
 
@@ -28,11 +30,12 @@ type Props = {
 };
 
 export default function MobileClientNav({ user, currentTab, unpaidCount }: Props) {
+  const t = useTranslations("Dashboard.sidebar");
   const [open, setOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setMounted(true);
+    queueMicrotask(() => setMounted(true));
   }, []);
 
   useEffect(() => {
@@ -116,17 +119,18 @@ export default function MobileClientNav({ user, currentTab, unpaidCount }: Props
           <p className="truncate text-xs text-gray-400">{user.email}</p>
         </div>
         <nav className="min-h-0 flex-1 space-y-1 overflow-y-auto overscroll-contain px-3 py-3">
-          {link("tracking", "Live tracking", <Search size={20} />)}
-          {link("overview", "My overview", <LayoutDashboard size={20} />)}
-          {link("new-box", "Pre-register box", <Plus size={20} />)}
-          {link("shipments", "All shipments", <Package size={20} />)}
-          {link("invoices", "Billing & invoices", <Receipt size={20} />, unpaidCount)}
-          {link("external", "Add tracking", <ShoppingBag size={20} />)}
+          {link("tracking", t("tracking"), <Search size={20} />)}
+          {link("overview", t("overview"), <LayoutDashboard size={20} />)}
+          {link("new-box", t("newBox"), <Plus size={20} />)}
+          {link("shipments", t("shipments"), <Package size={20} />)}
+          {link("invoices", t("invoices"), <Receipt size={20} />, unpaidCount)}
+          {link("external", t("external"), <ShoppingBag size={20} />)}
+          {link("pickup", "Pickup request", <Truck size={20} />)}
           <div className="mt-4 space-y-1 border-t border-gray-800 pt-4">
-            <p className="mb-2 px-4 text-[10px] font-bold uppercase tracking-wider text-gray-500">Info</p>
-            {link("pricing", "Pricing & services", <DollarSign size={20} />)}
-            {link("profile", "Profile settings", <Settings size={20} />)}
-            {link("terms", "CGU / legal", <Scale size={20} />)}
+            <p className="mb-2 px-4 text-[10px] font-bold uppercase tracking-wider text-gray-500">{t("info")}</p>
+            {link("pricing", t("pricing"), <DollarSign size={20} />)}
+            {link("profile", t("profile"), <Settings size={20} />)}
+            {link("terms", t("terms"), <Scale size={20} />)}
           </div>
         </nav>
         <div className="shrink-0 space-y-2 border-t border-gray-800 bg-mex-dark p-4">

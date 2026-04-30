@@ -37,7 +37,7 @@ export default async function TrackPage({ searchParams }: { searchParams: Promis
       where: { trackingId },
       include: {
         events: { orderBy: { date: "desc" } },
-        request: { select: { shippingMethod: true, departure: true } },
+        request: { select: { shippingMethod: true, departure: true, destinationCountry: true } },
       },
     });
 
@@ -98,6 +98,7 @@ export default async function TrackPage({ searchParams }: { searchParams: Promis
               status={pkg.status}
               shippingMethod={pkg.request.shippingMethod}
               departure={pkg.request.departure}
+              destinationCountry={pkg.request.destinationCountry}
               invoice={null}
               events={pkg.events
                 .filter((e) => !shouldOmitClientTrackingEvent(e.description))

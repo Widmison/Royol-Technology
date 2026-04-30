@@ -3,6 +3,10 @@ import { Montserrat } from "next/font/google";
 import "./globals.css";
 import ConditionalLayout from "@/components/ConditionalLayout";
 import { ShippingCalculatorProvider } from "@/components/ShippingCalculatorProvider";
+import { NextIntlClientProvider } from "next-intl";
+import { getLocale, getMessages, setRequestLocale } from "next-intl/server";
+import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import { getSiteUrlString } from "@/lib/site";
 import { sharePreviewOgImage } from "@/lib/share-image";
 
@@ -70,20 +74,25 @@ export const metadata: Metadata = {
     : {}),
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const locale = await getLocale();
+  setRequestLocale(locale);
+  const messages = await getMessages();
+
   return (
-    <html lang="en" className={montserrat.variable}>
+    <html lang={locale} className={montserrat.variable}>
       <body className="font-sans antialiased text-mex-dark bg-white">
-        
-        {/* Global shipping calculator modal (Navbar + client dashboard triggers) */}
-        <ShippingCalculatorProvider>
-          <ConditionalLayout>{children}</ConditionalLayout>
-        </ShippingCalculatorProvider>
-        
+        <NextIntlClientProvider messages={messages}>
+          <ShippingCalculatorProvider>
+            <ConditionalLayout>{children}</ConditionalLayout>
+          </ShippingCalculatorProvider>
+        </NextIntlClientProvider>
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );

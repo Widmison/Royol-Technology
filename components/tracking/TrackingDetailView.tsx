@@ -11,6 +11,7 @@ import {
   AlertCircle,
 } from "lucide-react";
 import { packageStatusShortLabel, packageStatusTimelineTitle } from "@/lib/packageStatusDisplay";
+import { shipmentRouteLabel } from "@/lib/shipmentRouteLabel";
 
 export type TrackingDetailInvoice = {
   id: string;
@@ -33,6 +34,7 @@ export type TrackingDetailPackage = {
   status: string;
   shippingMethod: string;
   departure: string;
+  destinationCountry?: string | null;
   invoice: TrackingDetailInvoice | null;
   events: TrackingDetailEvent[];
 };
@@ -55,6 +57,7 @@ export default function TrackingDetailView({
   status,
   shippingMethod,
   departure,
+  destinationCountry,
   invoice,
   events,
 }: TrackingDetailViewProps) {
@@ -73,7 +76,7 @@ export default function TrackingDetailView({
             <p className="mb-1 text-sm font-medium text-gray-500">Tracking number</p>
             <h2 className="text-xl font-black tracking-tight text-mex-dark">{trackingId}</h2>
             <p className="mt-1 text-xs font-medium text-gray-400">
-              {departure} &rarr; Haiti · {shippingMethod}
+              {shipmentRouteLabel(departure, destinationCountry)} · {shippingMethod}
             </p>
           </div>
           <div className="text-left sm:text-right">

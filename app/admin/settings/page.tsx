@@ -9,6 +9,7 @@ import {
   Clock,
   Keyboard,
 } from "lucide-react";
+import AdminTwoFactorPanel from "@/components/admin/AdminTwoFactorPanel";
 
 export const dynamic = "force-dynamic";
 
@@ -22,15 +23,17 @@ export default function AdminSettingsPage() {
         </p>
       </div>
 
+      <AdminTwoFactorPanel />
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
         <section className="rounded-2xl border border-gray-100 bg-white p-5 sm:p-6 shadow-sm">
           <h2 className="text-lg font-black text-mex-dark flex items-center gap-2 mb-4">
             <MapPin className="text-mex-blue" size={22} /> US receiving (Doral)
           </h2>
           <p className="font-bold text-mex-dark">1962 NW 82nd Ave</p>
-          <p className="font-bold text-mex-dark mb-3">Doral, FL 33126</p>
+          <p className="font-bold text-mex-dark mb-3">Doral, FL 33191</p>
           <a
-            href="https://www.google.com/maps/search/?api=1&query=1962%20NW%2082nd%20Ave%2C%20Doral%2C%20FL%2033126"
+            href="https://www.google.com/maps/search/?api=1&query=1962%20NW%2082nd%20Ave%2C%20Doral%2C%20FL%2033191"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 text-sm font-bold text-mex-blue hover:underline"

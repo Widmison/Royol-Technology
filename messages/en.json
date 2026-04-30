@@ -1,0 +1,232 @@
+{
+  "Nav": {
+    "home": "Home",
+    "track": "Track package",
+    "services": "Services",
+    "calc": "Calculate shipping",
+    "login": "Client login",
+    "quote": "Request a quote"
+  },
+  "Footer": {
+    "slogan": "Reliable. Fast. Secure.",
+    "slogan_ht": "Sèvis rapid e sekirize. Livrezon garanti!",
+    "contact": "Contact & info",
+    "addressLine1": "1962 NW 82nd Ave",
+    "addressLine2": "Doral, FL 33191",
+    "partner": "Invest with us — tell us you want to partner (Google Form)",
+    "partnerSub": "Envesti avè nou — ranpli fòm patnè a isit la.",
+    "servicePointsTitle": "Service points",
+    "stMarcName": "MelschyElectronic's St Marc",
+    "stMarcAddress": "Rue Louverture, Saint-Marc",
+    "santiagoName": "Villa Olimpica pickup point",
+    "santiagoAddress": "Villa Olimpica Manzana M Casa 8B, Dominican Republic",
+    "santiagoPhone": "+1 809 407 5020",
+    "navHome": "Home",
+    "navReceipts": "Receipts",
+    "navSent": "Sent",
+    "navServicePoint": "Service point",
+    "rights": "All rights reserved.",
+    "cgu": "Terms of use (CGU)",
+    "lastUpdated": "Last update: 04/01/2026",
+    "designedBy": "Designed and developed by",
+    "company": "MEX509 SHIPPING SERVICES"
+  },
+  "WhatsApp": {
+    "label": "WhatsApp",
+    "aria": "Chat with MEX509 support on WhatsApp"
+  },
+  "Dashboard": {
+    "overview": {
+      "addressHelpCta": "US address tutorial for online shopping"
+    },
+    "sidebar": {
+      "clientPortal": "Client portal",
+      "tracking": "Live tracking",
+      "overview": "My overview",
+      "newBox": "Pre-register box",
+      "shipments": "All shipments",
+      "invoices": "Billing & invoices",
+      "external": "Add tracking",
+      "info": "Information",
+      "pricing": "Pricing & services",
+      "addressHelp": "US address help",
+      "profile": "Profile settings",
+      "terms": "CGU / legal terms"
+    },
+    "referral": {
+      "title": "Your referral code",
+      "hint": "Share it with friends. They can enter it when they create an account.",
+      "copyCode": "Copy code",
+      "copyLink": "Copy signup link",
+      "copied": "Copied",
+      "shareText": "Ship to Haiti with MEX509. Use my code {code} at signup: {link}",
+      "shareButton": "Share"
+    },
+    "addressTutorial": {
+      "title": "How to use your US address online",
+      "intro": "When you shop on Amazon, Shein, or other US stores, enter your MEX509 Miami address exactly as it appears in your profile. Include your name and phone so we can match your box.",
+      "cardTitle": "Address format to copy at checkout",
+      "stepLabel": "Visual guide",
+      "altMain": "MEX509 US delivery and logistics",
+      "altBox": "MEX509 shipping branding",
+      "altTrusted": "Trusted cargo service"
+    },
+    "pricing": {
+      "visualsTitle": "Service highlights",
+      "visualsSub": "A quick look at lanes, trust, and delivery—then your full rate cards below."
+    }
+  },
+  "Home": {
+    "heroImageAlt": "MEX509 delivery courier",
+    "heroTitleLine1": "Ship Fast,",
+    "heroTitleLine2": "Receive Fast!",
+    "heroSubtitle": "Fast, secure, and headache-free delivery logistics from USA, DR, and China to Haiti.",
+    "trackPlaceholder": "Enter tracking number (e.g., MEX1234)",
+    "trackButton": "Track package",
+    "cards": {
+      "learnMore": "Learn more",
+      "air": {
+        "title": "Air Freight",
+        "body": "Fast delivery in 5-7 days for urgent packages and documents."
+      },
+      "quote": {
+        "title": "Send a Package",
+        "body": "Calculate price and request a pickup instantly using our smart online form.",
+        "cta": "Get a Quote Now"
+      },
+      "ocean": {
+        "title": "Ocean Freight",
+        "body": "Cost-effective shipping for heavy barrels, appliances, and large cargo."
+      }
+    },
+    "groundIntroBold": "Ground and regional freight",
+    "groundIntro1": "is available too -",
+    "browseServices": "browse all services",
+    "or": "or",
+    "startQuote": "start a quote",
+    "how": {
+      "title": "How it works",
+      "subtitle": "From your first quote to delivery in Haiti - simple steps, clear expectations.",
+      "steps": {
+        "1": {
+          "title": "Pre-register online",
+          "body": "Tell us what you are shipping, where it is going, and how you want it sent (air, ocean, or ground)."
+        },
+        "2": {
+          "title": "Drop off in Doral",
+          "body": "Bring your packages to our Doral counter. We weigh, verify, and prepare your shipment."
+        },
+        "3": {
+          "title": "Pay and we ship",
+          "body": "After weighing you get a clear invoice. Once paid, your cargo moves on the next available leg."
+        },
+        "4": {
+          "title": "Track to delivery",
+          "body": "Use your tracking ID anytime for status updates until your recipient gets the package."
+        }
+      },
+      "ctaQuote": "Start your quote",
+      "ctaLogin": "Already a customer? Sign in"
+    },
+    "visit": {
+      "title": "Visit us in Doral",
+      "subtitle": "Walk-ins welcome for drop-off and questions. Call ahead if you are bringing oversized cargo.",
+      "maps": "Open in Google Maps",
+      "cardTitle": "Pickup and cutoffs",
+      "cardBody": "Air and ocean schedules vary by week. After you submit a quote, our team confirms timing, required paperwork, and anything special about your cargo - so there are no surprises at the counter.",
+      "cardLink": "Read service details"
+    },
+    "testimonials": {
+      "title": "What Our Clients Say",
+      "subtitle": "See why hundreds of clients trust MEX509 for their shipping needs.",
+      "items": {
+        "1": {
+          "quote": "Service is really fast. I shipped a laptop to my brother in Haiti and it arrived smoothly.",
+          "name": "Jean Michel",
+          "city": "Miami, FL"
+        },
+        "2": {
+          "quote": "The best shipping company from USA to Haiti. Very professional and my barrels always arrive on time.",
+          "name": "Sarah L.",
+          "city": "Orlando, FL"
+        },
+        "3": {
+          "quote": "I love how they respond on WhatsApp and tracking is very easy to use.",
+          "name": "Patrick D.",
+          "city": "Dominican Republic"
+        }
+      }
+    },
+    "faq": {
+      "title": "Common questions",
+      "subtitle": "Quick answers for new shippers.",
+      "items": {
+        "1": { "q": "Do I need an account to get a quote?", "a": "No. You can complete the quote form first." },
+        "2": { "q": "What happens after I submit a quote?", "a": "You bring your goods to Doral for weighing, then we invoice based on real weight and service." },
+        "3": { "q": "How long do air and ocean take?", "a": "Typical ranges are about 5-7 business days for air and 14-21 for ocean." },
+        "4": { "q": "Can you handle shopping purchases or door delivery?", "a": "Yes - we offer shopping assistance and local delivery options." },
+        "5": { "q": "What should I bring to drop-off?", "a": "Bring your packed items, any invoices/declarations, and valid ID." }
+      }
+    },
+    "trust": {
+      "title": "Stress-Free Delivery!",
+      "fastTitle": "Fast Turnaround",
+      "fastBody": "Average delivery timeframe of around 10 days to Haiti.",
+      "secureTitle": "100% Secure",
+      "secureBody": "Your items are logged, insured, and tracked every step of the way.",
+      "localTitle": "Local Delivery",
+      "localBody": "Convenient pickup locations and direct-to-door options available."
+    }
+  },
+  "Services": {
+    "capabilitiesTitle": "Capabilities",
+    "capabilitiesSub": "Pick the lane that fits your cargo - every option is backed by our Doral team and tracking tools.",
+    "startNow": "Start now",
+    "notSureTitle": "Not sure which lane fits?",
+    "notSureSub": "Request a quote - we will recommend air vs ocean and guide your intake at Doral.",
+    "startQuote": "Start your quote",
+    "swipeAllThree": "Swipe to see all three",
+    "catalog": {
+      "us-ht": {
+        "title": "Shipping USA to Haiti",
+        "description": "Fast, reliable air and ocean freight from our Miami warehouse directly to Port-au-Prince."
+      },
+      "dr-ht": {
+        "title": "Shipping DR to Haiti",
+        "description": "Cross-border logistics from the Dominican Republic to Haiti with safe handling."
+      },
+      "shopping": {
+        "title": "Online Shopping Assistance",
+        "description": "We can purchase from major stores on your behalf and ship to Haiti."
+      },
+      "local": {
+        "title": "Local Delivery",
+        "description": "Choose secure pickup points or door delivery in supported zones."
+      },
+      "warehouse": {
+        "title": "Warehouse Services",
+        "description": "Secure storage and consolidation to reduce freight costs."
+      }
+    },
+    "promo": {
+      "aria": "Service highlights",
+      "eyebrow": "Why teams choose MEX509",
+      "title": "Delivery, transport, and trusted cargo - same standards at every touchpoint."
+    },
+    "hero": {
+      "badge": "USA - DR - Haiti lanes",
+      "title1": "Freight and logistics",
+      "title2": "Built for speed and trust",
+      "subtitle": "Air, ocean, consolidation, and warehouse handling from our Doral hub with clear tracking.",
+      "chip1": "Express lanes - 5-7 day air",
+      "chip2": "Secure handling and updates",
+      "chip3": "1962 NW 82nd Ave, Doral, FL",
+      "ctaQuote": "Get a quote",
+      "ctaBox": "Pre-register a box",
+      "tagline": "Ship fast - Receive fast",
+      "intakeLabel": "Hub intake",
+      "intakeBody": "Miami - Container-ready cargo",
+      "track": "Track"
+    }
+  }
+}

@@ -5,6 +5,7 @@ import { requireAdminApiUser } from "@/lib/requireApiSession";
 import { pushStaffNotification, pushUserNotification } from "@/lib/pushAppNotification";
 import { sendExternalTrackingUpdateEmails } from "@/lib/sendNotificationEmails";
 import { getPortalSiteUrl } from "@/lib/siteUrl";
+import { canPerformStaffCapability } from "@/lib/staffAccess";
 
 const STATUSES = new Set(Object.values(ExternalTrackingStatus));
 
@@ -12,6 +13,9 @@ export async function PATCH(req: Request, ctx: { params: Promise<{ id: string }>
   try {
     const adminOrRes = await requireAdminApiUser();
     if (adminOrRes instanceof NextResponse) return adminOrRes;
+    if (!canPerformStaffCapability(adminOrRes, "tracking:external-review")) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
 
     const { id } = await ctx.params;
     const body = await req.json().catch(() => ({}));
@@ -51,15 +55,6 @@ export async function PATCH(req: Request, ctx: { params: Promise<{ id: string }>
           { status: 403 }
         );
       }
-      const taken = await prisma.clientExternalTracking.findFirst({
-        where: { linkedPackageId: pkg.id, NOT: { id: existing.id } },
-      });
-      if (taken) {
-        return NextResponse.json(
-          { error: "That MEX package is already linked to another external entry." },
-          { status: 409 }
-        );
-      }
       linkedPackageId = pkg.id;
     } else if (linkedRaw === null) linkedPackageId = null;
     else if (typeof linkedRaw === "string" && linkedRaw.trim()) {
@@ -75,15 +70,6 @@ export async function PATCH(req: Request, ctx: { params: Promise<{ id: string }>
         return NextResponse.json(
           { error: "That internal package belongs to a different client." },
           { status: 403 }
-        );
-      }
-      const taken = await prisma.clientExternalTracking.findFirst({
-        where: { linkedPackageId: lid, NOT: { id: existing.id } },
-      });
-      if (taken) {
-        return NextResponse.json(
-          { error: "That MEX package is already linked to another external entry." },
-          { status: 409 }
         );
       }
       linkedPackageId = lid;
@@ -106,7 +92,7 @@ export async function PATCH(req: Request, ctx: { params: Promise<{ id: string }>
     if (linkedPackageId !== undefined) {
       data.linkedPackageId = linkedPackageId;
       if (linkedPackageId !== null) {
-        data.status = ExternalTrackingStatus.LINKED;
+        data.status = ExternalTrackingStatus.PACKED_RECEIVED;
       }
     }
 

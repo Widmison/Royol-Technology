@@ -3,6 +3,7 @@ import type { Package, TrackingEvent, Invoice, ShipmentRequest } from "@prisma/c
 import { prisma } from "@/lib/prisma";
 import { requireClientApiUser } from "@/lib/requireApiSession";
 import { shouldOmitClientTrackingEvent, stripManualAdminTrackingSuffix } from "@/lib/trackingClientTimeline";
+import { shipmentRouteLabel } from "@/lib/shipmentRouteLabel";
 
 type PackageWithRelations = Package & {
   request: ShipmentRequest & { invoice: Invoice | null };
@@ -25,6 +26,7 @@ function serializePackageDetail(p: PackageWithRelations) {
     status: p.status,
     shippingMethod: p.request.shippingMethod,
     departure: p.request.departure,
+    destinationCountry: p.request.destinationCountry,
     invoice: p.request.invoice
       ? {
           id: p.request.invoice.id,
@@ -85,7 +87,7 @@ export async function GET(req: Request) {
       packages: packages.map((p) => ({
         id: p.id,
         updatedAt: p.updatedAt.toISOString(),
-        route: `${p.request.departure} → Haiti`,
+        route: shipmentRouteLabel(p.request.departure, p.request.destinationCountry),
         ...serializePackageDetail(p),
       })),
     });

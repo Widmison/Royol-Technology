@@ -6,6 +6,8 @@ import {
   ADMIN_SESSION_COOKIE,
   CLIENT_SESSION_COOKIE,
 } from "@/lib/authCookies";
+import { isAdminDashboardHost } from "@/lib/adminDashboardHost";
+import { looksLikePrismaUserId } from "@/lib/prismaUserId";
 
 /**
  * Paths that may be visited on the admin host *without* the `/admin` prefix
@@ -19,6 +21,8 @@ const ADMIN_SHORTCUT_PREFIXES = [
   "/shipments",
   "/invoices",
   "/clients",
+  "/staff",
+  "/complete-profile",
   "/settings",
   "/scan",
   "/search",
@@ -40,11 +44,6 @@ function nextWithPath(req: NextRequest, pathnameForHeader: string) {
   });
 }
 
-/** `admin.example.com` or `admin.portal.example.com` */
-function isAdminDashboardHost(host: string): boolean {
-  return host.startsWith("admin.") || host.startsWith("admin.portal.");
-}
-
 function envHostname(envName: string): string | null {
   const raw = process.env[envName]?.trim();
   if (!raw) return null;
@@ -56,9 +55,14 @@ function envHostname(envName: string): string | null {
   }
 }
 
-function hasSessionCookie(req: NextRequest, name: string): boolean {
-  const v = req.cookies.get(name)?.value;
-  return typeof v === "string" && v.trim().length > 0;
+function hasValidAdminSessionCookie(req: NextRequest): boolean {
+  const v = req.cookies.get(ADMIN_SESSION_COOKIE)?.value;
+  return typeof v === "string" && looksLikePrismaUserId(v);
+}
+
+function hasValidClientSessionCookie(req: NextRequest): boolean {
+  const v = req.cookies.get(CLIENT_SESSION_COOKIE)?.value;
+  return typeof v === "string" && looksLikePrismaUserId(v);
 }
 
 function adminLoginRedirectUrl(req: NextRequest): URL {
@@ -102,18 +106,24 @@ export default async function middleware(req: NextRequest) {
   const hostNoPort = hostname.split(":")[0] ?? hostname;
 
   const secret = process.env.AUTH_SECRET;
-  const jwtToken = secret
-    ? await getToken({
+  let jwtToken: JWT | null = null;
+  if (secret) {
+    try {
+      jwtToken = (await getToken({
         req,
         secret,
         secureCookie: process.env.NODE_ENV === "production",
-      })
-    : null;
-  const adminJwt = jwtToken as JWT | null;
-  const hasGoogleAdmin = !!adminJwt?.sub && adminJwt.role === "admin";
+      })) as JWT | null;
+    } catch {
+      jwtToken = null;
+    }
+  }
+  const adminJwt = jwtToken;
+  /** Legacy NextAuth JWT (if present); admin cookie is the primary session for staff. */
+  const hasJwtAdmin = !!adminJwt?.sub && adminJwt.role === "admin";
 
   function hasAdminAccess(): boolean {
-    return hasGoogleAdmin || hasSessionCookie(req, ADMIN_SESSION_COOKIE);
+    return hasJwtAdmin || hasValidAdminSessionCookie(req);
   }
 
   /** Skip host routing / auth for static assets (safe even when matcher hits file-like paths). */
@@ -145,7 +155,7 @@ export default async function middleware(req: NextRequest) {
   }
 
   if (portalHost && hostNoPort === portalHost && pathname === "/") {
-    const hasClient = hasSessionCookie(req, CLIENT_SESSION_COOKIE);
+    const hasClient = hasValidClientSessionCookie(req);
     return NextResponse.redirect(new URL(hasClient ? "/dashboard?tab=tracking" : "/login", req.url));
   }
 
@@ -156,7 +166,7 @@ export default async function middleware(req: NextRequest) {
   if (
     !isAdminDashboardHost(hostNoPort) &&
     (pathname === "/dashboard" || pathname.startsWith("/dashboard/")) &&
-    !hasSessionCookie(req, CLIENT_SESSION_COOKIE)
+    !hasValidClientSessionCookie(req)
   ) {
     return NextResponse.redirect(new URL("/login", req.url));
   }

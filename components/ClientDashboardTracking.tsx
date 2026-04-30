@@ -50,7 +50,7 @@ export default function ClientDashboardTracking() {
 
   useEffect(() => {
     void load();
-    const t = setInterval(() => void load(), 12_000);
+    const t = setInterval(() => void load(), 45_000);
     return () => clearInterval(t);
   }, [load]);
 

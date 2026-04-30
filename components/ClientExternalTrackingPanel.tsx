@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { AlertCircle, CheckCircle2, Loader2, Plus, ShoppingBag, Truck, X } from "lucide-react";
+import { externalTrackingStatusLabel } from "@/lib/externalTrackingStatusDisplay";
 
 type Entry = {
   id: string;
@@ -17,7 +18,7 @@ type Entry = {
 };
 
 function statusLabel(s: string) {
-  return s.replace(/_/g, " ");
+  return externalTrackingStatusLabel(s);
 }
 
 /** POST/GET JSON → list row (live carrier tracking isn’t shown here — only what you saved). */

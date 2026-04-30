@@ -1,0 +1,198 @@
+{
+  "Nav": {
+    "home": "Inicio",
+    "track": "Rastrear paquete",
+    "services": "Servicios",
+    "calc": "Calcular envio",
+    "login": "Acceso cliente",
+    "quote": "Solicitar cotizacion"
+  },
+  "Footer": {
+    "slogan": "Confiable. Rapido. Seguro.",
+    "slogan_ht": "Rapido y seguro. Entrega garantizada.",
+    "contact": "Contacto e informacion",
+    "addressLine1": "1962 NW 82nd Ave",
+    "addressLine2": "Doral, FL 33191",
+    "partner": "Invierte con nosotros (formulario Google)",
+    "partnerSub": "Asociate con MEX509: llena el formulario aqui.",
+    "servicePointsTitle": "Puntos de servicio",
+    "stMarcName": "MelschyElectronic's St Marc",
+    "stMarcAddress": "Rue Louverture, Saint-Marc",
+    "santiagoName": "Punto de recogida Villa Olimpica",
+    "santiagoAddress": "Villa Olimpica Manzana M Casa 8B, Republica Dominicana",
+    "santiagoPhone": "+1 809 407 5020",
+    "navHome": "Inicio",
+    "navReceipts": "Recibidos",
+    "navSent": "Enviados",
+    "navServicePoint": "Punto de servicio",
+    "rights": "Todos los derechos reservados.",
+    "cgu": "Condiciones de uso (CGU)",
+    "lastUpdated": "Ultima actualizacion: 01/04/2026",
+    "designedBy": "Diseno y desarrollo por",
+    "company": "MEX509 SHIPPING SERVICES"
+  },
+  "WhatsApp": {
+    "label": "WhatsApp",
+    "aria": "Hablar con soporte MEX509 por WhatsApp"
+  },
+  "Dashboard": {
+    "overview": {
+      "addressHelpCta": "Guia: direccion US para compras online"
+    },
+    "sidebar": {
+      "clientPortal": "Portal del cliente",
+      "tracking": "Rastreo en vivo",
+      "overview": "Resumen",
+      "newBox": "Pre-registrar caja",
+      "shipments": "Todos los envios",
+      "invoices": "Facturacion",
+      "external": "Agregar rastreo",
+      "info": "Informacion",
+      "pricing": "Precios y servicios",
+      "addressHelp": "Ayuda direccion US",
+      "profile": "Perfil",
+      "terms": "CGU / legales"
+    },
+    "referral": {
+      "title": "Tu codigo de referido",
+      "hint": "Compartelo. Lo ingresan al registrarse.",
+      "copyCode": "Copiar codigo",
+      "copyLink": "Copiar enlace de registro",
+      "copied": "Listo",
+      "shareText": "Envia a Haiti con MEX509. Codigo {code} : {link}",
+      "shareButton": "Compartir"
+    },
+    "addressTutorial": {
+      "title": "Como usar tu direccion US al comprar",
+      "intro": "En Amazon, Shein u otras tiendas, usa la direccion MEX509 en Miami tal como figura en tu perfil, con tu nombre y telefono para identificar el paquete.",
+      "cardTitle": "Formato para pegar al pagar",
+      "stepLabel": "Guia visual",
+      "altMain": "Entrega MEX509",
+      "altBox": "Marca MEX509",
+      "altTrusted": "Carga confiable"
+    },
+    "pricing": {
+      "visualsTitle": "Destacados del servicio",
+      "visualsSub": "Un vistazo rapido; abajo estan las tarifas completas."
+    }
+  },
+  "Home": {
+    "heroImageAlt": "Mensajero MEX509",
+    "heroTitleLine1": "Envia rapido,",
+    "heroTitleLine2": "recibe rapido!",
+    "heroSubtitle": "Logistica rapida y segura desde USA, RD y China hacia Haiti.",
+    "trackPlaceholder": "Ingresa numero de rastreo (ej: MEX1234)",
+    "trackButton": "Rastrear paquete",
+    "cards": {
+      "learnMore": "Ver mas",
+      "air": { "title": "Carga aerea", "body": "Entrega rapida en 5-7 dias para paquetes urgentes." },
+      "quote": { "title": "Enviar un paquete", "body": "Calcula precio y solicita recogida en linea.", "cta": "Solicitar cotizacion" },
+      "ocean": { "title": "Carga maritima", "body": "Opcion economica para carga pesada y grande." }
+    },
+    "groundIntroBold": "Carga terrestre y regional",
+    "groundIntro1": "tambien disponible -",
+    "browseServices": "ver todos los servicios",
+    "or": "o",
+    "startQuote": "iniciar cotizacion",
+    "how": {
+      "title": "Como funciona",
+      "subtitle": "Desde tu cotizacion hasta la entrega en Haiti - pasos simples y claros.",
+      "steps": {
+        "1": { "title": "Pre-registra en linea", "body": "Indica que envias, destino y metodo (aereo/maritimo/terrestre)." },
+        "2": { "title": "Entrega en Doral", "body": "Pesamos, verificamos y preparamos tu envio." },
+        "3": { "title": "Pagas y enviamos", "body": "Tras el pesaje recibes factura y luego sale tu carga." },
+        "4": { "title": "Rastrea hasta entrega", "body": "Usa tu ID de rastreo para ver estados hasta entrega." }
+      },
+      "ctaQuote": "Iniciar cotizacion",
+      "ctaLogin": "Ya eres cliente? Inicia sesion"
+    },
+    "visit": {
+      "title": "Visitanos en Doral",
+      "subtitle": "Atendemos sin cita para entregas y preguntas.",
+      "maps": "Abrir en Google Maps",
+      "cardTitle": "Recogida y horarios",
+      "cardBody": "Los horarios aereo/maritimo cambian por semana. Confirmamos todo tras tu cotizacion.",
+      "cardLink": "Ver detalles de servicio"
+    },
+    "testimonials": {
+      "title": "Lo que dicen nuestros clientes",
+      "subtitle": "Por que tantos clientes confian en MEX509.",
+      "items": {
+        "1": { "quote": "Servicio super rapido. Mi paquete llego sin problemas.", "name": "Jean Michel", "city": "Miami, FL" },
+        "2": { "quote": "Muy profesionales y puntuales. Recomendado.", "name": "Sarah L.", "city": "Orlando, FL" },
+        "3": { "quote": "Responden por WhatsApp y el rastreo es facil.", "name": "Patrick D.", "city": "Republica Dominicana" }
+      }
+    },
+    "faq": {
+      "title": "Preguntas comunes",
+      "subtitle": "Respuestas rapidas para nuevos clientes.",
+      "items": {
+        "1": { "q": "Necesito cuenta para cotizar?", "a": "No. Puedes cotizar primero." },
+        "2": { "q": "Que pasa despues de cotizar?", "a": "Llevas la carga a Doral para pesaje y facturacion." },
+        "3": { "q": "Cuanto tarda aereo y maritimo?", "a": "Normalmente 5-7 dias (aereo) y 14-21 (maritimo)." },
+        "4": { "q": "Ofrecen ayuda de compras y entrega local?", "a": "Si, esas opciones estan disponibles." },
+        "5": { "q": "Que debo llevar al drop-off?", "a": "Articulos empacados, documentos y una identificacion." }
+      }
+    },
+    "trust": {
+      "title": "Entrega sin estres!",
+      "fastTitle": "Rapidez",
+      "fastBody": "Tiempo promedio de entrega de unos 10 dias a Haiti.",
+      "secureTitle": "100% Seguro",
+      "secureBody": "Tus articulos se registran y rastrean en cada etapa.",
+      "localTitle": "Entrega local",
+      "localBody": "Puntos de retiro y opciones puerta a puerta."
+    }
+  },
+  "Services": {
+    "capabilitiesTitle": "Capacidades",
+    "capabilitiesSub": "Elige la ruta correcta para tu carga con soporte y rastreo.",
+    "startNow": "Empezar",
+    "notSureTitle": "No sabes que opcion elegir?",
+    "notSureSub": "Solicita cotizacion y te recomendamos la mejor opcion.",
+    "startQuote": "Iniciar cotizacion",
+    "swipeAllThree": "Desliza para ver las tres",
+    "catalog": {
+      "us-ht": {
+        "title": "Envios USA a Haiti",
+        "description": "Carga aerea y maritima confiable desde Miami hacia Puerto Principe."
+      },
+      "dr-ht": {
+        "title": "Envios RD a Haiti",
+        "description": "Logistica fronteriza RD-Haiti con manejo seguro."
+      },
+      "shopping": {
+        "title": "Asistencia de compras online",
+        "description": "Compramos por ti en tiendas principales y enviamos a Haiti."
+      },
+      "local": {
+        "title": "Entrega local",
+        "description": "Retiro seguro o entrega puerta a puerta segun zona."
+      },
+      "warehouse": {
+        "title": "Servicios de almacen",
+        "description": "Almacenaje y consolidacion para reducir costos de flete."
+      }
+    },
+    "promo": {
+      "aria": "Destacados de servicios",
+      "eyebrow": "Por que elegir MEX509",
+      "title": "Entrega, transporte y carga confiable - mismo estandar en todo el proceso."
+    },
+    "hero": {
+      "badge": "Rutas USA - RD - Haiti",
+      "title1": "Carga y logistica",
+      "title2": "Rapida y confiable",
+      "subtitle": "Aereo, maritimo, consolidacion y almacen desde nuestro hub en Doral.",
+      "chip1": "Express - aereo en 5-7 dias",
+      "chip2": "Manejo seguro y actualizaciones",
+      "chip3": "1962 NW 82nd Ave, Doral, FL",
+      "ctaQuote": "Solicitar cotizacion",
+      "ctaBox": "Pre-registrar caja",
+      "tagline": "Envia rapido - Recibe rapido",
+      "intakeLabel": "Recepcion hub",
+      "intakeBody": "Miami - Carga lista para contenedor",
+      "track": "Rastrear"
+    }
+  }
+}

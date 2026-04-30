@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 // Added Star and Quote to the lucide-react import
 import {
+  ArrowRight,
   Search,
   MapPin,
   Plane,
@@ -17,10 +18,17 @@ import {
   Truck,
   ClipboardList,
   CreditCard,
+  ShoppingCart,
+  MapPinned,
+  Warehouse,
 } from "lucide-react";
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import HomeJsonLd from "@/components/seo/HomeJsonLd";
 import { sharePreviewOgImage } from "@/lib/share-image";
+import ServicesHero from "@/components/services/ServicesHero";
+import HomeServicesCards from "@/components/home/HomeServicesCards";
+import { LOGISTICS_SERVICES, type LogisticsServiceId } from "@/lib/logistics-services";
 
 export const metadata: Metadata = {
   title: "Shipping USA, DR & China to Haiti",
@@ -40,7 +48,18 @@ export const metadata: Metadata = {
   },
 };
 
-export default function Home() {
+export default async function Home() {
+  const t = await getTranslations("Home");
+  const tServices = await getTranslations("Services");
+
+  const serviceIconMap: Record<LogisticsServiceId, React.ComponentType<{ className?: string }>> = {
+    "us-ht": Plane,
+    "dr-ht": Ship,
+    shopping: ShoppingCart,
+    local: MapPinned,
+    warehouse: Warehouse,
+  };
+
   return (
     <div className="flex flex-col min-h-screen">
       <HomeJsonLd />
@@ -54,7 +73,7 @@ export default function Home() {
             
             <Image 
               src="/hero-v2.jpg" 
-              alt="MEX509 Delivery Courier" 
+              alt={t("heroImageAlt")}
               width={220} 
               height={275} 
               className="w-full max-w-[140px] md:max-w-[180px] lg:max-w-[220px] object-contain drop-shadow-xl z-10"
@@ -64,11 +83,11 @@ export default function Home() {
 
           <div className="text-center w-full">
             <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-mex-blue tracking-tight mb-3 italic uppercase">
-              Voye Li Vit, <br className="block sm:hidden" />
-              <span className="text-mex-orange">Resevwa Li Vit!</span>
+              {t("heroTitleLine1")} <br className="block sm:hidden" />
+              <span className="text-mex-orange">{t("heroTitleLine2")}</span>
             </h1>
             <p className="text-sm md:text-base text-gray-600 mb-6 font-medium max-w-2xl mx-auto">
-              Sèvis rapid e sekirize. Livrezon garanti! Fast, secure, and headache-free delivery logistics from USA, DR, and China to Haiti.
+              {t("heroSubtitle")}
             </p>
 
             <form
@@ -84,7 +103,7 @@ export default function Home() {
                   name="id"
                   type="search"
                   autoComplete="off"
-                  placeholder="Enter tracking number (e.g., MEX1234)"
+                  placeholder={t("trackPlaceholder")}
                   className="w-full pl-11 pr-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-mex-orange focus:border-transparent text-gray-800 font-medium"
                 />
               </div>
@@ -92,7 +111,7 @@ export default function Home() {
                 type="submit"
                 className="w-full sm:w-auto bg-mex-blue text-white px-8 py-3 rounded-xl font-bold hover:bg-blue-900 transition-colors whitespace-nowrap flex items-center justify-center gap-2"
               >
-                Track package
+                {t("trackButton")}
               </button>
             </form>
           </div>
@@ -103,65 +122,85 @@ export default function Home() {
       {/* QUICK ACTIONS / SERVICES OVERVIEW (Your Custom Design) */}
       <section className="py-12 bg-white relative z-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 -mt-20">
-            
-            <div className="group bg-white rounded-3xl shadow-md hover:shadow-xl p-8 border border-gray-100 flex flex-col items-center text-center hover:-translate-y-2 transition-all duration-300">
-              <div className="bg-blue-50 group-hover:bg-mex-blue transition-colors duration-300 p-4 rounded-2xl mb-5">
-                <Plane className="h-8 w-8 text-mex-blue group-hover:text-white transition-colors duration-300" />
-              </div>
-              <h3 className="text-xl font-bold text-mex-dark mb-3">Air Freight</h3>
-              <p className="text-gray-500 text-sm mb-6 leading-relaxed">
-                Fast delivery in 5-7 days for urgent packages and documents.
-              </p>
-              <Link href="/services#air" className="mt-auto text-sm font-bold text-gray-400 group-hover:text-mex-blue transition-colors">
-                Learn more &rarr;
-              </Link>
-            </div>
-            
-            <div className="group bg-white rounded-3xl shadow-xl p-8 border-2 border-mex-orange/20 relative flex flex-col items-center text-center hover:-translate-y-2 transition-all duration-300 overflow-hidden md:-mt-4 md:mb-4">
-              <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-mex-orange to-orange-400"></div>
-              <div className="absolute top-0 right-0 w-32 h-32 bg-mex-orange/5 rounded-bl-full -z-10"></div>
-
-              <div className="bg-orange-50 group-hover:bg-mex-orange transition-colors duration-300 p-5 rounded-2xl mb-5">
-                <Package className="h-9 w-9 text-mex-orange group-hover:text-white transition-colors duration-300" />
-              </div>
-              <h3 className="text-2xl font-black text-mex-dark mb-3 tracking-tight">Send a Package</h3>
-              <p className="text-gray-600 text-sm mb-8 leading-relaxed">
-                Calculate price & request a pickup instantly using our smart online form.
-              </p>
-              <Link 
-                href="/quote" 
-                className="mt-auto w-full bg-mex-orange/10 group-hover:bg-mex-orange text-mex-orange group-hover:text-white py-3 px-6 rounded-xl font-bold transition-all duration-300"
-              >
-                Get a Quote Now
-              </Link>
-            </div>
-
-            <div className="group bg-white rounded-3xl shadow-md hover:shadow-xl p-8 border border-gray-100 flex flex-col items-center text-center hover:-translate-y-2 transition-all duration-300">
-              <div className="bg-blue-50 group-hover:bg-mex-blue transition-colors duration-300 p-4 rounded-2xl mb-5">
-                <Ship className="h-8 w-8 text-mex-blue group-hover:text-white transition-colors duration-300" />
-              </div>
-              <h3 className="text-xl font-bold text-mex-dark mb-3">Ocean Freight</h3>
-              <p className="text-gray-500 text-sm mb-6 leading-relaxed">
-                Cost-effective shipping for heavy barrels, appliances, and large cargo.
-              </p>
-              <Link href="/services#ocean" className="mt-auto text-sm font-bold text-gray-400 group-hover:text-mex-blue transition-colors">
-                Learn more &rarr;
-              </Link>
-            </div>
-
+          <div className="-mt-20">
+            <HomeServicesCards />
           </div>
           <p className="mt-10 max-w-2xl mx-auto text-center text-sm text-gray-600">
-            <span className="font-bold text-mex-dark">Ground &amp; regional freight</span> is available too —{" "}
+            <span className="font-bold text-mex-dark">{t("groundIntroBold")}</span> {t("groundIntro1")}{" "}
             <Link href="/services" className="font-bold text-mex-blue underline-offset-2 hover:underline">
-              browse all services
+              {t("browseServices")}
             </Link>{" "}
-            or{" "}
+            {t("or")}{" "}
             <Link href="/quote" className="font-bold text-mex-orange underline-offset-2 hover:underline">
-              start a quote
+              {t("startQuote")}
             </Link>
             .
           </p>
+        </div>
+      </section>
+
+      <section className="border-y border-gray-100 bg-white py-10 sm:py-14">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <ServicesHero />
+        </div>
+      </section>
+
+      <section className="bg-[#fafbfc] py-12 sm:py-16">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="mx-auto mb-10 max-w-3xl text-center">
+            <p className="text-[11px] font-black uppercase tracking-[0.2em] text-mex-blue/80">{tServices("hero.badge")}</p>
+            <h2 className="mt-2 text-3xl font-black uppercase italic tracking-tight text-mex-blue sm:text-4xl">
+              {tServices("capabilitiesTitle")}
+            </h2>
+            <p className="mt-4 text-sm font-medium leading-relaxed text-gray-600 sm:text-base">
+              {tServices("capabilitiesSub")}
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 lg:gap-8">
+            {LOGISTICS_SERVICES.map((service, index) => {
+              const Icon = serviceIconMap[service.id];
+              return (
+                <article
+                  key={service.id}
+                  className="group relative flex flex-col overflow-hidden rounded-3xl border border-gray-100 bg-white p-7 shadow-[0_2px_24px_-4px_rgba(15,23,42,0.08)] transition duration-300 hover:-translate-y-1 hover:border-mex-blue/15 hover:shadow-[0_24px_48px_-12px_rgba(29,59,142,0.15)]"
+                >
+                  <span
+                    className="absolute right-6 top-6 font-black tabular-nums text-5xl leading-none text-gray-100 transition group-hover:text-blue-50"
+                    aria-hidden
+                  >
+                    {String(index + 1).padStart(2, "0")}
+                  </span>
+                  <div className="relative mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-50 to-white shadow-inner ring-1 ring-mex-blue/10">
+                    <Icon className="h-7 w-7 text-mex-blue" />
+                  </div>
+                  <h3 className="relative text-xl font-black leading-snug text-mex-dark">{tServices(`catalog.${service.id}.title`)}</h3>
+                  <p className="relative mt-3 flex-grow text-sm font-medium leading-relaxed text-gray-600">
+                    {tServices(`catalog.${service.id}.description`)}
+                  </p>
+                  <div className="relative mt-6 border-t border-gray-50 pt-5">
+                    {service.external ? (
+                      <a
+                        href={service.actionHref}
+                        className="inline-flex items-center gap-2 font-black text-mex-orange transition hover:gap-3"
+                      >
+                        {tServices("startNow")}
+                        <ArrowRight className="h-5 w-5" strokeWidth={2.5} aria-hidden />
+                      </a>
+                    ) : (
+                      <Link
+                        href={service.actionHref}
+                        className="inline-flex items-center gap-2 font-black text-mex-orange transition hover:gap-3"
+                      >
+                        {tServices("startNow")}
+                        <ArrowRight className="h-5 w-5" strokeWidth={2.5} aria-hidden />
+                      </Link>
+                    )}
+                  </div>
+                </article>
+              );
+            })}
+          </div>
         </div>
       </section>
 
@@ -170,36 +209,36 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="mx-auto mb-12 max-w-2xl text-center">
             <h2 id="how-it-works-heading" className="text-3xl font-black italic uppercase text-mex-blue sm:text-4xl">
-              How it works
+              {t("how.title")}
             </h2>
             <p className="mt-3 text-sm font-medium text-gray-600 sm:text-base">
-              From your first quote to delivery in Haiti — simple steps, clear expectations.
+              {t("how.subtitle")}
             </p>
           </div>
           <ol className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
             {[
               {
                 step: "1",
-                title: "Pre-register online",
-                body: "Tell us what you’re shipping, where it’s going, and how you want it sent (air, ocean, or ground).",
+                title: t("how.steps.1.title"),
+                body: t("how.steps.1.body"),
                 icon: ClipboardList,
               },
               {
                 step: "2",
-                title: "Drop off in Doral",
-                body: "Bring your packages to our Doral counter. We weigh, verify, and prepare your shipment.",
+                title: t("how.steps.2.title"),
+                body: t("how.steps.2.body"),
                 icon: MapPin,
               },
               {
                 step: "3",
-                title: "Pay & we ship",
-                body: "After weighing you get a clear invoice. Once paid, your cargo moves on the next available leg.",
+                title: t("how.steps.3.title"),
+                body: t("how.steps.3.body"),
                 icon: CreditCard,
               },
               {
                 step: "4",
-                title: "Track to delivery",
-                body: "Use your tracking ID anytime for status updates until your recipient gets the package.",
+                title: t("how.steps.4.title"),
+                body: t("how.steps.4.body"),
                 icon: Package,
               },
             ].map(({ step, title, body, icon: Icon }) => (
@@ -221,13 +260,13 @@ export default function Home() {
               href="/quote"
               className="inline-flex items-center justify-center rounded-full bg-mex-orange px-8 py-3 text-sm font-bold text-white shadow-lg shadow-orange-500/25 transition hover:bg-orange-700"
             >
-              Start your quote
+              {t("how.ctaQuote")}
             </Link>
             <Link
               href="/login"
               className="text-sm font-bold text-mex-blue underline-offset-4 hover:underline"
             >
-              Already a customer? Sign in
+              {t("how.ctaLogin")}
             </Link>
           </div>
         </div>
@@ -239,15 +278,15 @@ export default function Home() {
           <div className="flex flex-col gap-10 lg:flex-row lg:items-center lg:justify-between">
             <div className="max-w-xl">
               <h2 id="visit-heading" className="text-2xl font-black italic uppercase text-mex-dark sm:text-3xl">
-                Visit us in Doral
+                {t("visit.title")}
               </h2>
               <p className="mt-3 text-sm font-medium text-gray-600 sm:text-base">
-                Walk-ins welcome for drop-off and questions. Call ahead if you’re bringing oversized cargo.
+                {t("visit.subtitle")}
               </p>
               <address className="mt-6 not-italic text-base font-bold text-mex-dark">
                 1962 NW 82nd Ave
                 <br />
-                Doral, FL 33126
+                Doral, FL 33191
               </address>
               <div className="mt-6 flex flex-col gap-3 text-sm font-semibold text-gray-700 sm:flex-row sm:flex-wrap sm:items-center sm:gap-6">
                 <a
@@ -266,24 +305,23 @@ export default function Home() {
                 </a>
               </div>
               <a
-                href="https://www.google.com/maps/search/?api=1&query=1962+NW+82nd+Ave+Doral+FL+33126"
+                href="https://www.google.com/maps/search/?api=1&query=1962+NW+82nd+Ave+Doral+FL+33191"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="mt-6 inline-flex items-center gap-2 rounded-xl border-2 border-mex-blue px-5 py-3 text-sm font-bold text-mex-blue transition hover:bg-mex-blue hover:text-white"
               >
-                Open in Google Maps
+                {t("visit.maps")}
                 <ExternalLink className="h-4 w-4" aria-hidden />
               </a>
             </div>
             <div className="flex flex-1 flex-col items-start rounded-2xl border border-gray-100 bg-mex-gray/50 p-6 sm:p-8 lg:max-w-md">
               <Truck className="mb-3 h-10 w-10 text-mex-orange" aria-hidden />
-              <h3 className="text-lg font-black text-mex-dark">Pickup &amp; cutoffs</h3>
+              <h3 className="text-lg font-black text-mex-dark">{t("visit.cardTitle")}</h3>
               <p className="mt-2 text-sm leading-relaxed text-gray-600">
-                Air and ocean schedules vary by week. After you submit a quote, our team confirms timing, required
-                paperwork, and anything special about your cargo — so there are no surprises at the counter.
+                {t("visit.cardBody")}
               </p>
               <Link href="/services" className="mt-4 text-sm font-bold text-mex-orange hover:underline">
-                Read service details →
+                {t("visit.cardLink")} →
               </Link>
             </div>
           </div>
@@ -296,8 +334,8 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-black italic text-white uppercase mb-4">What Our Clients Say</h2>
-            <p className="text-blue-200 font-medium max-w-2xl mx-auto">Don't just take our word for it. See why hundreds of clients trust MEX509 for their shipping needs.</p>
+            <h2 className="text-3xl md:text-4xl font-black italic text-white uppercase mb-4">{t("testimonials.title")}</h2>
+            <p className="text-blue-200 font-medium max-w-2xl mx-auto">{t("testimonials.subtitle")}</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -307,10 +345,10 @@ export default function Home() {
                 {[...Array(5)].map((_, i) => (<Star key={i} className="h-5 w-5 fill-yellow-400 text-yellow-400" />))}
               </div>
               <p className="text-gray-600 mb-6 relative z-10 italic">
-                "Sèvis la rapid tout bon! Mwen voye yon laptop pou frè m Ayiti, li jwenn li san grate tèt. Mèsi MEX509!"
+                {t("testimonials.items.1.quote")}
               </p>
-              <div className="font-bold text-mex-dark">- Jean Michel</div>
-              <div className="text-xs text-gray-400">Miami, FL</div>
+              <div className="font-bold text-mex-dark">- {t("testimonials.items.1.name")}</div>
+              <div className="text-xs text-gray-400">{t("testimonials.items.1.city")}</div>
             </div>
 
             <div className="bg-white rounded-2xl p-8 shadow-xl relative transform md:-translate-y-4">
@@ -319,10 +357,10 @@ export default function Home() {
                 {[...Array(5)].map((_, i) => (<Star key={i} className="h-5 w-5 fill-yellow-400 text-yellow-400" />))}
               </div>
               <p className="text-gray-600 mb-6 relative z-10 italic">
-                "The best shipping company from USA to Haiti. Very professional and my barrels always arrive exactly on time. Highly recommended!"
+                {t("testimonials.items.2.quote")}
               </p>
-              <div className="font-bold text-mex-dark">- Sarah L.</div>
-              <div className="text-xs text-gray-400">Orlando, FL</div>
+              <div className="font-bold text-mex-dark">- {t("testimonials.items.2.name")}</div>
+              <div className="text-xs text-gray-400">{t("testimonials.items.2.city")}</div>
             </div>
 
             <div className="bg-white rounded-2xl p-8 shadow-xl relative">
@@ -331,10 +369,10 @@ export default function Home() {
                 {[...Array(5)].map((_, i) => (<Star key={i} className="h-5 w-5 fill-yellow-400 text-yellow-400" />))}
               </div>
               <p className="text-gray-600 mb-6 relative z-10 italic">
-                "Mwen renmen kòman yo toujou reponn sou WhatsApp. Tracking sistèm lan vrèman fasil pou itilize pou wè kote pakè a ye."
+                {t("testimonials.items.3.quote")}
               </p>
-              <div className="font-bold text-mex-dark">- Patrick D.</div>
-              <div className="text-xs text-gray-400">Dominican Republic</div>
+              <div className="font-bold text-mex-dark">- {t("testimonials.items.3.name")}</div>
+              <div className="text-xs text-gray-400">{t("testimonials.items.3.city")}</div>
             </div>
           </div>
 
@@ -345,32 +383,32 @@ export default function Home() {
       <section className="border-t border-gray-100 bg-white py-16 sm:py-20" aria-labelledby="faq-heading">
         <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
           <h2 id="faq-heading" className="text-center text-3xl font-black italic uppercase text-mex-blue sm:text-4xl">
-            Common questions
+            {t("faq.title")}
           </h2>
           <p className="mx-auto mt-3 max-w-xl text-center text-sm text-gray-600">
-            Quick answers for new shippers. For specifics on your box, we’re happy to help by phone or email.
+            {t("faq.subtitle")}
           </p>
           <div className="mt-10 space-y-3">
             {[
               {
-                q: "Do I need an account to get a quote?",
-                a: "No. You can complete the quote form first. Creating an account is useful to save addresses, see invoices, and track everything in one place.",
+                q: t("faq.items.1.q"),
+                a: t("faq.items.1.a"),
               },
               {
-                q: "What happens after I submit a quote?",
-                a: "You’ll bring your goods to our Doral location for weighing. We then invoice you based on actual weight/volume and service — you pay before we release the shipment into transit.",
+                q: t("faq.items.2.q"),
+                a: t("faq.items.2.a"),
               },
               {
-                q: "How long do air and ocean take?",
-                a: "Typical ranges are about 5–7 business days for air and about 14–21 for ocean, depending on consolidation and customs. We’ll confirm a realistic window for your lane when you check in.",
+                q: t("faq.items.3.q"),
+                a: t("faq.items.3.a"),
               },
               {
-                q: "Can you handle shopping purchases or door delivery?",
-                a: "Yes — we offer shopping assistance and local delivery options as part of our service lineup. See the Services page for how each product works.",
+                q: t("faq.items.4.q"),
+                a: t("faq.items.4.a"),
               },
               {
-                q: "What should I bring to drop-off?",
-                a: "Your packed items, any invoices or declarations you have, and a valid ID. If you’re unsure what’s allowed, contact us before you ship so we can advise.",
+                q: t("faq.items.5.q"),
+                a: t("faq.items.5.a"),
               },
             ].map((item) => (
               <details
@@ -390,22 +428,22 @@ export default function Home() {
       {/* WHY CHOOSE US / TRUST BADGES */}
       <section className="py-16 bg-gray-50 border-t border-gray-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl font-black italic text-mex-dark mb-12 uppercase">Livrezon San Grate Tèt!</h2>
+          <h2 className="text-3xl font-black italic text-mex-dark mb-12 uppercase">{t("trust.title")}</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="flex flex-col items-center">
               <Clock className="h-12 w-12 text-mex-orange mb-4" />
-              <h4 className="font-bold text-lg mb-2 text-mex-dark">Fast Turnaround</h4>
-              <p className="text-gray-500 text-sm">Average delivery timeframe of just 10 days straight to Haiti.</p>
+              <h4 className="font-bold text-lg mb-2 text-mex-dark">{t("trust.fastTitle")}</h4>
+              <p className="text-gray-500 text-sm">{t("trust.fastBody")}</p>
             </div>
             <div className="flex flex-col items-center">
               <ShieldCheck className="h-12 w-12 text-mex-orange mb-4" />
-              <h4 className="font-bold text-lg mb-2 text-mex-dark">100% Secure</h4>
-              <p className="text-gray-500 text-sm">Your items are logged, insured, and tracked every step of the way.</p>
+              <h4 className="font-bold text-lg mb-2 text-mex-dark">{t("trust.secureTitle")}</h4>
+              <p className="text-gray-500 text-sm">{t("trust.secureBody")}</p>
             </div>
             <div className="flex flex-col items-center">
               <MapPin className="h-12 w-12 text-mex-orange mb-4" />
-              <h4 className="font-bold text-lg mb-2 text-mex-dark">Local Delivery</h4>
-              <p className="text-gray-500 text-sm">Convenient pickup locations and direct-to-door options available.</p>
+              <h4 className="font-bold text-lg mb-2 text-mex-dark">{t("trust.localTitle")}</h4>
+              <p className="text-gray-500 text-sm">{t("trust.localBody")}</p>
             </div>
           </div>
         </div>

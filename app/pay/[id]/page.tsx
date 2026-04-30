@@ -1,9 +1,11 @@
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
+import Image from "next/image";
 import BrandLogo from "@/components/BrandLogo";
 import ClientTrackingIdLink from "@/components/ClientTrackingIdLink";
-import { CheckCircle, CreditCard, Receipt, MapPin, Package, ShieldCheck } from "lucide-react";
-import { createInvoicePaymentToken } from "@/lib/payToken";
+import { Banknote, CheckCircle, Receipt, MapPin, Package, ShieldCheck, Smartphone } from "lucide-react";
+import { MOBILE_MONEY_QR } from "@/lib/paymentPublicConfig";
+import { shipmentRouteLabel } from "@/lib/shipmentRouteLabel";
 
 export const dynamic = "force-dynamic";
 
@@ -28,14 +30,6 @@ export default async function ClientPaymentPage({ params }: { params: Promise<{ 
   const isPaid = invoice.status === "PAID";
   const trackingNumber = invoice.request.package?.trackingId;
 
-  let payToken = "";
-  try {
-    payToken = createInvoicePaymentToken(invoice.id);
-  } catch {
-    payToken = "";
-  }
-  const payUnavailable = process.env.NODE_ENV === "production" && !payToken;
-
   return (
     <div className="min-h-dvh bg-gray-50 flex flex-col items-center py-8 sm:py-12 px-3 sm:px-6 lg:px-8 font-sans">
       
@@ -44,7 +38,7 @@ export default async function ClientPaymentPage({ params }: { params: Promise<{ 
         <BrandLogo href="/" width={240} height={80} alt="MEX509" className="h-12 w-auto object-left" prefetch={false} />
       </div>
 
-      <div className="bg-white rounded-3xl shadow-2xl border border-gray-100 w-full max-w-lg overflow-hidden">
+      <div className="bg-white rounded-3xl shadow-2xl border border-gray-100 w-full max-w-xl overflow-hidden">
         
         {/* DYNAMIC HEADER */}
         <div className={`p-8 text-center ${isPaid ? 'bg-green-600' : 'bg-mex-dark'} text-white relative overflow-hidden`}>
@@ -80,7 +74,7 @@ export default async function ClientPaymentPage({ params }: { params: Promise<{ 
                 />
               </div>
               <p className="text-sm text-amber-900/80 mt-3 flex items-center justify-center gap-1 font-medium">
-                <ShieldCheck size={16} /> Pay below to clear your invoice; you can already use this ID on /track.
+                <ShieldCheck size={16} /> Send payment using the options below; our team will mark your invoice paid after we verify funds. Track this ID anytime on /track.
               </p>
             </div>
           )}
@@ -104,9 +98,11 @@ export default async function ClientPaymentPage({ params }: { params: Promise<{ 
                     ? "NatCash"
                     : invoice.paidVia === "MONCASH"
                       ? "MonCash"
-                      : invoice.paidVia === "CARD"
-                        ? "Card / online"
-                        : invoice.paidVia}
+                      : invoice.paidVia === "CASH"
+                        ? "Cash (office)"
+                        : invoice.paidVia === "CARD"
+                          ? "Card / online"
+                          : invoice.paidVia}
                 </p>
               )}
             </div>
@@ -116,7 +112,9 @@ export default async function ClientPaymentPage({ params }: { params: Promise<{ 
           <div className="bg-gray-50 p-6 rounded-2xl border border-gray-100 space-y-4">
             <div className="flex justify-between items-center border-b border-gray-200 pb-4">
               <span className="text-gray-500 font-bold flex items-center gap-2"><MapPin size={18}/> Route</span>
-              <span className="font-black text-mex-dark">{invoice.request.departure} &rarr; Haiti</span>
+              <span className="font-black text-mex-dark">
+                {shipmentRouteLabel(invoice.request.departure, invoice.request.destinationCountry)}
+              </span>
             </div>
             <div className="flex justify-between items-center border-b border-gray-200 pb-4">
               <span className="text-gray-500 font-bold flex items-center gap-2"><Package size={18}/> Weight</span>
@@ -128,55 +126,92 @@ export default async function ClientPaymentPage({ params }: { params: Promise<{ 
             </div>
           </div>
 
-          {/* IF UNPAID: SHOW PAYMENT BUTTON */}
+          {/* IF UNPAID: QR + instructions only — staff records payment in Admin → Invoices */}
           {!isPaid && (
-            <div className="space-y-4 pt-4">
-              {payUnavailable && (
-                <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-center text-sm font-bold text-red-700">
-                  Payments are temporarily unavailable (missing server configuration). Contact support.
-                </div>
-              )}
-              <p className="text-center text-sm font-bold text-gray-600">Choose how you pay</p>
-              <div className="grid gap-3">
-                <form action="/api/pay" method="POST">
-                  <input type="hidden" name="invoiceId" value={invoice.id} />
-                  <input type="hidden" name="payToken" value={payToken} />
-                  <input type="hidden" name="paidVia" value="CARD" />
-                  <button
-                    type="submit"
-                    disabled={payUnavailable}
-                    className="flex w-full items-center justify-center gap-3 rounded-2xl bg-mex-orange px-8 py-4 text-lg font-black text-white shadow-lg shadow-orange-500/30 transition-all hover:bg-orange-700 disabled:pointer-events-none disabled:opacity-50"
-                  >
-                    <CreditCard size={24} /> Card / online (simulated)
-                  </button>
-                </form>
-                <form action="/api/pay" method="POST">
-                  <input type="hidden" name="invoiceId" value={invoice.id} />
-                  <input type="hidden" name="payToken" value={payToken} />
-                  <input type="hidden" name="paidVia" value="NATCASH" />
-                  <button
-                    type="submit"
-                    disabled={payUnavailable}
-                    className="flex w-full items-center justify-center gap-3 rounded-2xl border-2 border-emerald-600 bg-emerald-50 px-8 py-4 text-lg font-black text-emerald-900 transition-all hover:bg-emerald-100 disabled:pointer-events-none disabled:opacity-50"
-                  >
-                    NatCash
-                  </button>
-                </form>
-                <form action="/api/pay" method="POST">
-                  <input type="hidden" name="invoiceId" value={invoice.id} />
-                  <input type="hidden" name="payToken" value={payToken} />
-                  <input type="hidden" name="paidVia" value="MONCASH" />
-                  <button
-                    type="submit"
-                    disabled={payUnavailable}
-                    className="flex w-full items-center justify-center gap-3 rounded-2xl border-2 border-sky-600 bg-sky-50 px-8 py-4 text-lg font-black text-sky-900 transition-all hover:bg-sky-100 disabled:pointer-events-none disabled:opacity-50"
-                  >
-                    MonCash
-                  </button>
-                </form>
+            <div className="space-y-6 pt-4">
+              <div className="rounded-2xl border border-blue-100 bg-blue-50/90 px-4 py-3 text-sm text-mex-dark">
+                <p className="font-black">How payment works</p>
+                <p className="mt-1 font-medium leading-relaxed text-gray-700">
+                  Use MonCash, NatCash, or cash below.{" "}
+                  <strong>MEX509 staff verifies your payment</strong> and marks this invoice paid in our system — you cannot
+                  self-confirm here. Card payments may be added later.
+                </p>
+                <p className="mt-2 text-xs font-medium text-gray-600">
+                  Questions? Email{" "}
+                  <a href="mailto:info@mex509.com" className="font-bold text-mex-blue underline">
+                    info@mex509.com
+                  </a>{" "}
+                  with this page link or invoice ID.
+                </p>
               </div>
-              <p className="flex items-center justify-center gap-1 text-center text-xs font-medium text-gray-400">
-                <ShieldCheck size={14} /> All options mark this invoice paid in the portal (demo — confirm funds offline for mobile money).
+
+              <div>
+                <p className="text-center text-sm font-black uppercase tracking-wide text-gray-500">Pay this invoice</p>
+                <p className="mt-1 text-center text-xs font-medium text-gray-400">
+                  Scan the QR or send <span className="font-bold text-mex-dark">${invoice.totalAmount.toFixed(2)} USD</span>{" "}
+                  to the account shown. Include your name so we can match your payment.
+                </p>
+              </div>
+
+              {/* MonCash */}
+              <div className="rounded-2xl border-2 border-sky-200 bg-sky-50/60 p-5 space-y-4">
+                <div className="flex items-center gap-2 text-sky-900">
+                  <Smartphone className="shrink-0" size={22} />
+                  <span className="text-lg font-black">{MOBILE_MONEY_QR.moncash.label}</span>
+                </div>
+                <div className="relative mx-auto aspect-square w-full max-w-[240px] overflow-hidden rounded-xl border border-white bg-white shadow-inner">
+                  <Image
+                    src={MOBILE_MONEY_QR.moncash.imageSrc}
+                    alt="MonCash QR code"
+                    fill
+                    sizes="240px"
+                    className="object-contain p-2"
+                    priority
+                  />
+                </div>
+                <div className="text-center text-sm font-semibold text-sky-950">
+                  <p>{MOBILE_MONEY_QR.moncash.recipient}</p>
+                  <p className="mt-1 font-mono text-base font-black tracking-wide">{MOBILE_MONEY_QR.moncash.phoneDisplay}</p>
+                </div>
+              </div>
+
+              {/* NatCash */}
+              <div className="rounded-2xl border-2 border-emerald-200 bg-emerald-50/60 p-5 space-y-4">
+                <div className="flex items-center gap-2 text-emerald-950">
+                  <Smartphone className="shrink-0" size={22} />
+                  <span className="text-lg font-black">{MOBILE_MONEY_QR.natcash.label}</span>
+                </div>
+                <div className="relative mx-auto aspect-square w-full max-w-[240px] overflow-hidden rounded-xl border border-white bg-white shadow-inner">
+                  <Image
+                    src={MOBILE_MONEY_QR.natcash.imageSrc}
+                    alt="NatCash QR code"
+                    fill
+                    sizes="240px"
+                    className="object-contain p-2"
+                  />
+                </div>
+                <div className="text-center text-sm font-semibold text-emerald-950">
+                  <p>{MOBILE_MONEY_QR.natcash.recipient}</p>
+                  <p className="mt-1 font-mono text-base font-black tracking-wide">{MOBILE_MONEY_QR.natcash.phoneDisplay}</p>
+                </div>
+              </div>
+
+              {/* Cash */}
+              <div className="rounded-2xl border-2 border-amber-200 bg-amber-50/80 p-5 space-y-3">
+                <div className="flex items-center gap-2 text-amber-950">
+                  <Banknote className="shrink-0" size={22} />
+                  <span className="text-lg font-black">Cash at MEX509</span>
+                </div>
+                <p className="text-sm font-medium leading-relaxed text-amber-950/90">
+                  Pay in person at our counter (e.g. Doral warehouse). Reference:{" "}
+                  <span className="font-mono font-black text-amber-950">{invoice.id.slice(0, 8)}…</span> Staff records payment on
+                  their dashboard after receiving cash.
+                </p>
+              </div>
+
+              <p className="flex items-start justify-center gap-2 text-center text-xs font-medium leading-snug text-gray-500">
+                <ShieldCheck size={14} className="mt-0.5 shrink-0" />
+                You will receive an email and portal notification when your invoice is marked paid.
               </p>
             </div>
           )}

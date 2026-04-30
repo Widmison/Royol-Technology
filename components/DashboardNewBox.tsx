@@ -1,8 +1,18 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Package, MapPin, CheckCircle, ArrowRight } from "lucide-react";
+
+/** USA intake sites (lanes to Haiti). */
+const USA_DROPOFFS = ["Miami Warehouse", "Orlando Warehouse", "Atlanta Warehouse"] as const;
+/** Dominican Republic intake sites (lanes within DR). */
+const DR_DROPOFFS = [
+  "Santo Domingo Warehouse",
+  "Santiago Warehouse",
+  "Puerto Plata Warehouse",
+  "La Romana Warehouse",
+] as const;
 
 export default function DashboardNewBox({ user }: { user: any }) {
   const router = useRouter();
@@ -10,8 +20,18 @@ export default function DashboardNewBox({ user }: { user: any }) {
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // We pre-fill their info so they only have to select the package details!
-  const [departure, setDeparture] = useState("Miami Warehouse");
+  const [destinationCountry, setDestinationCountry] = useState<"HT" | "DO">("HT");
+
+  const departureOptions = useMemo(
+    () => (destinationCountry === "DO" ? [...DR_DROPOFFS] : [...USA_DROPOFFS]),
+    [destinationCountry]
+  );
+
+  const [departure, setDeparture] = useState<string>(USA_DROPOFFS[0]);
+
+  useEffect(() => {
+    setDeparture(departureOptions[0] ?? USA_DROPOFFS[0]);
+  }, [departureOptions]);
   const [category, setCategory] = useState("Standard Box");
   const [description, setDescription] = useState("");
 
@@ -29,6 +49,7 @@ export default function DashboardNewBox({ user }: { user: any }) {
           lastName: user.lastName,
           phone: user.phone || "Not Provided",
           departure,
+          destinationCountry,
           category,
           description,
         }),
@@ -87,14 +108,31 @@ export default function DashboardNewBox({ user }: { user: any }) {
         )}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <label className="block text-sm font-bold text-gray-700 mb-2 flex items-center gap-2"><MapPin size={16}/> Drop-off Location</label>
-            <select value={departure} onChange={(e) => setDeparture(e.target.value)} className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-mex-blue outline-none font-medium">
-              <option>Miami Warehouse</option>
-              <option>Orlando Warehouse</option>
-              <option>Atlanta Warehouse</option>
+            <label className="block text-sm font-bold text-gray-700 mb-2 flex items-center gap-2"><MapPin size={16}/> Delivery country</label>
+            <select
+              value={destinationCountry}
+              onChange={(e) => setDestinationCountry(e.target.value as "HT" | "DO")}
+              className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-mex-blue outline-none font-medium"
+            >
+              <option value="HT">Haiti</option>
+              <option value="DO">Dominican Republic</option>
             </select>
           </div>
           <div>
+            <label className="block text-sm font-bold text-gray-700 mb-2 flex items-center gap-2"><MapPin size={16}/> Drop-off location</label>
+            <select
+              value={departure}
+              onChange={(e) => setDeparture(e.target.value)}
+              className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-mex-blue outline-none font-medium"
+            >
+              {departureOptions.map((opt) => (
+                <option key={opt} value={opt}>
+                  {opt}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="md:col-span-2">
             <label className="block text-sm font-bold text-gray-700 mb-2 flex items-center gap-2"><Package size={16}/> Item Category</label>
             <select value={category} onChange={(e) => setCategory(e.target.value)} className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-mex-blue outline-none font-medium">
               <option>Standard Box</option>

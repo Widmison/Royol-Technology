@@ -7,8 +7,7 @@ export default function AdminAccessDeniedPage() {
       <div className="relative z-10 mx-auto w-full max-w-md text-center">
         <h1 className="text-2xl font-black tracking-tight text-mex-dark sm:text-3xl">Access denied</h1>
         <p className="mx-auto mt-3 max-w-sm text-sm font-medium text-gray-600">
-          Your Google account is not on the Mex509 admin allowlist. Only approved staff emails can use the
-          admin dashboard.
+          You don&apos;t have access to the admin dashboard. Only approved staff accounts can sign in.
         </p>
         <Link
           href="/admin/login"

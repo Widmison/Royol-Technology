@@ -1,12 +1,23 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Lock, Mail, ArrowRight, ArrowLeft, User as UserIcon, MapPin, KeyRound, Phone } from "lucide-react";
 import { signupPasswordRuleChecks } from "@/lib/passwordPolicy";
 import SignupPasswordHints from "@/components/SignupPasswordHints";
 
 type AuthMode = "login" | "signup" | "verify" | "forgot" | "reset";
+
+function RefFromQuerySync({ onRef }: { onRef: (code: string) => void }) {
+  const search = useSearchParams();
+  useEffect(() => {
+    const raw = search.get("ref")?.trim();
+    if (!raw) return;
+    const code = raw.toUpperCase().replace(/[^A-Z0-9]/g, "");
+    if (code.length >= 5) onRef(code);
+  }, [search, onRef]);
+  return null;
+}
 
 export default function LoginPage() {
   const router = useRouter();
@@ -23,6 +34,7 @@ export default function LoginPage() {
   const [city, setCity] = useState("");
   const [state, setState] = useState("");
   const [zipCode, setZipCode] = useState("");
+  const [referredBy, setReferredBy] = useState("");
 
   const [otpCode, setOtpCode] = useState("");
   const [devVerificationCode, setDevVerificationCode] = useState<string | null>(null);
@@ -76,6 +88,7 @@ export default function LoginPage() {
           city,
           state,
           zipCode,
+          referredBy,
           code: otpCode,
         }),
       });
@@ -252,6 +265,9 @@ export default function LoginPage() {
 
   return (
     <div className="relative min-h-screen overflow-x-hidden bg-gray-50 px-4 py-10 font-sans sm:py-14">
+      <Suspense fallback={null}>
+        <RefFromQuerySync onRef={setReferredBy} />
+      </Suspense>
       <div className="pointer-events-none absolute left-[-10%] top-[-10%] h-[40%] w-[40%] rounded-full bg-mex-blue/10 blur-3xl" />
       <div className="pointer-events-none absolute bottom-[-10%] right-[-10%] h-[40%] w-[40%] rounded-full bg-mex-orange/10 blur-3xl" />
 
@@ -586,9 +602,24 @@ export default function LoginPage() {
                             value={zipCode}
                             onChange={(e) => setZipCode(e.target.value)}
                             className="w-full rounded-xl border border-gray-300 px-4 py-3 text-sm font-medium text-gray-700 outline-none focus:ring-2 focus:ring-mex-blue"
-                            placeholder="33101"
+                            placeholder="33191"
                           />
                         </div>
+                      </div>
+                      <div>
+                        <label className="mb-2 block text-sm font-bold text-gray-700">
+                          Referral Code (optional)
+                        </label>
+                        <input
+                          type="text"
+                          value={referredBy}
+                          onChange={(e) => setReferredBy(e.target.value.toUpperCase())}
+                          className="w-full rounded-xl border border-gray-300 px-4 py-3 text-sm font-medium uppercase tracking-wide text-gray-700 outline-none focus:ring-2 focus:ring-mex-blue"
+                          placeholder="MEXXXXXXX"
+                        />
+                        <p className="mt-1 text-xs font-medium text-gray-500">
+                          If someone invited you, enter their client referral code.
+                        </p>
                       </div>
                     </div>
                   )}

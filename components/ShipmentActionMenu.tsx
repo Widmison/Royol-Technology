@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ScanLine, ScanBarcode, CheckCircle, Edit2, X, Save } from "lucide-react";
 import AdminPrintDocumentLinks from "@/components/admin/AdminPrintDocumentLinks";
+import AdminDangerDeleteButton from "@/components/admin/AdminDangerDeleteButton";
 import { ALL_ADMIN_SCAN_STATUS_OPTIONS, optionForStatus } from "@/lib/adminTrackingStatusOptions";
 
 const LOCATION_PRESETS = [
@@ -25,9 +26,10 @@ const CUSTOM_KEY = "__custom__";
 
 type PkgShape = {
   requestId: string;
+  id: string;
   trackingId: string;
   status: string;
-  events?: { location: string; description: string | null; date: Date; status: string }[];
+  events?: { id: string; location: string; description: string | null; date: Date; status: string }[];
 };
 
 export default function ShipmentActionMenu({ pkg }: { pkg: PkgShape }) {
@@ -138,6 +140,21 @@ export default function ShipmentActionMenu({ pkg }: { pkg: PkgShape }) {
     <div className="relative flex w-full flex-wrap items-center justify-end gap-2 md:w-auto">
       <AdminPrintDocumentLinks requestId={pkg.requestId} layout="row" />
       {ScanButton}
+      <AdminDangerDeleteButton
+        endpoint={`/api/admin/packages/${pkg.id}`}
+        title="Delete this package?"
+        message={`This removes package ${pkg.trackingId}, all tracking events, and the linked invoice.`}
+        className="inline-flex items-center gap-1.5 rounded-xl border border-red-200 bg-red-50 px-3 py-2.5 text-xs font-bold text-red-700 transition hover:bg-red-100"
+      />
+      {latest ? (
+        <AdminDangerDeleteButton
+          endpoint={`/api/admin/tracking-events/${latest.id}`}
+          title="Delete latest tracking event?"
+          message={`This removes the newest timeline update for ${pkg.trackingId} and rewinds package status to the previous event.`}
+          confirmLabel="Delete event"
+          className="inline-flex items-center gap-1.5 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2.5 text-xs font-bold text-amber-700 transition hover:bg-amber-100"
+        />
+      ) : null}
 
       {pkg.status !== "DELIVERED" && (
         <button

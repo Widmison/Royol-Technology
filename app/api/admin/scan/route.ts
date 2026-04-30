@@ -2,9 +2,12 @@ import { NextResponse } from "next/server";
 import { $Enums, type PackageStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { requireAdminApiUser } from "@/lib/requireApiSession";
+import { sendTrackingScanOpsEmail } from "@/lib/sendNotificationEmails";
 import { sendTrackingUpdateEmail } from "@/lib/sendTrackingUpdateEmail";
-import { pushUserNotification } from "@/lib/pushAppNotification";
+import { pushStaffNotification, pushUserNotification } from "@/lib/pushAppNotification";
+import { getAdminPortalUrl } from "@/lib/siteUrl";
 import { packageStatusShortLabel } from "@/lib/packageStatusDisplay";
+import { canPerformStaffCapability } from "@/lib/staffAccess";
 
 const ALLOWED_STATUSES = new Set(Object.values($Enums.PackageStatus));
 
@@ -12,6 +15,9 @@ export async function POST(req: Request) {
   try {
     const adminOrRes = await requireAdminApiUser();
     if (adminOrRes instanceof NextResponse) return adminOrRes;
+    if (!canPerformStaffCapability(adminOrRes, "tracking:scan-update")) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
 
     const { trackingId, status, location, description } = await req.json();
 
@@ -83,6 +89,23 @@ export async function POST(req: Request) {
         link: `/dashboard?tab=tracking&open=${encodeURIComponent(String(trackingId).toUpperCase())}`,
       });
     }
+
+    const statusLabel = packageStatusShortLabel(status);
+    await pushStaffNotification({
+      type: "PACKAGE_SCAN_UPDATE",
+      title: `Scan · ${String(trackingId).toUpperCase()}`,
+      body: `${statusLabel} — ${location}`,
+      link: "/admin/scan",
+    });
+
+    void sendTrackingScanOpsEmail({
+      trackingId: String(trackingId).toUpperCase(),
+      statusLabel,
+      location,
+      detail: eventDescription,
+      clientEmail: clientEmail ?? null,
+      adminUrl: getAdminPortalUrl(),
+    }).catch((err) => console.warn("[scan] ops email failed:", err));
 
     return NextResponse.json({ 
       success: true, 

@@ -34,11 +34,13 @@ export default function DashboardReferralShareCard({ referralCode }: Props) {
   return (
     <div className="rounded-2xl border border-mex-orange/20 bg-gradient-to-br from-orange-50/80 to-white p-5 shadow-sm">
       <div className="flex items-start justify-between gap-3">
-        <div>
+        <div className="min-w-0 flex-1">
           <h3 className="text-xs font-black uppercase tracking-widest text-mex-orange">{t("title")}</h3>
-          <p className="mt-1 font-mono text-2xl font-black tracking-wide text-mex-dark sm:text-3xl">{referralCode}</p>
+          <p className="mt-1 break-all font-mono text-lg font-black leading-snug tracking-wide text-mex-dark [overflow-wrap:anywhere] sm:text-2xl md:text-3xl">
+            {referralCode}
+          </p>
         </div>
-        <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-mex-orange/10 text-mex-orange">
+        <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-mex-orange/10 text-mex-orange">
           <Share2 size={20} />
         </span>
       </div>

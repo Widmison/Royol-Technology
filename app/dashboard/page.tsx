@@ -186,7 +186,9 @@ export default async function ClientDashboardPage({
           ? "bg-green-50 text-green-800 border-green-100"
           : "bg-gray-100 text-gray-700 border-gray-100";
     return (
-      <span className={`inline-flex rounded-full border px-3 py-1 text-[10px] font-black uppercase tracking-wider ${tone}`}>
+      <span
+        className={`inline-block max-w-full rounded-full border px-3 py-1 text-center text-[10px] font-black uppercase leading-snug tracking-wider break-words md:whitespace-nowrap ${tone}`}
+      >
         {label}
       </span>
     );
@@ -652,12 +654,14 @@ export default async function ClientDashboardPage({
                         key={req.id}
                         className="space-y-3 rounded-2xl border border-gray-100 bg-gray-50/60 p-4 shadow-sm"
                       >
-                        <div className="flex justify-between gap-3">
-                          <div className="min-w-0">
-                            <p className="font-black text-mex-dark">{shipmentRouteLabel(req.departure, req.destinationCountry)}</p>
+                        <div className="flex items-start gap-3">
+                          <div className="min-w-0 flex-1">
+                            <p className="break-words font-black text-mex-dark">{shipmentRouteLabel(req.departure, req.destinationCountry)}</p>
                             <p className="mt-1 text-xs font-semibold text-gray-500">{req.category}</p>
                           </div>
-                          {requestStatusBadge(req.status)}
+                          <div className="flex max-w-[42%] shrink-0 flex-col items-end justify-start self-start sm:max-w-[11rem]">
+                            {requestStatusBadge(req.status)}
+                          </div>
                         </div>
                         <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs font-medium text-gray-500">
                           <span className="inline-flex items-center gap-1">

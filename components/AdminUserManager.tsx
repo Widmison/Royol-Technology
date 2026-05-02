@@ -123,10 +123,81 @@ export default function AdminUserManager({ initialUsers }: { initialUsers: any[]
         </button>
       </div>
 
-      {/* USERS TABLE */}
+      {/* USERS TABLE — stacked cards on small screens, full table on large */}
       <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden animate-in fade-in duration-500">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left">
+        <div className="lg:hidden divide-y divide-gray-100">
+          {filteredUsers.length === 0 ? (
+            <p className="p-8 text-center text-gray-500 font-medium">No clients found.</p>
+          ) : (
+            filteredUsers.map((u) => (
+              <div key={u.id} className="p-4 sm:p-5 space-y-3">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <div className="font-black text-mex-dark text-base">
+                      {u.firstName} {u.lastName}
+                    </div>
+                    <div className="text-xs text-gray-400 mt-0.5 font-medium">ID: {u.id.substring(0, 8)}…</div>
+                  </div>
+                  {u.isVerified ? (
+                    <span className="shrink-0 bg-green-100 text-green-700 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider inline-flex items-center gap-1">
+                      <CheckCircle size={12} /> Verified
+                    </span>
+                  ) : (
+                    <span className="shrink-0 bg-orange-100 text-orange-700 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider inline-flex items-center gap-1">
+                      <AlertTriangle size={12} /> Pending
+                    </span>
+                  )}
+                </div>
+                <div className="space-y-1.5 text-sm">
+                  <div className="flex items-start gap-2 text-gray-600 font-medium min-w-0">
+                    <Mail size={14} className="text-gray-400 shrink-0 mt-0.5" />
+                    <span className="break-all">{u.email}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-gray-600 font-medium">
+                    <Phone size={14} className="text-gray-400 shrink-0" />
+                    {u.phone || "N/A"}
+                  </div>
+                  <div className="flex items-start gap-2 text-gray-600 font-medium">
+                    <MapPin size={16} className="text-gray-400 shrink-0 mt-0.5" />
+                    <div className="min-w-0">
+                      <div className="text-mex-dark font-bold">{u.address || "No address on file"}</div>
+                      {(u.city || u.state || u.zipCode) && (
+                        <div className="text-xs text-gray-400">
+                          {u.city}, {u.state} {u.zipCode}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 text-gray-500 text-sm pt-1">
+                    <Calendar size={14} />
+                    {new Date(u.createdAt).toLocaleDateString()}
+                  </div>
+                </div>
+                <div className="flex justify-end gap-2 pt-1">
+                  <button
+                    type="button"
+                    onClick={() => openEditModal(u)}
+                    className="p-2.5 bg-blue-50 text-mex-blue hover:bg-blue-100 rounded-xl transition-colors"
+                    aria-label={`Edit ${u.firstName} ${u.lastName}`}
+                  >
+                    <Edit2 size={18} />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => openDeleteModal(u)}
+                    className="p-2.5 bg-red-50 text-red-500 hover:bg-red-100 rounded-xl transition-colors"
+                    aria-label={`Delete ${u.firstName} ${u.lastName}`}
+                  >
+                    <Trash2 size={18} />
+                  </button>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+
+        <div className="hidden lg:block overflow-x-auto overscroll-x-contain">
+          <table className="w-full text-left min-w-[880px]">
             <thead className="bg-gray-50 text-gray-500 text-xs uppercase tracking-wider border-b border-gray-100">
               <tr>
                 <th className="p-5 font-bold">Client Name</th>
@@ -139,42 +210,71 @@ export default function AdminUserManager({ initialUsers }: { initialUsers: any[]
             </thead>
             <tbody className="text-sm divide-y divide-gray-50">
               {filteredUsers.length === 0 ? (
-                <tr><td colSpan={6} className="p-8 text-center text-gray-500 font-medium">No clients found.</td></tr>
+                <tr>
+                  <td colSpan={6} className="p-8 text-center text-gray-500 font-medium">
+                    No clients found.
+                  </td>
+                </tr>
               ) : (
                 filteredUsers.map((u) => (
                   <tr key={u.id} className="hover:bg-gray-50 transition-colors">
                     <td className="p-5">
-                      <div className="font-black text-mex-dark text-base">{u.firstName} {u.lastName}</div>
+                      <div className="font-black text-mex-dark text-base">
+                        {u.firstName} {u.lastName}
+                      </div>
                       <div className="text-xs text-gray-400 mt-1 font-medium">ID: {u.id.substring(0, 8)}...</div>
                     </td>
                     <td className="p-5">
-                      <div className="flex items-center gap-2 text-gray-600 font-medium mb-1"><Mail size={14} className="text-gray-400 shrink-0"/> <span className="truncate w-32 md:w-auto block">{u.email}</span></div>
-                      <div className="flex items-center gap-2 text-gray-600 font-medium"><Phone size={14} className="text-gray-400 shrink-0"/> {u.phone || "N/A"}</div>
+                      <div className="flex items-center gap-2 text-gray-600 font-medium mb-1">
+                        <Mail size={14} className="text-gray-400 shrink-0" />{" "}
+                        <span className="truncate w-32 md:w-auto block">{u.email}</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-gray-600 font-medium">
+                        <Phone size={14} className="text-gray-400 shrink-0" /> {u.phone || "N/A"}
+                      </div>
                     </td>
                     <td className="p-5">
                       <div className="flex items-start gap-2 text-gray-600 font-medium">
-                        <MapPin size={16} className="text-gray-400 shrink-0 mt-0.5"/>
+                        <MapPin size={16} className="text-gray-400 shrink-0 mt-0.5" />
                         <div>
                           <div className="text-sm text-mex-dark font-bold">{u.address || "No address on file"}</div>
-                          {(u.city || u.state || u.zipCode) && <div className="text-xs text-gray-400">{u.city}, {u.state} {u.zipCode}</div>}
+                          {(u.city || u.state || u.zipCode) && (
+                            <div className="text-xs text-gray-400">
+                              {u.city}, {u.state} {u.zipCode}
+                            </div>
+                          )}
                         </div>
                       </div>
                     </td>
                     <td className="p-5">
                       {u.isVerified ? (
-                         <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider flex items-center gap-1 w-fit"><CheckCircle size={12}/> Verified</span>
+                        <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider flex items-center gap-1 w-fit">
+                          <CheckCircle size={12} /> Verified
+                        </span>
                       ) : (
-                         <span className="bg-orange-100 text-orange-700 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider flex items-center gap-1 w-fit"><AlertTriangle size={12}/> Pending</span>
+                        <span className="bg-orange-100 text-orange-700 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider flex items-center gap-1 w-fit">
+                          <AlertTriangle size={12} /> Pending
+                        </span>
                       )}
                     </td>
                     <td className="p-5 text-gray-500 font-medium hidden md:table-cell">
-                      <div className="flex items-center gap-2"><Calendar size={14}/> {new Date(u.createdAt).toLocaleDateString()}</div>
+                      <div className="flex items-center gap-2">
+                        <Calendar size={14} /> {new Date(u.createdAt).toLocaleDateString()}
+                      </div>
                     </td>
                     <td className="p-5 text-right space-x-2 whitespace-nowrap">
-                      <button onClick={() => openEditModal(u)} className="p-2 bg-blue-50 text-mex-blue hover:bg-blue-100 rounded-lg transition-colors inline-block">
+                      <button
+                        onClick={() => openEditModal(u)}
+                        className="p-2 bg-blue-50 text-mex-blue hover:bg-blue-100 rounded-lg transition-colors inline-block"
+                        aria-label={`Edit ${u.firstName} ${u.lastName}`}
+                      >
                         <Edit2 size={18} />
                       </button>
-                      <button onClick={() => openDeleteModal(u)} className="p-2 bg-red-50 text-red-500 hover:bg-red-100 rounded-lg transition-colors inline-block">
+                      <button
+                        onClick={() => openDeleteModal(u)}
+                        className="p-2 bg-red-50 text-red-500 hover:bg-red-100 rounded-lg transition-colors inline-block"
+                        aria-label={`Delete ${u.firstName} ${u.lastName}`}
+                      >
                         <Trash2 size={18} />
                       </button>
                     </td>

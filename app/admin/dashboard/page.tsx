@@ -154,7 +154,37 @@ export default async function AdminDashboardPage() {
             All shipments →
           </Link>
         </div>
-        <div className="overflow-x-auto">
+        <div className="lg:hidden divide-y divide-gray-100">
+          {recentPackages.length === 0 ? (
+            <p className="p-6 text-center font-medium text-gray-500">
+              No packages yet. Use <strong>Weigh &amp; Invoice</strong> in the{" "}
+              <Link href="/admin/quotes" className="font-bold text-mex-blue hover:underline">
+                quote queue
+              </Link>{" "}
+              when a box arrives.
+            </p>
+          ) : (
+            recentPackages.map((pkg) => (
+              <div key={pkg.id} className="flex flex-wrap items-start justify-between gap-3 p-4 sm:p-5">
+                <div className="min-w-0 space-y-1">
+                  <Link
+                    href="/admin/shipments"
+                    className="font-black tracking-wide text-mex-dark hover:text-mex-blue hover:underline break-all"
+                  >
+                    {pkg.trackingId}
+                  </Link>
+                  <p className="text-sm font-medium text-gray-700">
+                    {pkg.request.firstName} {pkg.request.lastName}
+                  </p>
+                </div>
+                <span className="shrink-0 rounded-full bg-gray-100 px-2.5 py-1 text-[10px] font-black uppercase tracking-wider text-gray-800">
+                  {String(pkg.status).split("_").join(" ")}
+                </span>
+              </div>
+            ))
+          )}
+        </div>
+        <div className="hidden lg:block overflow-x-auto overscroll-x-contain">
           <table className="min-w-[520px] w-full text-left">
             <thead className="border-b border-gray-100 bg-white text-xs font-bold uppercase tracking-wider text-gray-400">
               <tr>

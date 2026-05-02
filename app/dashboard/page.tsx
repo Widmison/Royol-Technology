@@ -737,64 +737,101 @@ export default async function ClientDashboardPage({
                 </div>
               )}
               <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                <table className="w-full text-left">
-                  <thead className="bg-gray-50 text-gray-500 text-xs uppercase tracking-wider border-b border-gray-100">
-                    <tr>
-                      <th className="p-5 font-bold">Date & Route</th>
-                      <th className="p-5 font-bold hidden md:table-cell">Items</th>
-                      <th className="p-5 font-bold">Status</th>
-                      <th className="p-5 font-bold min-w-[200px] hidden lg:table-cell">Drop-off</th>
-                      <th className="p-5 font-bold text-right">Tracking</th>
-                    </tr>
-                  </thead>
-                  <tbody className="text-sm divide-y divide-gray-50">
-                    {requests.length === 0 ? (
+                <div className="lg:hidden divide-y divide-gray-100">
+                  {requests.length === 0 ? (
+                    <p className="p-8 text-center text-gray-500">{tPage("shipments.noneFound")}</p>
+                  ) : shipmentsToShow.length === 0 ? (
+                    <p className="p-8 text-center text-gray-500">
+                      {tPage("shipments.noneMatch")}{" "}
+                      <Link href="/dashboard?tab=shipments" className="font-bold text-mex-blue hover:underline" prefetch={false}>
+                        {tPage("shipments.showAll")}
+                      </Link>
+                      .
+                    </p>
+                  ) : (
+                    shipmentsToShow.map((req: any) => (
+                      <div key={req.id} className="p-4 sm:p-5 space-y-3">
+                        <div className="flex flex-wrap items-start justify-between gap-2">
+                          <div className="min-w-0">
+                            <p className="font-bold text-mex-dark">{shipmentRouteLabel(req.departure, req.destinationCountry)}</p>
+                            <p className="text-xs text-gray-400 mt-1">{new Date(req.createdAt).toLocaleDateString()}</p>
+                            <p className="mt-2 text-sm text-gray-600 font-medium md:hidden">{req.category}</p>
+                          </div>
+                          <span className="inline-flex shrink-0 bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-[10px] uppercase font-bold tracking-wider">
+                            {String(req.status).split("_").join(" ")}
+                          </span>
+                        </div>
+                        <div className="hidden md:block text-sm text-gray-600 font-medium">{req.category}</div>
+                        {req.status === "PENDING_DROPOFF" ? <PendingDropoffHelp variant="compact" /> : null}
+                        <div className="flex flex-wrap items-center justify-between gap-2 border-t border-gray-50 pt-3">
+                          <span className="text-xs font-bold uppercase tracking-wide text-gray-400">{tPage("overview.table.tracking")}</span>
+                          <ClientTrackingIdLink trackingId={req.package?.trackingId} />
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+
+                <div className="hidden lg:block overflow-x-auto overscroll-x-contain">
+                  <table className="w-full min-w-[640px] text-left">
+                    <thead className="bg-gray-50 text-gray-500 text-xs uppercase tracking-wider border-b border-gray-100">
                       <tr>
-                        <td colSpan={5} className="p-8 text-center text-gray-500">{tPage("shipments.noneFound")}</td>
+                        <th className="p-5 font-bold">Date & Route</th>
+                        <th className="p-5 font-bold hidden md:table-cell">Items</th>
+                        <th className="p-5 font-bold">Status</th>
+                        <th className="p-5 font-bold min-w-[200px] hidden lg:table-cell">Drop-off</th>
+                        <th className="p-5 font-bold text-right">Tracking</th>
                       </tr>
-                    ) : shipmentsToShow.length === 0 ? (
-                      <tr>
-                        <td colSpan={5} className="p-8 text-center text-gray-500">
-                          {tPage("shipments.noneMatch")}{" "}
-                          <Link href="/dashboard?tab=shipments" className="font-bold text-mex-blue hover:underline" prefetch={false}>
-                            {tPage("shipments.showAll")}
-                          </Link>
-                          .
-                        </td>
-                      </tr>
-                    ) : (
-                      shipmentsToShow.map((req: any) => (
-                        <tr key={req.id} className="hover:bg-gray-50 transition-colors align-top">
-                          <td className="p-5">
-                            <div className="font-bold text-mex-dark">{shipmentRouteLabel(req.departure, req.destinationCountry)}</div>
-                            <div className="text-xs text-gray-400 mt-1">{new Date(req.createdAt).toLocaleDateString()}</div>
-                            {req.status === "PENDING_DROPOFF" && (
-                              <div className="mt-3 lg:hidden">
-                                <PendingDropoffHelp variant="compact" />
-                              </div>
-                            )}
-                          </td>
-                          <td className="p-5 text-gray-600 font-medium hidden md:table-cell">{req.category}</td>
-                          <td className="p-5">
-                            <span className="inline-flex bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-[10px] uppercase font-bold tracking-wider">
-                              {String(req.status).split("_").join(" ")}
-                            </span>
-                          </td>
-                          <td className="p-5 hidden lg:table-cell">
-                            {req.status === "PENDING_DROPOFF" ? (
-                              <PendingDropoffHelp variant="compact" />
-                            ) : (
-                              <span className="text-gray-300 text-sm font-medium">—</span>
-                            )}
-                          </td>
-                          <td className="p-5 text-right whitespace-nowrap">
-                            <ClientTrackingIdLink trackingId={req.package?.trackingId} />
+                    </thead>
+                    <tbody className="text-sm divide-y divide-gray-50">
+                      {requests.length === 0 ? (
+                        <tr>
+                          <td colSpan={5} className="p-8 text-center text-gray-500">{tPage("shipments.noneFound")}</td>
+                        </tr>
+                      ) : shipmentsToShow.length === 0 ? (
+                        <tr>
+                          <td colSpan={5} className="p-8 text-center text-gray-500">
+                            {tPage("shipments.noneMatch")}{" "}
+                            <Link href="/dashboard?tab=shipments" className="font-bold text-mex-blue hover:underline" prefetch={false}>
+                              {tPage("shipments.showAll")}
+                            </Link>
+                            .
                           </td>
                         </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
+                      ) : (
+                        shipmentsToShow.map((req: any) => (
+                          <tr key={req.id} className="hover:bg-gray-50 transition-colors align-top">
+                            <td className="p-5">
+                              <div className="font-bold text-mex-dark">{shipmentRouteLabel(req.departure, req.destinationCountry)}</div>
+                              <div className="text-xs text-gray-400 mt-1">{new Date(req.createdAt).toLocaleDateString()}</div>
+                              {req.status === "PENDING_DROPOFF" && (
+                                <div className="mt-3 lg:hidden">
+                                  <PendingDropoffHelp variant="compact" />
+                                </div>
+                              )}
+                            </td>
+                            <td className="p-5 text-gray-600 font-medium hidden md:table-cell">{req.category}</td>
+                            <td className="p-5">
+                              <span className="inline-flex bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-[10px] uppercase font-bold tracking-wider">
+                                {String(req.status).split("_").join(" ")}
+                              </span>
+                            </td>
+                            <td className="p-5 hidden lg:table-cell">
+                              {req.status === "PENDING_DROPOFF" ? (
+                                <PendingDropoffHelp variant="compact" />
+                              ) : (
+                                <span className="text-gray-300 text-sm font-medium">—</span>
+                              )}
+                            </td>
+                            <td className="p-5 text-right whitespace-nowrap">
+                              <ClientTrackingIdLink trackingId={req.package?.trackingId} />
+                            </td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             </div>
           )}

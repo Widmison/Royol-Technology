@@ -1,5 +1,10 @@
 @import "tailwindcss";
 
+/* Prevent accidental horizontal scroll from wide tables / long strings site-wide */
+html {
+  overflow-x: clip;
+}
+
 @theme {
   /* Brand Colors */
   --color-mex-blue: #1D3B8E;

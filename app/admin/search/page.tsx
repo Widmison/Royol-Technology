@@ -207,7 +207,18 @@ export default async function AdminSearchPage({ searchParams }: { searchParams: 
               Found {clients.length} client{clients.length > 1 ? "s" : ""}
             </h3>
           </div>
-          <div className="overflow-x-auto">
+          <div className="lg:hidden divide-y divide-gray-100">
+            {clients.map((c) => (
+              <div key={c.id} className="p-4 sm:p-5 space-y-2">
+                <p className="font-black text-mex-dark">
+                  {c.firstName} {c.lastName}
+                </p>
+                <p className="text-sm text-gray-600 break-all">{c.email}</p>
+                <p className="text-sm text-gray-600">{c.phone || "N/A"}</p>
+              </div>
+            ))}
+          </div>
+          <div className="hidden lg:block overflow-x-auto overscroll-x-contain">
             <table className="w-full text-left min-w-[520px]">
               <thead className="bg-gray-50 text-gray-400 text-xs uppercase tracking-wider border-b border-gray-100">
                 <tr>

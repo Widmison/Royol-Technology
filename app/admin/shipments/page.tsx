@@ -64,7 +64,7 @@ export default async function AdminShipmentsPage({
           Shipments
         </h1>
         <p className="text-gray-500 font-medium text-sm mt-1">
-          Full master list — scroll horizontally on small screens to see every column.
+          Card layout on phones and small tablets; full-width table from large screens up (horizontal scroll if needed).
         </p>
         <div className="mt-4 flex flex-wrap items-center gap-2">
           {chip("/admin/shipments", "All", filter == null)}
@@ -89,95 +89,155 @@ export default async function AdminShipmentsPage({
       </div>
 
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-        <div className="overflow-x-auto overscroll-x-contain">
-          <table className="w-full text-left min-w-[800px]">
-            <thead className="bg-gray-50 text-gray-400 text-xs uppercase tracking-wider border-b border-gray-100">
-              <tr>
-                <th className="p-4 sm:p-5 font-bold whitespace-nowrap">Tracking ID</th>
-                <th className="p-4 sm:p-5 font-bold min-w-[140px]">Client</th>
-                <th className="p-4 sm:p-5 font-bold min-w-[160px]">Route &amp; ETA</th>
-                <th className="p-4 sm:p-5 font-bold min-w-[140px]">Status</th>
-                <th className="p-4 sm:p-5 font-bold min-w-[180px]">Last location</th>
-                <th className="p-4 sm:p-5 font-bold text-right min-w-[120px]">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="text-sm divide-y divide-gray-50">
-              {packages.length === 0 ? (
-                <tr>
-                  <td colSpan={6} className="p-8 text-center text-gray-500 font-medium">
-                    No packages yet. Use <strong>Weigh &amp; Invoice</strong> in the{" "}
-                    <Link href="/admin/quotes" className="font-bold text-mex-blue underline">
-                      quote queue
-                    </Link>{" "}
-                    when a box arrives.
-                  </td>
-                </tr>
-              ) : (
-                packages.map((pkg: any) => {
-                  const method = pkg.request.shippingMethod?.toLowerCase() || "";
-                  const isAir = method.includes("air") || method.includes("avyon");
-                  const isGround = method.includes("ground");
-                  const MethodIcon = isGround ? Truck : isAir ? Plane : Ship;
-                  const etaText = isGround
-                    ? "Ground / regional"
-                    : isAir
-                      ? "5–7 days (air)"
-                      : "14–21 days (ocean)";
-                  const lastEv = pkg.events?.[0];
+        {packages.length === 0 ? (
+          <p className="p-8 text-center text-gray-500 font-medium">
+            No packages yet. Use <strong>Weigh &amp; Invoice</strong> in the{" "}
+            <Link href="/admin/quotes" className="font-bold text-mex-blue underline">
+              quote queue
+            </Link>{" "}
+            when a box arrives.
+          </p>
+        ) : (
+          <>
+            <div className="lg:hidden divide-y divide-gray-100">
+              {packages.map((pkg: any) => {
+                const method = pkg.request.shippingMethod?.toLowerCase() || "";
+                const isAir = method.includes("air") || method.includes("avyon");
+                const isGround = method.includes("ground");
+                const MethodIcon = isGround ? Truck : isAir ? Plane : Ship;
+                const etaText = isGround
+                  ? "Ground / regional"
+                  : isAir
+                    ? "5–7 days (air)"
+                    : "14–21 days (ocean)";
+                const lastEv = pkg.events?.[0];
 
-                  return (
-                    <tr key={pkg.id} className="hover:bg-gray-50 align-top">
-                      <td className="p-4 sm:p-5 font-black text-mex-dark text-base tracking-wider uppercase whitespace-nowrap">
-                        {pkg.trackingId}
-                      </td>
-                      <td className="p-4 sm:p-5">
-                        <div className="font-bold text-mex-dark">
+                return (
+                  <div key={pkg.id} className="p-4 sm:p-5 space-y-3">
+                    <div className="flex flex-wrap items-start justify-between gap-2">
+                      <div className="min-w-0">
+                        <p className="font-black text-mex-dark text-base tracking-wider uppercase break-all">
+                          {pkg.trackingId}
+                        </p>
+                        <p className="mt-1 font-bold text-mex-dark">
                           {pkg.request.firstName} {pkg.request.lastName}
+                        </p>
+                        <p className="text-gray-500 text-xs font-medium break-all">{pkg.request.phone}</p>
+                      </div>
+                      <span className="inline-flex shrink-0 rounded-full border border-gray-200 bg-gray-100 px-3 py-1.5 text-[10px] font-black uppercase tracking-wider text-gray-800">
+                        {String(pkg.status).split("_").join(" ")}
+                      </span>
+                    </div>
+                    <div>
+                      <div className="font-bold text-gray-700 flex items-center gap-2 flex-wrap">
+                        USA <ArrowRight size={14} className="text-gray-400 shrink-0" /> Haiti
+                      </div>
+                      <div
+                        className={`text-[10px] font-black mt-1 flex items-center gap-1.5 uppercase tracking-wider ${isAir ? "text-mex-blue" : "text-gray-500"}`}
+                      >
+                        <MethodIcon size={14} /> ETA: {etaText}
+                      </div>
+                    </div>
+                    {lastEv ? (
+                      <div className="text-xs font-medium text-gray-700 space-y-1">
+                        <div className="font-bold text-mex-dark">{lastEv.location}</div>
+                        {lastEv.description ? (
+                          <div className="text-gray-500 line-clamp-3">{lastEv.description}</div>
+                        ) : null}
+                        <div className="text-[10px] text-gray-400">
+                          Updated {new Date(lastEv.date).toLocaleString()}
                         </div>
-                        <div className="text-gray-500 text-xs font-medium mt-0.5 break-all">{pkg.request.phone}</div>
-                      </td>
-                      <td className="p-4 sm:p-5">
-                        <div className="font-bold text-gray-700 flex items-center gap-2 flex-wrap">
-                          USA <ArrowRight size={14} className="text-gray-400 shrink-0" /> Haiti
-                        </div>
-                        <div
-                          className={`text-[10px] font-black mt-1.5 flex items-center gap-1.5 uppercase tracking-wider ${isAir ? "text-mex-blue" : "text-gray-500"}`}
-                        >
-                          <MethodIcon size={14} /> ETA: {etaText}
-                        </div>
-                      </td>
-                      <td className="p-4 sm:p-5">
-                        <span className="inline-flex rounded-full border border-gray-200 bg-gray-100 px-3 py-1.5 text-[10px] font-black uppercase tracking-wider text-gray-800">
-                          {String(pkg.status).split("_").join(" ")}
-                        </span>
-                        {lastEv && (
-                          <div className="mt-1.5 text-[10px] font-medium text-gray-400">
-                            Updated {new Date(lastEv.date).toLocaleString()}
+                      </div>
+                    ) : (
+                      <p className="text-xs text-gray-400">No tracking events yet.</p>
+                    )}
+                    <div className="flex flex-wrap items-center justify-end gap-2 pt-1 border-t border-gray-50">
+                      <ShipmentActionMenu pkg={pkg} />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            <div className="hidden lg:block overflow-x-auto overscroll-x-contain">
+              <table className="w-full text-left min-w-[800px]">
+                <thead className="bg-gray-50 text-gray-400 text-xs uppercase tracking-wider border-b border-gray-100">
+                  <tr>
+                    <th className="p-4 sm:p-5 font-bold whitespace-nowrap">Tracking ID</th>
+                    <th className="p-4 sm:p-5 font-bold min-w-[140px]">Client</th>
+                    <th className="p-4 sm:p-5 font-bold min-w-[160px]">Route &amp; ETA</th>
+                    <th className="p-4 sm:p-5 font-bold min-w-[140px]">Status</th>
+                    <th className="p-4 sm:p-5 font-bold min-w-[180px]">Last location</th>
+                    <th className="p-4 sm:p-5 font-bold text-right min-w-[120px]">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="text-sm divide-y divide-gray-50">
+                  {packages.map((pkg: any) => {
+                    const method = pkg.request.shippingMethod?.toLowerCase() || "";
+                    const isAir = method.includes("air") || method.includes("avyon");
+                    const isGround = method.includes("ground");
+                    const MethodIcon = isGround ? Truck : isAir ? Plane : Ship;
+                    const etaText = isGround
+                      ? "Ground / regional"
+                      : isAir
+                        ? "5–7 days (air)"
+                        : "14–21 days (ocean)";
+                    const lastEv = pkg.events?.[0];
+
+                    return (
+                      <tr key={pkg.id} className="hover:bg-gray-50 align-top">
+                        <td className="p-4 sm:p-5 font-black text-mex-dark text-base tracking-wider uppercase whitespace-nowrap">
+                          {pkg.trackingId}
+                        </td>
+                        <td className="p-4 sm:p-5">
+                          <div className="font-bold text-mex-dark">
+                            {pkg.request.firstName} {pkg.request.lastName}
                           </div>
-                        )}
-                      </td>
-                      <td className="p-4 sm:p-5 text-xs font-medium text-gray-700">
-                        {lastEv ? (
-                          <>
-                            <div className="font-bold text-mex-dark line-clamp-2">{lastEv.location}</div>
-                            {lastEv.description && (
-                              <div className="mt-0.5 line-clamp-2 text-gray-500">{lastEv.description}</div>
-                            )}
-                          </>
-                        ) : (
-                          <span className="text-gray-400">No events yet</span>
-                        )}
-                      </td>
-                      <td className="p-4 sm:p-5 text-right">
-                        <ShipmentActionMenu pkg={pkg} />
-                      </td>
-                    </tr>
-                  );
-                })
-              )}
-            </tbody>
-          </table>
-        </div>
+                          <div className="text-gray-500 text-xs font-medium mt-0.5 break-all">{pkg.request.phone}</div>
+                        </td>
+                        <td className="p-4 sm:p-5">
+                          <div className="font-bold text-gray-700 flex items-center gap-2 flex-wrap">
+                            USA <ArrowRight size={14} className="text-gray-400 shrink-0" /> Haiti
+                          </div>
+                          <div
+                            className={`text-[10px] font-black mt-1.5 flex items-center gap-1.5 uppercase tracking-wider ${isAir ? "text-mex-blue" : "text-gray-500"}`}
+                          >
+                            <MethodIcon size={14} /> ETA: {etaText}
+                          </div>
+                        </td>
+                        <td className="p-4 sm:p-5">
+                          <span className="inline-flex rounded-full border border-gray-200 bg-gray-100 px-3 py-1.5 text-[10px] font-black uppercase tracking-wider text-gray-800">
+                            {String(pkg.status).split("_").join(" ")}
+                          </span>
+                          {lastEv && (
+                            <div className="mt-1.5 text-[10px] font-medium text-gray-400">
+                              Updated {new Date(lastEv.date).toLocaleString()}
+                            </div>
+                          )}
+                        </td>
+                        <td className="p-4 sm:p-5 text-xs font-medium text-gray-700">
+                          {lastEv ? (
+                            <>
+                              <div className="font-bold text-mex-dark line-clamp-2">{lastEv.location}</div>
+                              {lastEv.description && (
+                                <div className="mt-0.5 line-clamp-2 text-gray-500">{lastEv.description}</div>
+                              )}
+                            </>
+                          ) : (
+                            <span className="text-gray-400">No events yet</span>
+                          )}
+                        </td>
+                        <td className="p-4 sm:p-5 text-right">
+                          <ShipmentActionMenu pkg={pkg} />
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

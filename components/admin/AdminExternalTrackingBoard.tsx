@@ -102,51 +102,39 @@ export default function AdminExternalTrackingBoard({ highlightId }: { highlightI
         </div>
       ) : (
         <div className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[900px] text-left text-sm">
-              <thead className="border-b border-gray-100 bg-gray-50 text-xs font-black uppercase tracking-wider text-gray-500">
-                <tr>
-                  <th className="p-4">Client</th>
-                  <th className="p-4">External #</th>
-                  <th className="p-4">Meta</th>
-                  <th className="p-4">Status</th>
-                  <th className="p-4">Linked MEX</th>
-                  <th className="p-4 text-right">Action</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-50">
+          {entries.length === 0 && !loading ? (
+            <p className="py-12 text-center text-sm font-medium text-gray-500">No external tracking entries yet.</p>
+          ) : (
+            <>
+              <div className="lg:hidden divide-y divide-gray-100">
                 {entries.map((e) => (
-                  <tr
+                  <div
                     key={e.id}
-                    className={`hover:bg-gray-50/80 ${
+                    className={`space-y-3 p-4 ${
                       highlightId === e.id ? "bg-orange-50/90 ring-1 ring-inset ring-mex-orange/30" : ""
                     }`}
                   >
-                    <td className="p-4 align-top">
-                      <p className="font-bold text-mex-dark">
-                        {e.user.firstName} {e.user.lastName}
-                      </p>
-                      <p className="text-xs font-medium text-gray-500">{e.user.email}</p>
-                      {e.user.phone && <p className="text-xs text-gray-400">{e.user.phone}</p>}
-                    </td>
-                    <td className="p-4 align-top font-black tracking-wide text-mex-blue">{e.trackingNumber}</td>
-                    <td className="p-4 align-top text-xs text-gray-600">
-                      {[e.storeLabel, e.carrier].filter(Boolean).join(" · ") || "—"}
-                      {e.notes && <p className="mt-1 line-clamp-2">{e.notes}</p>}
-                    </td>
-                    <td className="p-4 align-top">
-                      <span className="rounded-full border border-gray-200 bg-gray-50 px-2 py-0.5 text-[10px] font-black uppercase">
+                    <div className="flex flex-wrap items-start justify-between gap-2">
+                      <div className="min-w-0">
+                        <p className="font-bold text-mex-dark">
+                          {e.user.firstName} {e.user.lastName}
+                        </p>
+                        <p className="text-xs font-medium text-gray-500 break-all">{e.user.email}</p>
+                        {e.user.phone && <p className="text-xs text-gray-400">{e.user.phone}</p>}
+                      </div>
+                      <span className="shrink-0 rounded-full border border-gray-200 bg-gray-50 px-2 py-0.5 text-[10px] font-black uppercase">
                         {externalTrackingStatusLabel(e.status)}
                       </span>
-                    </td>
-                    <td className="p-4 align-top font-mono text-xs">
-                      {e.linkedPackage ? (
-                        <span className="font-bold text-green-700">{e.linkedPackage.trackingId}</span>
-                      ) : (
-                        "—"
-                      )}
-                    </td>
-                    <td className="p-4 align-top text-right">
+                    </div>
+                    <p className="font-black tracking-wide text-mex-blue break-all">{e.trackingNumber}</p>
+                    <p className="text-xs text-gray-600">
+                      {[e.storeLabel, e.carrier].filter(Boolean).join(" · ") || "—"}
+                    </p>
+                    {e.notes && <p className="text-xs text-gray-600 line-clamp-3">{e.notes}</p>}
+                    <div className="flex flex-wrap items-center justify-between gap-2 border-t border-gray-50 pt-2">
+                      <span className="font-mono text-xs font-bold text-green-700">
+                        {e.linkedPackage ? e.linkedPackage.trackingId : "—"}
+                      </span>
                       <button
                         type="button"
                         onClick={() => setEditing(e)}
@@ -154,14 +142,69 @@ export default function AdminExternalTrackingBoard({ highlightId }: { highlightI
                       >
                         Manage
                       </button>
-                    </td>
-                  </tr>
+                    </div>
+                  </div>
                 ))}
-              </tbody>
-            </table>
-          </div>
-          {entries.length === 0 && !loading && (
-            <p className="py-12 text-center text-sm font-medium text-gray-500">No external tracking entries yet.</p>
+              </div>
+              <div className="hidden lg:block overflow-x-auto overscroll-x-contain">
+                <table className="w-full min-w-[900px] text-left text-sm">
+                  <thead className="border-b border-gray-100 bg-gray-50 text-xs font-black uppercase tracking-wider text-gray-500">
+                    <tr>
+                      <th className="p-4">Client</th>
+                      <th className="p-4">External #</th>
+                      <th className="p-4">Meta</th>
+                      <th className="p-4">Status</th>
+                      <th className="p-4">Linked MEX</th>
+                      <th className="p-4 text-right">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-50">
+                    {entries.map((e) => (
+                      <tr
+                        key={e.id}
+                        className={`hover:bg-gray-50/80 ${
+                          highlightId === e.id ? "bg-orange-50/90 ring-1 ring-inset ring-mex-orange/30" : ""
+                        }`}
+                      >
+                        <td className="p-4 align-top">
+                          <p className="font-bold text-mex-dark">
+                            {e.user.firstName} {e.user.lastName}
+                          </p>
+                          <p className="text-xs font-medium text-gray-500">{e.user.email}</p>
+                          {e.user.phone && <p className="text-xs text-gray-400">{e.user.phone}</p>}
+                        </td>
+                        <td className="p-4 align-top font-black tracking-wide text-mex-blue">{e.trackingNumber}</td>
+                        <td className="p-4 align-top text-xs text-gray-600">
+                          {[e.storeLabel, e.carrier].filter(Boolean).join(" · ") || "—"}
+                          {e.notes && <p className="mt-1 line-clamp-2">{e.notes}</p>}
+                        </td>
+                        <td className="p-4 align-top">
+                          <span className="rounded-full border border-gray-200 bg-gray-50 px-2 py-0.5 text-[10px] font-black uppercase">
+                            {externalTrackingStatusLabel(e.status)}
+                          </span>
+                        </td>
+                        <td className="p-4 align-top font-mono text-xs">
+                          {e.linkedPackage ? (
+                            <span className="font-bold text-green-700">{e.linkedPackage.trackingId}</span>
+                          ) : (
+                            "—"
+                          )}
+                        </td>
+                        <td className="p-4 align-top text-right">
+                          <button
+                            type="button"
+                            onClick={() => setEditing(e)}
+                            className="rounded-lg bg-mex-blue px-3 py-1.5 text-xs font-black text-white hover:bg-blue-900"
+                          >
+                            Manage
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </>
           )}
         </div>
       )}

@@ -374,41 +374,52 @@ export default function AdminShell({
 
       <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
         <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-gray-100 shrink-0">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between px-3 sm:px-4 lg:px-8 py-3 sm:py-3.5">
-            <div className="flex items-center gap-2 min-w-0">
+          <div className="flex flex-col gap-3 px-3 py-3 sm:px-4 sm:py-3.5 lg:flex-row lg:items-center lg:gap-6 lg:px-8">
+            <div className="flex min-w-0 items-center gap-2 lg:max-w-[min(100%,14rem)] lg:shrink-0">
               <button
                 type="button"
-                className="md:hidden p-2.5 rounded-xl border border-gray-200 bg-gray-50 text-mex-dark hover:bg-gray-100 shrink-0"
+                className="shrink-0 rounded-xl border border-gray-200 bg-gray-50 p-2.5 text-mex-dark hover:bg-gray-100 md:hidden"
                 onClick={() => setMenuOpen(true)}
                 aria-label="Open navigation"
               >
                 <Menu size={22} />
               </button>
-              <div className="hidden sm:flex items-center gap-3 border-l border-gray-100 pl-3 min-w-0">
-                <div className="w-9 h-9 rounded-full bg-mex-blue flex items-center justify-center text-white text-xs font-black shrink-0">
+              <div className="hidden min-w-0 items-center gap-3 border-l border-gray-100 pl-3 sm:flex">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-mex-blue text-xs font-black text-white">
                   AD
                 </div>
                 <div className="min-w-0">
-                  <div className="text-sm font-bold text-mex-dark truncate">Operations</div>
-                  <div className="text-xs text-gray-500 truncate">MEX509 admin</div>
+                  <div className="truncate text-sm font-bold text-mex-dark">Operations</div>
+                  <div className="truncate text-xs text-gray-500">MEX509 admin</div>
                 </div>
               </div>
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-mex-blue text-[10px] font-black text-white sm:hidden">
+                AD
+              </div>
             </div>
-            <div className="w-full sm:flex-1 sm:max-w-xl md:max-w-md lg:max-w-lg min-w-0">
+
+            <div className="min-w-0 w-full flex-1 lg:max-w-xl xl:max-w-2xl">
               <AdminSearchBar />
             </div>
-            <div className="hidden sm:flex items-center gap-2 shrink-0">
+
+            <div className="flex shrink-0 items-center justify-end gap-1 border-t border-gray-100 pt-3 sm:gap-2 lg:border-0 lg:pt-0">
               <PortalNotificationBell variant="admin" />
               {canAccessRestrictedAdminPages && (
                 <Link
                   href="/admin/settings"
-                  className="inline-flex items-center justify-center gap-2 rounded-xl border border-gray-200 px-3 py-2 text-sm font-bold text-gray-700 hover:bg-gray-50"
+                  className="inline-flex items-center justify-center gap-2 rounded-xl border border-gray-200 p-2 text-sm font-bold text-gray-700 hover:bg-gray-50 sm:px-3"
+                  title="Settings"
                 >
-                  <Settings size={18} /> Settings
+                  <Settings size={18} className="shrink-0" aria-hidden />
+                  <span className="hidden sm:inline">Settings</span>
                 </Link>
               )}
-              <AdminSignOutButton className="inline-flex items-center justify-center gap-2 rounded-xl border border-gray-200 px-3 py-2 text-sm font-bold text-gray-700 hover:bg-red-50 hover:border-red-200 hover:text-red-700">
-                <LogOut size={18} /> Sign out
+              <AdminSignOutButton
+                aria-label="Sign out"
+                className="inline-flex items-center justify-center gap-2 rounded-xl border border-gray-200 p-2 text-sm font-bold text-gray-700 hover:border-red-200 hover:bg-red-50 hover:text-red-700 sm:px-3"
+              >
+                <LogOut size={18} className="shrink-0" aria-hidden />
+                <span className="hidden sm:inline">Sign out</span>
               </AdminSignOutButton>
             </div>
           </div>

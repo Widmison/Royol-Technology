@@ -117,8 +117,9 @@
       "cardLink": "Li detay sèvis yo"
     },
     "testimonials": {
+      "kicker": "Opinyon kliyan",
       "title": "Sa kliyan yo di",
-      "subtitle": "Men poukisa anpil kliyan fè MEX509 konfyans.",
+      "subtitle": "Vwa reyèl ki itilize MEX509 sou liy Étazini, Dominican Republic, ak Ayiti.",
       "items": {
         "1": { "quote": "Sèvis la vrèman rapid. Pake mwen rive san pwoblèm.", "name": "Jean Michel", "city": "Miami, FL" },
         "2": { "quote": "Yo pwofesyonèl, e livrezon yo rive alè.", "name": "Sarah L.", "city": "Orlando, FL" },

@@ -197,8 +197,9 @@
       "cardLink": "Voir les details de service"
     },
     "testimonials": {
+      "kicker": "Témoignages",
       "title": "Avis clients",
-      "subtitle": "Pourquoi nos clients font confiance a MEX509.",
+      "subtitle": "Retours reels sur nos liaisons Etats-Unis, Republique dominicaine et Haiti.",
       "items": {
         "1": { "quote": "Service tres rapide. Mon colis est arrive sans probleme.", "name": "Jean Michel", "city": "Miami, FL" },
         "2": { "quote": "Tres professionnel et ponctuel. Je recommande fortement.", "name": "Sarah L.", "city": "Orlando, FL" },

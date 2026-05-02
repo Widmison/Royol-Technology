@@ -8,7 +8,6 @@ import {
   Clock,
   Package,
   Star,
-  Quote,
   Phone,
   Mail,
   ExternalLink,
@@ -248,54 +247,38 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* NEW: CLIENT TESTIMONIALS */}
-      <section className="py-20 bg-mex-blue relative overflow-hidden">
-        <div className="absolute top-0 left-0 w-full h-full opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-black italic text-white uppercase mb-4">{t("testimonials.title")}</h2>
-            <p className="text-blue-200 font-medium max-w-2xl mx-auto">{t("testimonials.subtitle")}</p>
+      {/* Client testimonials — same visual language as “How it works” + FAQ */}
+      <section className="border-t border-gray-100 bg-gray-50 py-16 sm:py-20" aria-labelledby="testimonials-heading">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="mx-auto mb-12 max-w-2xl text-center">
+            <p className="text-xs font-black uppercase tracking-[0.28em] text-mex-orange/90">{t("testimonials.kicker")}</p>
+            <h2 id="testimonials-heading" className="mt-3 text-3xl font-black italic uppercase text-mex-blue sm:text-4xl">
+              {t("testimonials.title")}
+            </h2>
+            <p className="mt-3 text-sm font-medium text-gray-600 sm:text-base">{t("testimonials.subtitle")}</p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="bg-white rounded-2xl p-8 shadow-xl relative">
-              <Quote className="absolute top-6 right-6 h-10 w-10 text-gray-100" />
-              <div className="flex gap-1 mb-4">
-                {[...Array(5)].map((_, i) => (<Star key={i} className="h-5 w-5 fill-yellow-400 text-yellow-400" />))}
-              </div>
-              <p className="text-gray-600 mb-6 relative z-10 italic">
-                {t("testimonials.items.1.quote")}
-              </p>
-              <div className="font-bold text-mex-dark">- {t("testimonials.items.1.name")}</div>
-              <div className="text-xs text-gray-400">{t("testimonials.items.1.city")}</div>
-            </div>
-
-            <div className="bg-white rounded-2xl p-8 shadow-xl relative transform md:-translate-y-4">
-              <Quote className="absolute top-6 right-6 h-10 w-10 text-gray-100" />
-              <div className="flex gap-1 mb-4">
-                {[...Array(5)].map((_, i) => (<Star key={i} className="h-5 w-5 fill-yellow-400 text-yellow-400" />))}
-              </div>
-              <p className="text-gray-600 mb-6 relative z-10 italic">
-                {t("testimonials.items.2.quote")}
-              </p>
-              <div className="font-bold text-mex-dark">- {t("testimonials.items.2.name")}</div>
-              <div className="text-xs text-gray-400">{t("testimonials.items.2.city")}</div>
-            </div>
-
-            <div className="bg-white rounded-2xl p-8 shadow-xl relative">
-              <Quote className="absolute top-6 right-6 h-10 w-10 text-gray-100" />
-              <div className="flex gap-1 mb-4">
-                {[...Array(5)].map((_, i) => (<Star key={i} className="h-5 w-5 fill-yellow-400 text-yellow-400" />))}
-              </div>
-              <p className="text-gray-600 mb-6 relative z-10 italic">
-                {t("testimonials.items.3.quote")}
-              </p>
-              <div className="font-bold text-mex-dark">- {t("testimonials.items.3.name")}</div>
-              <div className="text-xs text-gray-400">{t("testimonials.items.3.city")}</div>
-            </div>
+          <div className="grid grid-cols-1 gap-6 sm:gap-8 md:grid-cols-3">
+            {(["1", "2", "3"] as const).map((id) => (
+              <figure
+                key={id}
+                className="group flex h-full flex-col rounded-2xl border border-gray-100 bg-white p-6 shadow-sm ring-1 ring-black/[0.02] transition-shadow duration-300 hover:shadow-md sm:p-7"
+              >
+                <div className="flex gap-0.5 pt-0.5" role="presentation" aria-hidden>
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} className="h-4 w-4 fill-amber-400 text-amber-400 transition group-hover:fill-amber-500" />
+                  ))}
+                </div>
+                <blockquote className="relative mt-5 flex-1 border-l-[3px] border-mex-orange pl-5">
+                  <p className="text-pretty text-sm leading-relaxed text-gray-700 sm:text-[15px] sm:leading-[1.65]">{t(`testimonials.items.${id}.quote`)}</p>
+                </blockquote>
+                <figcaption className="mt-8 border-t border-gray-100 pt-5">
+                  <p className="font-black leading-tight text-mex-dark">{t(`testimonials.items.${id}.name`)}</p>
+                  <p className="mt-1 text-[11px] font-bold uppercase tracking-wider text-gray-400">{t(`testimonials.items.${id}.city`)}</p>
+                </figcaption>
+              </figure>
+            ))}
           </div>
-
         </div>
       </section>
 

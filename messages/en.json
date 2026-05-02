@@ -219,8 +219,9 @@
       "cardLink": "Read service details"
     },
     "testimonials": {
-      "title": "What Our Clients Say",
-      "subtitle": "See why hundreds of clients trust MEX509 for their shipping needs.",
+      "kicker": "Client reviews",
+      "title": "What our clients say",
+      "subtitle": "Real feedback from shippers using MEX509 on USA, Dominican Republic, and Haiti lanes.",
       "items": {
         "1": {
           "quote": "Service is really fast. I shipped a laptop to my brother in Haiti and it arrived smoothly.",

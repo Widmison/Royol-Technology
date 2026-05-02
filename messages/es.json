@@ -197,8 +197,9 @@
       "cardLink": "Ver detalles de servicio"
     },
     "testimonials": {
+      "kicker": "Opiniones de clientes",
       "title": "Lo que dicen nuestros clientes",
-      "subtitle": "Por que tantos clientes confian en MEX509.",
+      "subtitle": "Comentarios reales sobre envios EE.UU., Republica Dominicana y Haiti.",
       "items": {
         "1": { "quote": "Servicio super rapido. Mi paquete llego sin problemas.", "name": "Jean Michel", "city": "Miami, FL" },
         "2": { "quote": "Muy profesionales y puntuales. Recomendado.", "name": "Sarah L.", "city": "Orlando, FL" },

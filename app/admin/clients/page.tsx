@@ -36,9 +36,7 @@ export default async function AdminClientsPage() {
         }))}
       />
 
-      <div className="overflow-x-hidden min-w-0">
-        <AdminUserManager initialUsers={allClients} />
-      </div>
+      <AdminUserManager initialUsers={allClients} />
     </div>
   );
 }

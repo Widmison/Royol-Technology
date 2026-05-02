@@ -123,9 +123,9 @@ export default function AdminUserManager({ initialUsers }: { initialUsers: any[]
         </button>
       </div>
 
-      {/* USERS TABLE — stacked cards on small screens, full table on large */}
+      {/* USERS TABLE — cards below xl (main column is narrow next to sidebar); full table from xl up */}
       <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden animate-in fade-in duration-500">
-        <div className="lg:hidden divide-y divide-gray-100">
+        <div className="xl:hidden divide-y divide-gray-100">
           {filteredUsers.length === 0 ? (
             <p className="p-8 text-center text-gray-500 font-medium">No clients found.</p>
           ) : (
@@ -196,16 +196,16 @@ export default function AdminUserManager({ initialUsers }: { initialUsers: any[]
           )}
         </div>
 
-        <div className="hidden lg:block overflow-x-auto overscroll-x-contain">
-          <table className="w-full text-left min-w-[880px]">
+        <div className="hidden xl:block overflow-x-auto overscroll-x-contain">
+          <table className="w-full table-fixed text-left">
             <thead className="bg-gray-50 text-gray-500 text-xs uppercase tracking-wider border-b border-gray-100">
               <tr>
-                <th className="p-5 font-bold">Client Name</th>
-                <th className="p-5 font-bold">Contact Info</th>
-                <th className="p-5 font-bold">Home Address</th>
-                <th className="p-5 font-bold">Status</th>
-                <th className="p-5 font-bold hidden md:table-cell">Date Joined</th>
-                <th className="p-5 font-bold text-right">Actions</th>
+                <th className="w-[17%] p-3 xl:p-4 font-bold align-bottom">Client Name</th>
+                <th className="w-[21%] p-3 xl:p-4 font-bold align-bottom">Contact Info</th>
+                <th className="w-[28%] p-3 xl:p-4 font-bold align-bottom">Home Address</th>
+                <th className="w-[12%] p-3 xl:p-4 font-bold align-bottom">Status</th>
+                <th className="w-[12%] p-3 xl:p-4 font-bold align-bottom hidden md:table-cell">Date Joined</th>
+                <th className="w-[10%] p-3 xl:p-4 font-bold text-right align-bottom">Actions</th>
               </tr>
             </thead>
             <tbody className="text-sm divide-y divide-gray-50">
@@ -217,52 +217,58 @@ export default function AdminUserManager({ initialUsers }: { initialUsers: any[]
                 </tr>
               ) : (
                 filteredUsers.map((u) => (
-                  <tr key={u.id} className="hover:bg-gray-50 transition-colors">
-                    <td className="p-5">
-                      <div className="font-black text-mex-dark text-base">
+                  <tr key={u.id} className="hover:bg-gray-50 transition-colors align-top">
+                    <td className="p-3 xl:p-4">
+                      <div className="break-words font-black text-mex-dark text-base">
                         {u.firstName} {u.lastName}
                       </div>
-                      <div className="text-xs text-gray-400 mt-1 font-medium">ID: {u.id.substring(0, 8)}...</div>
+                      <div className="text-xs text-gray-400 mt-1 font-medium break-all">
+                        ID: {u.id.substring(0, 8)}...
+                      </div>
                     </td>
-                    <td className="p-5">
-                      <div className="flex items-center gap-2 text-gray-600 font-medium mb-1">
-                        <Mail size={14} className="text-gray-400 shrink-0" />{" "}
-                        <span className="truncate w-32 md:w-auto block">{u.email}</span>
+                    <td className="p-3 xl:p-4 min-w-0">
+                      <div className="flex items-start gap-2 text-gray-600 font-medium mb-1 min-w-0">
+                        <Mail size={14} className="text-gray-400 shrink-0 mt-0.5" />
+                        <span className="break-all">{u.email}</span>
                       </div>
                       <div className="flex items-center gap-2 text-gray-600 font-medium">
-                        <Phone size={14} className="text-gray-400 shrink-0" /> {u.phone || "N/A"}
+                        <Phone size={14} className="text-gray-400 shrink-0" />{" "}
+                        <span className="break-all">{u.phone || "N/A"}</span>
                       </div>
                     </td>
-                    <td className="p-5">
-                      <div className="flex items-start gap-2 text-gray-600 font-medium">
+                    <td className="p-3 xl:p-4 min-w-0">
+                      <div className="flex items-start gap-2 text-gray-600 font-medium min-w-0">
                         <MapPin size={16} className="text-gray-400 shrink-0 mt-0.5" />
-                        <div>
-                          <div className="text-sm text-mex-dark font-bold">{u.address || "No address on file"}</div>
+                        <div className="min-w-0">
+                          <div className="break-words text-sm text-mex-dark font-bold">
+                            {u.address || "No address on file"}
+                          </div>
                           {(u.city || u.state || u.zipCode) && (
-                            <div className="text-xs text-gray-400">
+                            <div className="break-words text-xs text-gray-400">
                               {u.city}, {u.state} {u.zipCode}
                             </div>
                           )}
                         </div>
                       </div>
                     </td>
-                    <td className="p-5">
+                    <td className="p-3 xl:p-4">
                       {u.isVerified ? (
-                        <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider flex items-center gap-1 w-fit">
-                          <CheckCircle size={12} /> Verified
+                        <span className="bg-green-100 text-green-700 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider inline-flex items-center gap-1 w-fit max-w-full">
+                          <CheckCircle size={12} className="shrink-0" /> Verified
                         </span>
                       ) : (
-                        <span className="bg-orange-100 text-orange-700 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider flex items-center gap-1 w-fit">
-                          <AlertTriangle size={12} /> Pending
+                        <span className="bg-orange-100 text-orange-700 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider inline-flex items-center gap-1 w-fit max-w-full">
+                          <AlertTriangle size={12} className="shrink-0" /> Pending
                         </span>
                       )}
                     </td>
-                    <td className="p-5 text-gray-500 font-medium hidden md:table-cell">
+                    <td className="p-3 xl:p-4 text-gray-500 font-medium hidden md:table-cell">
                       <div className="flex items-center gap-2">
-                        <Calendar size={14} /> {new Date(u.createdAt).toLocaleDateString()}
+                        <Calendar size={14} className="shrink-0" />{" "}
+                        {new Date(u.createdAt).toLocaleDateString()}
                       </div>
                     </td>
-                    <td className="p-5 text-right space-x-2 whitespace-nowrap">
+                    <td className="p-3 xl:p-4 text-right space-x-2 whitespace-nowrap">
                       <button
                         onClick={() => openEditModal(u)}
                         className="p-2 bg-blue-50 text-mex-blue hover:bg-blue-100 rounded-lg transition-colors inline-block"

@@ -14,7 +14,7 @@ const googleConfigured =
 /**
  * Admin sign-in:
  * - Primary: `/api/admin/auth` (email + OTP) + `adminId` cookie
- * - Secondary: Google OAuth (allowlisted staff in `ADMIN_STAFF_REGISTRY` / DB ADMIN only)
+ * - Secondary: Google OAuth (`StaffAllowlistEntry` in DB / ADMIN only)
  */
 export const { handlers, auth, signIn, signOut } = NextAuth({
   trustHost: true,
@@ -55,7 +55,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if (account?.provider !== "google" || !user?.email) {
         return true;
       }
-      if (!isStaffEmailAllowed(user.email)) {
+      if (!(await isStaffEmailAllowed(user.email))) {
         return false;
       }
       const existing = await prisma.user.findFirst({

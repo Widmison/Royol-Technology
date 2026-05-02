@@ -96,7 +96,7 @@ async function handleCredentialsStep(ip: string, body: Body) {
     return NextResponse.json({ error: "Email and password are required." }, { status: 400 });
   }
 
-  const registry = getStaffRegistryEntry(canonical);
+  const registry = await getStaffRegistryEntry(canonical);
   const existing = await prisma.user.findFirst({
     where: { email: { equals: canonical, mode: "insensitive" } },
   });

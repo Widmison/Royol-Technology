@@ -90,6 +90,21 @@ model AdminLoginOtp {
   @@index([email])
 }
 
+/**
+ * Emails allowed to use the admin portal (sign-in + Google OAuth bootstrap).
+ * Managed in Settings by Web Dev only — replaces the old hardcoded registry.
+ */
+model StaffAllowlistEntry {
+  id        String         @id @default(cuid())
+  email     String         @unique
+  staffRole AdminStaffRole
+  roleLabel String         @default("")
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+
+  @@index([staffRole])
+}
+
 // 2. PRE-REGISTRATION / QUOTE FORM (What they fill out online)
 model ShipmentRequest {
   id               String        @id @default(cuid())

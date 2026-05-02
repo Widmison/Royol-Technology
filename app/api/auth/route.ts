@@ -183,7 +183,7 @@ export async function POST(req: Request) {
     let user;
 
     if (action === "signup") {
-      if (isAdminPortalLoginEmail(email)) {
+      if (await isAdminPortalLoginEmail(email)) {
         return NextResponse.json(
           { error: "This email is reserved for administrator sign-in." },
           { status: 400 }

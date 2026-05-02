@@ -1,4 +1,5 @@
-import { AdminStaffRole } from "@prisma/client";
+import type { AdminStaffRole } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 
 export type StaffRegistryEntry = {
   email: string;
@@ -6,30 +7,28 @@ export type StaffRegistryEntry = {
   roleLabel: string;
 };
 
-/** Approved admin portal identities — matched on email/password admin sign-in. */
-export const ADMIN_STAFF_REGISTRY: StaffRegistryEntry[] = [
-  {
-    email: "widmisonfrancois@royoltechnology.com",
-    staffRole: AdminStaffRole.WEB_DEV,
-    roleLabel: "Web Dev — full access",
-  },
-  {
-    email: "info@mex509.com",
-    staffRole: AdminStaffRole.ADMIN_TEAM,
-    roleLabel: "Admin team",
-  },
-];
-
 export function normalizeStaffEmail(email: string) {
   return email.trim().toLowerCase();
 }
 
-export function getStaffRegistryEntry(email: string): StaffRegistryEntry | undefined {
+/** Resolve allowlisted staff row from the database (case-insensitive email). */
+export async function getStaffRegistryEntry(email: string): Promise<StaffRegistryEntry | undefined> {
   const n = normalizeStaffEmail(email);
-  return ADMIN_STAFF_REGISTRY.find((e) => normalizeStaffEmail(e.email) === n);
+  const row = await prisma.staffAllowlistEntry.findFirst({
+    where: { email: { equals: n, mode: "insensitive" } },
+  });
+  if (!row) return undefined;
+  return {
+    email: row.email,
+    staffRole: row.staffRole,
+    roleLabel: row.roleLabel || "",
+  };
 }
 
-export function isStaffEmailAllowed(email: string): boolean {
-  return !!getStaffRegistryEntry(email);
+export async function isStaffEmailAllowed(email: string): Promise<boolean> {
+  const n = normalizeStaffEmail(email);
+  const count = await prisma.staffAllowlistEntry.count({
+    where: { email: { equals: n, mode: "insensitive" } },
+  });
+  return count > 0;
 }
-

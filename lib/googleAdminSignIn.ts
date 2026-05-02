@@ -18,7 +18,7 @@ export async function ensureGoogleAdminUser(emailRaw: string) {
     return existing;
   }
 
-  const registry = getStaffRegistryEntry(email);
+  const registry = await getStaffRegistryEntry(email);
   if (!registry) return null;
 
   const placeholder = randomBytes(32).toString("hex");

@@ -4,8 +4,8 @@ export function normalizeEmail(email: string) {
   return email.trim().toLowerCase();
 }
 
-/** Backward-compatible name — any email in the staff registry is reserved from the client portal. */
-export function isAdminPortalLoginEmail(email: string) {
+/** Any email on the staff allowlist is reserved from the client signup portal. */
+export async function isAdminPortalLoginEmail(email: string): Promise<boolean> {
   return isStaffEmailAllowed(email);
 }
 

@@ -10,10 +10,16 @@ import {
   Keyboard,
 } from "lucide-react";
 import AdminTwoFactorPanel from "@/components/admin/AdminTwoFactorPanel";
+import AdminStaffAllowlistPanel from "@/components/admin/AdminStaffAllowlistPanel";
+import { getAdminSessionUser } from "@/lib/serverSession";
+import { isWebDevPortalAdmin } from "@/lib/webDevAccess";
 
 export const dynamic = "force-dynamic";
 
-export default function AdminSettingsPage() {
+export default async function AdminSettingsPage() {
+  const admin = await getAdminSessionUser();
+  const showStaffAllowlist = isWebDevPortalAdmin(admin);
+
   return (
     <div className="space-y-6 sm:space-y-8 animate-in fade-in duration-300">
       <div>
@@ -22,6 +28,8 @@ export default function AdminSettingsPage() {
           Quick reference for docks, tools, and shortcuts. Bookmark this page on warehouse tablets.
         </p>
       </div>
+
+      {showStaffAllowlist ? <AdminStaffAllowlistPanel /> : null}
 
       <AdminTwoFactorPanel />
 

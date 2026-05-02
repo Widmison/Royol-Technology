@@ -2,11 +2,8 @@ import Image from "next/image";
 import Link from "next/link";
 // Added Star and Quote to the lucide-react import
 import {
-  ArrowRight,
   Search,
   MapPin,
-  Plane,
-  Ship,
   ShieldCheck,
   Clock,
   Package,
@@ -18,17 +15,12 @@ import {
   Truck,
   ClipboardList,
   CreditCard,
-  ShoppingCart,
-  MapPinned,
-  Warehouse,
 } from "lucide-react";
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import HomeJsonLd from "@/components/seo/HomeJsonLd";
 import { sharePreviewOgImage } from "@/lib/share-image";
-import ServicesHero from "@/components/services/ServicesHero";
 import HomeServicesCards from "@/components/home/HomeServicesCards";
-import { LOGISTICS_SERVICES, type LogisticsServiceId } from "@/lib/logistics-services";
 
 export const metadata: Metadata = {
   title: "Shipping USA, DR & China to Haiti",
@@ -50,15 +42,6 @@ export const metadata: Metadata = {
 
 export default async function Home() {
   const t = await getTranslations("Home");
-  const tServices = await getTranslations("Services");
-
-  const serviceIconMap: Record<LogisticsServiceId, React.ComponentType<{ className?: string }>> = {
-    "us-ht": Plane,
-    "dr-ht": Ship,
-    shopping: ShoppingCart,
-    local: MapPinned,
-    warehouse: Warehouse,
-  };
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -136,71 +119,6 @@ export default async function Home() {
             </Link>
             .
           </p>
-        </div>
-      </section>
-
-      <section className="border-y border-gray-100 bg-white py-10 sm:py-14">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <ServicesHero />
-        </div>
-      </section>
-
-      <section className="bg-[#fafbfc] py-12 sm:py-16">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="mx-auto mb-10 max-w-3xl text-center">
-            <p className="text-[11px] font-black uppercase tracking-[0.2em] text-mex-blue/80">{tServices("hero.badge")}</p>
-            <h2 className="mt-2 text-3xl font-black uppercase italic tracking-tight text-mex-blue sm:text-4xl">
-              {tServices("capabilitiesTitle")}
-            </h2>
-            <p className="mt-4 text-sm font-medium leading-relaxed text-gray-600 sm:text-base">
-              {tServices("capabilitiesSub")}
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 lg:gap-8">
-            {LOGISTICS_SERVICES.map((service, index) => {
-              const Icon = serviceIconMap[service.id];
-              return (
-                <article
-                  key={service.id}
-                  className="group relative flex flex-col overflow-hidden rounded-3xl border border-gray-100 bg-white p-7 shadow-[0_2px_24px_-4px_rgba(15,23,42,0.08)] transition duration-300 hover:-translate-y-1 hover:border-mex-blue/15 hover:shadow-[0_24px_48px_-12px_rgba(29,59,142,0.15)]"
-                >
-                  <span
-                    className="absolute right-6 top-6 font-black tabular-nums text-5xl leading-none text-gray-100 transition group-hover:text-blue-50"
-                    aria-hidden
-                  >
-                    {String(index + 1).padStart(2, "0")}
-                  </span>
-                  <div className="relative mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-50 to-white shadow-inner ring-1 ring-mex-blue/10">
-                    <Icon className="h-7 w-7 text-mex-blue" />
-                  </div>
-                  <h3 className="relative text-xl font-black leading-snug text-mex-dark">{tServices(`catalog.${service.id}.title`)}</h3>
-                  <p className="relative mt-3 flex-grow text-sm font-medium leading-relaxed text-gray-600">
-                    {tServices(`catalog.${service.id}.description`)}
-                  </p>
-                  <div className="relative mt-6 border-t border-gray-50 pt-5">
-                    {service.external ? (
-                      <a
-                        href={service.actionHref}
-                        className="inline-flex items-center gap-2 font-black text-mex-orange transition hover:gap-3"
-                      >
-                        {tServices("startNow")}
-                        <ArrowRight className="h-5 w-5" strokeWidth={2.5} aria-hidden />
-                      </a>
-                    ) : (
-                      <Link
-                        href={service.actionHref}
-                        className="inline-flex items-center gap-2 font-black text-mex-orange transition hover:gap-3"
-                      >
-                        {tServices("startNow")}
-                        <ArrowRight className="h-5 w-5" strokeWidth={2.5} aria-hidden />
-                      </Link>
-                    )}
-                  </div>
-                </article>
-              );
-            })}
-          </div>
         </div>
       </section>
 

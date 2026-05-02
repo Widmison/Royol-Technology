@@ -41,6 +41,20 @@ export async function PATCH(req: Request) {
       return NextResponse.json({ ok: true });
     }
 
+    if (body.markUnread) {
+      if (ids.length === 0) {
+        return NextResponse.json({ error: "No ids provided." }, { status: 400 });
+      }
+      await prisma.appNotification.updateMany({
+        where: {
+          userId: userOrRes.id,
+          id: { in: ids },
+        },
+        data: { readAt: null },
+      });
+      return NextResponse.json({ ok: true });
+    }
+
     if (ids.length === 0) {
       return NextResponse.json({ error: "No ids provided." }, { status: 400 });
     }

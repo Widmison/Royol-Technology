@@ -47,6 +47,7 @@
       "shipments": "All shipments",
       "invoices": "Billing & invoices",
       "external": "Add tracking",
+      "pickup": "Pickup request",
       "info": "Information",
       "pricing": "Pricing & services",
       "addressHelp": "US address help",
@@ -74,6 +75,85 @@
     "pricing": {
       "visualsTitle": "Service highlights",
       "visualsSub": "A quick look at lanes, trust, and delivery—then your full rate cards below."
+    },
+    "page": {
+      "loadingTracking": "Loading tracking...",
+      "overview": {
+        "preRegisterBox": "Pre-register a box",
+        "liveTracking": "Live tracking",
+        "quickLinks": "Quick links",
+        "linkTracking": "Tracking",
+        "linkFullShipments": "Full shipment history",
+        "linkBilling": "Billing & invoices",
+        "linkProfile": "Profile & address",
+        "account": "Account",
+        "editProfile": "Edit profile",
+        "actionRequiredUnpaid": "Action Required: Unpaid Invoices",
+        "payInvoice": "Pay Invoice",
+        "allRegistrations": "All registrations & shipments",
+        "allRegistrationsSub": "Full list — same data as Shipment History, including dates, categories, invoices, and live package status.",
+        "openDedicatedHistory": "Open dedicated history view",
+        "stats": {
+          "registrations": "Registrations",
+          "allTimeRequests": "All-time requests",
+          "openHistory": "Open history",
+          "awaitingDropoff": "Awaiting drop-off",
+          "bringCargo": "Bring cargo to warehouse",
+          "filterList": "Filter list",
+          "unpaidInvoices": "Unpaid invoices",
+          "allClear": "All clear",
+          "billing": "Billing",
+          "inNetwork": "In our network",
+          "notDeliveredYet": "Packages not delivered yet",
+          "delivered": "Delivered",
+          "completedJourneys": "Completed journeys",
+          "paidVia": "Paid via MEX509",
+          "lifetimePaid": "Lifetime invoice total (paid)",
+          "paidInvoices": "Paid invoices"
+        },
+        "table": {
+          "registered": "Registered",
+          "route": "Route",
+          "contents": "Contents",
+          "officeStatus": "Office status",
+          "packageTracking": "Package / tracking",
+          "invoice": "Invoice",
+          "dropoff": "Drop-off",
+          "id": "ID",
+          "noShipments": "No shipments yet. Pre-register a box to get started.",
+          "noShipmentsShort": "No shipments yet.",
+          "awaitingWarehouseIntake": "Awaiting warehouse intake",
+          "notInvoicedYet": "Not invoiced yet",
+          "payNow": "Pay now",
+          "notInvoiced": "Not invoiced",
+          "package": "Package",
+          "tracking": "Tracking"
+        }
+      },
+      "shipments": {
+        "title": "Shipment History",
+        "subtitle": "Every package you have ever shipped with MEX509.",
+        "showing": "Showing",
+        "clearFilter": "Clear filter — show all",
+        "noneFound": "No shipments found.",
+        "noneMatch": "No shipments match this filter.",
+        "showAll": "Show all shipments"
+      },
+      "invoices": {
+        "title": "Billing & Invoices",
+        "subtitle": "Review your payment history and outstanding balances.",
+        "showing": "Showing",
+        "clearFilter": "Clear filter — show all",
+        "noneGenerated": "No invoices generated yet.",
+        "noneMatch": "No invoices match this filter.",
+        "showAll": "Show all invoices",
+        "paid": "Paid",
+        "payNow": "Pay Now"
+      },
+      "profile": {
+        "title": "Profile & Settings",
+        "subtitle": "Update your personal information and delivery address."
+      }
     }
   },
   "Home": {

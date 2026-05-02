@@ -47,6 +47,7 @@
       "shipments": "Todos los envios",
       "invoices": "Facturacion",
       "external": "Agregar rastreo",
+      "pickup": "Solicitud de recogida",
       "info": "Informacion",
       "pricing": "Precios y servicios",
       "addressHelp": "Ayuda direccion US",
@@ -74,6 +75,85 @@
     "pricing": {
       "visualsTitle": "Destacados del servicio",
       "visualsSub": "Un vistazo rapido; abajo estan las tarifas completas."
+    },
+    "page": {
+      "loadingTracking": "Cargando rastreo...",
+      "overview": {
+        "preRegisterBox": "Pre-registrar caja",
+        "liveTracking": "Rastreo en vivo",
+        "quickLinks": "Accesos rapidos",
+        "linkTracking": "Rastreo",
+        "linkFullShipments": "Historial completo de envios",
+        "linkBilling": "Facturacion e invoices",
+        "linkProfile": "Perfil y direccion",
+        "account": "Cuenta",
+        "editProfile": "Editar perfil",
+        "actionRequiredUnpaid": "Accion requerida: facturas pendientes",
+        "payInvoice": "Pagar factura",
+        "allRegistrations": "Todos los registros y envios",
+        "allRegistrationsSub": "Lista completa con fechas, categorias, facturas y estado en vivo del paquete.",
+        "openDedicatedHistory": "Abrir historial completo",
+        "stats": {
+          "registrations": "Registros",
+          "allTimeRequests": "Solicitudes historicas",
+          "openHistory": "Abrir historial",
+          "awaitingDropoff": "Pendiente de entrega",
+          "bringCargo": "Lleva la carga al almacen",
+          "filterList": "Filtrar lista",
+          "unpaidInvoices": "Facturas pendientes",
+          "allClear": "Todo al dia",
+          "billing": "Facturacion",
+          "inNetwork": "En nuestra red",
+          "notDeliveredYet": "Paquetes no entregados",
+          "delivered": "Entregados",
+          "completedJourneys": "Entregas completadas",
+          "paidVia": "Pagado via MEX509",
+          "lifetimePaid": "Total historico pagado",
+          "paidInvoices": "Facturas pagadas"
+        },
+        "table": {
+          "registered": "Registrado",
+          "route": "Ruta",
+          "contents": "Contenido",
+          "officeStatus": "Estado de oficina",
+          "packageTracking": "Paquete / rastreo",
+          "invoice": "Factura",
+          "dropoff": "Entrega",
+          "id": "ID",
+          "noShipments": "Aun no hay envios. Pre-registra una caja para comenzar.",
+          "noShipmentsShort": "Aun no hay envios.",
+          "awaitingWarehouseIntake": "Esperando recepcion en almacen",
+          "notInvoicedYet": "Aun sin factura",
+          "payNow": "Pagar ahora",
+          "notInvoiced": "Sin factura",
+          "package": "Paquete",
+          "tracking": "Rastreo"
+        }
+      },
+      "shipments": {
+        "title": "Historial de envios",
+        "subtitle": "Todos los paquetes que has enviado con MEX509.",
+        "showing": "Mostrando",
+        "clearFilter": "Limpiar filtro — mostrar todo",
+        "noneFound": "No se encontraron envios.",
+        "noneMatch": "Ningun envio coincide con este filtro.",
+        "showAll": "Mostrar todos los envios"
+      },
+      "invoices": {
+        "title": "Facturacion e invoices",
+        "subtitle": "Revisa tu historial de pagos y saldos pendientes.",
+        "showing": "Mostrando",
+        "clearFilter": "Limpiar filtro — mostrar todo",
+        "noneGenerated": "Aun no se han generado facturas.",
+        "noneMatch": "Ninguna factura coincide con este filtro.",
+        "showAll": "Mostrar todas las facturas",
+        "paid": "Pagado",
+        "payNow": "Pagar ahora"
+      },
+      "profile": {
+        "title": "Perfil y configuracion",
+        "subtitle": "Actualiza tu informacion personal y direccion de entrega."
+      }
     }
   },
   "Home": {

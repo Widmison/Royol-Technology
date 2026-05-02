@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useLocale } from "next-intl";
 import { Languages } from "lucide-react";
 import { locales, type AppLocale } from "@/i18n/routing";
@@ -11,7 +10,6 @@ function setLocaleCookie(next: AppLocale) {
 
 export default function LanguageSelector({ compact = false }: { compact?: boolean }) {
   const locale = useLocale() as AppLocale;
-  const router = useRouter();
 
   return (
     <label
@@ -26,7 +24,7 @@ export default function LanguageSelector({ compact = false }: { compact?: boolea
         onChange={(e) => {
           const v = e.target.value as AppLocale;
           setLocaleCookie(v);
-          router.refresh();
+          window.location.reload();
         }}
         className="bg-transparent text-xs font-black uppercase text-mex-dark outline-none"
       >

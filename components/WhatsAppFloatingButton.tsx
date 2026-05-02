@@ -5,7 +5,7 @@ import Image from "next/image";
 import { useTranslations } from "next-intl";
 
 const WHATSAPP_HT = "https://wa.link/ckduxz";
-const WHATSAPP_DR = "https://wa.link/l83463";
+const WHATSAPP_DR = "https://wa.link/yhoclq";
 
 export default function WhatsAppFloatingButton() {
   const t = useTranslations("WhatsApp");

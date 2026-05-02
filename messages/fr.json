@@ -47,6 +47,7 @@
       "shipments": "Toutes les expeditions",
       "invoices": "Factures",
       "external": "Tracking externe",
+      "pickup": "Demande de ramassage",
       "info": "Informations",
       "pricing": "Tarifs & services",
       "addressHelp": "Adresse US (aide)",
@@ -74,6 +75,85 @@
     "pricing": {
       "visualsTitle": "Apercu des services",
       "visualsSub": "Un apercu rapide, puis le detail des tarifs ci-dessous."
+    },
+    "page": {
+      "loadingTracking": "Chargement du suivi...",
+      "overview": {
+        "preRegisterBox": "Pre-enregistrer un colis",
+        "liveTracking": "Suivi en direct",
+        "quickLinks": "Liens rapides",
+        "linkTracking": "Suivi",
+        "linkFullShipments": "Historique complet",
+        "linkBilling": "Factures",
+        "linkProfile": "Profil et adresse",
+        "account": "Compte",
+        "editProfile": "Modifier le profil",
+        "actionRequiredUnpaid": "Action requise : factures impayees",
+        "payInvoice": "Payer la facture",
+        "allRegistrations": "Tous les enregistrements et expeditions",
+        "allRegistrationsSub": "Liste complete avec dates, categories, factures et statut en direct.",
+        "openDedicatedHistory": "Ouvrir l'historique detaille",
+        "stats": {
+          "registrations": "Enregistrements",
+          "allTimeRequests": "Demandes totales",
+          "openHistory": "Ouvrir l'historique",
+          "awaitingDropoff": "En attente de depot",
+          "bringCargo": "Apportez la cargaison a l'entrepot",
+          "filterList": "Filtrer la liste",
+          "unpaidInvoices": "Factures impayees",
+          "allClear": "Tout est regle",
+          "billing": "Facturation",
+          "inNetwork": "Dans notre reseau",
+          "notDeliveredYet": "Colis non livres",
+          "delivered": "Livres",
+          "completedJourneys": "Livraisons terminees",
+          "paidVia": "Paye via MEX509",
+          "lifetimePaid": "Total facture paye (a vie)",
+          "paidInvoices": "Factures payees"
+        },
+        "table": {
+          "registered": "Enregistre",
+          "route": "Route",
+          "contents": "Contenu",
+          "officeStatus": "Statut bureau",
+          "packageTracking": "Colis / suivi",
+          "invoice": "Facture",
+          "dropoff": "Depot",
+          "id": "ID",
+          "noShipments": "Aucune expedition. Pre-enregistrez un colis pour commencer.",
+          "noShipmentsShort": "Aucune expedition.",
+          "awaitingWarehouseIntake": "En attente de reception entrepot",
+          "notInvoicedYet": "Pas encore facture",
+          "payNow": "Payer",
+          "notInvoiced": "Non facture",
+          "package": "Colis",
+          "tracking": "Suivi"
+        }
+      },
+      "shipments": {
+        "title": "Historique des expeditions",
+        "subtitle": "Tous vos colis expedies avec MEX509.",
+        "showing": "Affichage",
+        "clearFilter": "Retirer le filtre — tout afficher",
+        "noneFound": "Aucune expedition trouvee.",
+        "noneMatch": "Aucune expedition ne correspond a ce filtre.",
+        "showAll": "Afficher toutes les expeditions"
+      },
+      "invoices": {
+        "title": "Facturation et factures",
+        "subtitle": "Consultez vos paiements et soldes en attente.",
+        "showing": "Affichage",
+        "clearFilter": "Retirer le filtre — tout afficher",
+        "noneGenerated": "Aucune facture generee pour le moment.",
+        "noneMatch": "Aucune facture ne correspond a ce filtre.",
+        "showAll": "Afficher toutes les factures",
+        "paid": "Payee",
+        "payNow": "Payer"
+      },
+      "profile": {
+        "title": "Profil et parametres",
+        "subtitle": "Mettez a jour vos informations personnelles et adresse de livraison."
+      }
     }
   },
   "Home": {

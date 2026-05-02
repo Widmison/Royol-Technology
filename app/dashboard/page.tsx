@@ -107,6 +107,7 @@ export default async function ClientDashboardPage({
   if (!user) redirect("/login");
 
   const tSidebar = await getTranslations("Dashboard.sidebar");
+  const tPage = await getTranslations("Dashboard.page");
 
   const unpaidInvoices = user.requests.filter((req: any) => req.invoice?.status === "UNPAID");
 
@@ -254,7 +255,7 @@ export default async function ClientDashboardPage({
                 : "text-gray-400 hover:bg-white/5 hover:text-white"
             }`}
           >
-            <Package size={20} /> Pickup request
+            <Package size={20} /> {tSidebar("pickup")}
           </Link>
 
           <div className="pt-4 mt-4 border-t border-gray-800">
@@ -314,7 +315,7 @@ export default async function ClientDashboardPage({
             <Suspense
               fallback={
                 <div className="rounded-2xl border border-gray-100 bg-white p-10 text-center text-sm font-medium text-gray-500">
-                  Loading tracking…
+                  {tPage("loadingTracking")}
                 </div>
               }
             >
@@ -343,13 +344,13 @@ export default async function ClientDashboardPage({
                     href="/dashboard?tab=new-box"
                     className="flex items-center justify-center gap-2 whitespace-nowrap rounded-xl bg-mex-orange px-6 py-4 font-black text-white shadow-lg shadow-orange-500/30 transition-all hover:bg-orange-700"
                   >
-                    <Plus size={20} /> Pre-register a box
+                    <Plus size={20} /> {tPage("overview.preRegisterBox")}
                   </Link>
                   <Link
                     href="/dashboard?tab=tracking"
                     className="flex items-center justify-center gap-2 whitespace-nowrap rounded-xl border border-gray-200 bg-gray-50 px-6 py-4 font-bold text-mex-dark hover:bg-gray-100"
                   >
-                    <Search size={18} /> Live tracking
+                    <Search size={18} /> {tPage("overview.liveTracking")}
                   </Link>
                 </div>
               </div>
@@ -361,13 +362,13 @@ export default async function ClientDashboardPage({
                   aria-label="View all registrations in shipment history"
                   className="group rounded-2xl border border-gray-100 bg-white p-4 shadow-sm transition hover:border-mex-blue/30 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-mex-orange focus-visible:ring-offset-2"
                 >
-                  <p className="text-[10px] font-black uppercase tracking-wider text-gray-400">Registrations</p>
+                  <p className="text-[10px] font-black uppercase tracking-wider text-gray-400">{tPage("overview.stats.registrations")}</p>
                   <p className="mt-2 text-2xl font-black text-mex-dark group-hover:text-mex-blue">
                     {overviewStats.totalRequests}
                   </p>
-                  <p className="mt-1 text-xs font-medium text-gray-500">All-time requests</p>
+                  <p className="mt-1 text-xs font-medium text-gray-500">{tPage("overview.stats.allTimeRequests")}</p>
                   <p className="mt-2 text-[10px] font-bold text-mex-blue opacity-0 transition group-hover:opacity-100">
-                    Open history →
+                    {tPage("overview.stats.openHistory")} →
                   </p>
                 </Link>
                 <Link
@@ -376,11 +377,11 @@ export default async function ClientDashboardPage({
                   aria-label="View shipments awaiting warehouse drop-off"
                   className="group rounded-2xl border border-amber-100 bg-amber-50/60 p-4 shadow-sm transition hover:border-amber-300 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-mex-orange focus-visible:ring-offset-2"
                 >
-                  <p className="text-[10px] font-black uppercase tracking-wider text-amber-800/80">Awaiting drop-off</p>
+                  <p className="text-[10px] font-black uppercase tracking-wider text-amber-800/80">{tPage("overview.stats.awaitingDropoff")}</p>
                   <p className="mt-2 text-2xl font-black text-amber-950">{overviewStats.pendingDropoff}</p>
-                  <p className="mt-1 text-xs font-medium text-amber-900/70">Bring cargo to warehouse</p>
+                  <p className="mt-1 text-xs font-medium text-amber-900/70">{tPage("overview.stats.bringCargo")}</p>
                   <p className="mt-2 text-[10px] font-bold text-amber-900 opacity-0 transition group-hover:opacity-100">
-                    Filter list →
+                    {tPage("overview.stats.filterList")} →
                   </p>
                 </Link>
                 <Link
@@ -389,17 +390,17 @@ export default async function ClientDashboardPage({
                   aria-label="View unpaid invoices"
                   className="group rounded-2xl border border-orange-100 bg-orange-50/50 p-4 shadow-sm transition hover:border-orange-200 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-mex-orange focus-visible:ring-offset-2"
                 >
-                  <p className="text-[10px] font-black uppercase tracking-wider text-orange-900/70">Unpaid invoices</p>
+                  <p className="text-[10px] font-black uppercase tracking-wider text-orange-900/70">{tPage("overview.stats.unpaidInvoices")}</p>
                   <p className="mt-2 text-2xl font-black text-mex-dark">{overviewStats.awaitingPayment}</p>
                   <p className="mt-1 text-xs font-medium text-gray-600">
                     {overviewStats.unpaidTotal > 0 ? (
                       <span className="font-bold text-red-600">${overviewStats.unpaidTotal.toFixed(2)} due</span>
                     ) : (
-                      "All clear"
+                      tPage("overview.stats.allClear")
                     )}
                   </p>
                   <p className="mt-2 text-[10px] font-bold text-mex-orange opacity-0 transition group-hover:opacity-100">
-                    Billing →
+                    {tPage("overview.stats.billing")} →
                   </p>
                 </Link>
                 <Link
@@ -408,11 +409,11 @@ export default async function ClientDashboardPage({
                   aria-label="View packages still moving through the network"
                   className="group rounded-2xl border border-blue-100 bg-blue-50/50 p-4 shadow-sm transition hover:border-mex-blue/40 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-mex-orange focus-visible:ring-offset-2"
                 >
-                  <p className="text-[10px] font-black uppercase tracking-wider text-mex-blue">In our network</p>
+                  <p className="text-[10px] font-black uppercase tracking-wider text-mex-blue">{tPage("overview.stats.inNetwork")}</p>
                   <p className="mt-2 text-2xl font-black text-mex-dark">{overviewStats.activeInNetwork}</p>
-                  <p className="mt-1 text-xs font-medium text-gray-600">Packages not delivered yet</p>
+                  <p className="mt-1 text-xs font-medium text-gray-600">{tPage("overview.stats.notDeliveredYet")}</p>
                   <p className="mt-2 text-[10px] font-bold text-mex-blue opacity-0 transition group-hover:opacity-100">
-                    Filter list →
+                    {tPage("overview.stats.filterList")} →
                   </p>
                 </Link>
                 <Link
@@ -421,11 +422,11 @@ export default async function ClientDashboardPage({
                   aria-label="View delivered shipments"
                   className="group rounded-2xl border border-green-100 bg-green-50/50 p-4 shadow-sm transition hover:border-green-200 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-mex-orange focus-visible:ring-offset-2"
                 >
-                  <p className="text-[10px] font-black uppercase tracking-wider text-green-800/80">Delivered</p>
+                  <p className="text-[10px] font-black uppercase tracking-wider text-green-800/80">{tPage("overview.stats.delivered")}</p>
                   <p className="mt-2 text-2xl font-black text-green-900">{overviewStats.delivered}</p>
-                  <p className="mt-1 text-xs font-medium text-green-800/80">Completed journeys</p>
+                  <p className="mt-1 text-xs font-medium text-green-800/80">{tPage("overview.stats.completedJourneys")}</p>
                   <p className="mt-2 text-[10px] font-bold text-green-800 opacity-0 transition group-hover:opacity-100">
-                    Filter list →
+                    {tPage("overview.stats.filterList")} →
                   </p>
                 </Link>
                 <Link
@@ -434,25 +435,25 @@ export default async function ClientDashboardPage({
                   aria-label="View paid invoices and payment history"
                   className="group col-span-2 flex flex-col rounded-2xl border border-gray-700 bg-gradient-to-br from-mex-dark to-gray-900 p-4 text-white shadow-sm transition hover:ring-2 hover:ring-white/25 focus:outline-none focus-visible:ring-2 focus-visible:ring-mex-orange focus-visible:ring-offset-2 lg:col-span-1 xl:col-span-1"
                 >
-                  <p className="text-[10px] font-black uppercase tracking-wider text-white/60">Paid via MEX509</p>
+                  <p className="text-[10px] font-black uppercase tracking-wider text-white/60">{tPage("overview.stats.paidVia")}</p>
                   <p className="mt-2 text-2xl font-black">${overviewStats.paidLifetime.toFixed(2)}</p>
-                  <p className="mt-1 text-xs font-medium text-white/70">Lifetime invoice total (paid)</p>
+                  <p className="mt-1 text-xs font-medium text-white/70">{tPage("overview.stats.lifetimePaid")}</p>
                   <p className="mt-auto pt-2 text-[10px] font-bold text-white/90 opacity-0 transition group-hover:opacity-100">
-                    Paid invoices →
+                    {tPage("overview.stats.paidInvoices")} →
                   </p>
                 </Link>
               </div>
 
               <div className="grid gap-4 lg:grid-cols-3">
                 <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm lg:col-span-2">
-                  <h2 className="mb-4 text-xs font-black uppercase tracking-wider text-gray-400">Quick links</h2>
+                  <h2 className="mb-4 text-xs font-black uppercase tracking-wider text-gray-400">{tPage("overview.quickLinks")}</h2>
                   <div className="flex flex-wrap gap-2">
                     <Link
                       href="/dashboard?tab=tracking"
                       className="inline-flex items-center gap-2 rounded-xl bg-gray-50 px-4 py-2.5 text-sm font-bold text-mex-dark ring-1 ring-gray-100 hover:bg-gray-100"
                     >
                       <Search size={16} className="text-mex-orange" />
-                      Tracking
+                      {tPage("overview.linkTracking")}
                       <ArrowRight size={14} className="text-gray-400" />
                     </Link>
                     <Link
@@ -460,7 +461,7 @@ export default async function ClientDashboardPage({
                       className="inline-flex items-center gap-2 rounded-xl bg-gray-50 px-4 py-2.5 text-sm font-bold text-mex-dark ring-1 ring-gray-100 hover:bg-gray-100"
                     >
                       <Package size={16} className="text-mex-blue" />
-                      Full shipment history
+                      {tPage("overview.linkFullShipments")}
                       <ArrowRight size={14} className="text-gray-400" />
                     </Link>
                     <Link
@@ -468,7 +469,7 @@ export default async function ClientDashboardPage({
                       className="inline-flex items-center gap-2 rounded-xl bg-gray-50 px-4 py-2.5 text-sm font-bold text-mex-dark ring-1 ring-gray-100 hover:bg-gray-100"
                     >
                       <Receipt size={16} className="text-mex-orange" />
-                      Billing & invoices
+                      {tPage("overview.linkBilling")}
                       <ArrowRight size={14} className="text-gray-400" />
                     </Link>
                     <Link
@@ -476,13 +477,13 @@ export default async function ClientDashboardPage({
                       className="inline-flex items-center gap-2 rounded-xl bg-gray-50 px-4 py-2.5 text-sm font-bold text-mex-dark ring-1 ring-gray-100 hover:bg-gray-100"
                     >
                       <Settings size={16} className="text-gray-500" />
-                      Profile & address
+                      {tPage("overview.linkProfile")}
                       <ArrowRight size={14} className="text-gray-400" />
                     </Link>
                   </div>
                 </div>
                 <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
-                  <h2 className="mb-3 text-xs font-black uppercase tracking-wider text-gray-400">Account</h2>
+                  <h2 className="mb-3 text-xs font-black uppercase tracking-wider text-gray-400">{tPage("overview.account")}</h2>
                   <ul className="space-y-3 text-sm">
                     <li className="flex gap-3">
                       <Mail size={18} className="mt-0.5 shrink-0 text-gray-400" />
@@ -508,7 +509,7 @@ export default async function ClientDashboardPage({
                     href="/dashboard?tab=profile"
                     className="mt-4 inline-flex text-sm font-bold text-mex-blue hover:underline"
                   >
-                    Edit profile
+                    {tPage("overview.editProfile")}
                   </Link>
                 </div>
               </div>
@@ -517,7 +518,7 @@ export default async function ClientDashboardPage({
 
               {unpaidInvoices.length > 0 && (
                 <div className="mb-8">
-                  <h2 className="text-lg font-black text-mex-dark mb-4 flex items-center gap-2"><AlertCircle className="text-red-500" /> Action Required: Unpaid Invoices</h2>
+                  <h2 className="text-lg font-black text-mex-dark mb-4 flex items-center gap-2"><AlertCircle className="text-red-500" /> {tPage("overview.actionRequiredUnpaid")}</h2>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {unpaidInvoices.map((req: any) => (
                       <div key={req.id} className="bg-white border-l-4 border-l-red-500 rounded-2xl p-6 flex flex-col sm:flex-row justify-between sm:items-center gap-4 shadow-sm">
@@ -532,7 +533,7 @@ export default async function ClientDashboardPage({
                           <div className="text-2xl font-black text-red-600 mt-1">${req.invoice?.totalAmount.toFixed(2)}</div>
                         </div>
                         <Link href={`/pay/${req.invoice?.id}`} className="bg-red-500 text-white px-6 py-3 rounded-xl font-bold hover:bg-red-600 transition-colors shadow-md text-center">
-                          Pay Invoice
+                          {tPage("overview.payInvoice")}
                         </Link>
                       </div>
                     ))}
@@ -543,18 +544,15 @@ export default async function ClientDashboardPage({
               <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                 <div>
                   <h2 className="text-lg font-black text-mex-dark flex items-center gap-2">
-                    <Package className="text-mex-blue" /> All registrations & shipments
+                    <Package className="text-mex-blue" /> {tPage("overview.allRegistrations")}
                   </h2>
-                  <p className="mt-1 text-sm font-medium text-gray-500">
-                    Full list — same data as Shipment History, including dates, categories, invoices, and live package
-                    status.
-                  </p>
+                  <p className="mt-1 text-sm font-medium text-gray-500">{tPage("overview.allRegistrationsSub")}</p>
                 </div>
                 <Link
                   href="/dashboard?tab=shipments"
                   className="shrink-0 text-sm font-bold text-mex-blue hover:underline"
                 >
-                  Open dedicated history view →
+                  {tPage("overview.openDedicatedHistory")} →
                 </Link>
               </div>
 
@@ -563,21 +561,21 @@ export default async function ClientDashboardPage({
                   <table className="w-full min-w-[980px] text-left">
                     <thead className="border-b border-gray-100 bg-gray-50 text-xs font-black uppercase tracking-wider text-gray-500">
                       <tr>
-                        <th className="whitespace-nowrap p-4 pl-5">Registered</th>
-                        <th className="min-w-[140px] p-4">Route</th>
-                        <th className="min-w-[120px] p-4">Contents</th>
-                        <th className="min-w-[130px] p-4">Office status</th>
-                        <th className="min-w-[160px] p-4">Package / tracking</th>
-                        <th className="min-w-[120px] p-4">Invoice</th>
-                        <th className="min-w-[160px] p-4">Drop-off</th>
-                        <th className="whitespace-nowrap p-4 pr-5 text-right">ID</th>
+                        <th className="whitespace-nowrap p-4 pl-5">{tPage("overview.table.registered")}</th>
+                        <th className="min-w-[140px] p-4">{tPage("overview.table.route")}</th>
+                        <th className="min-w-[120px] p-4">{tPage("overview.table.contents")}</th>
+                        <th className="min-w-[130px] p-4">{tPage("overview.table.officeStatus")}</th>
+                        <th className="min-w-[160px] p-4">{tPage("overview.table.packageTracking")}</th>
+                        <th className="min-w-[120px] p-4">{tPage("overview.table.invoice")}</th>
+                        <th className="min-w-[160px] p-4">{tPage("overview.table.dropoff")}</th>
+                        <th className="whitespace-nowrap p-4 pr-5 text-right">{tPage("overview.table.id")}</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-50 text-sm">
                       {requests.length === 0 ? (
                         <tr>
                           <td colSpan={8} className="p-10 text-center font-medium text-gray-500">
-                            No shipments yet. Pre-register a box to get started.
+                            {tPage("overview.table.noShipments")}
                           </td>
                         </tr>
                       ) : (
@@ -606,12 +604,12 @@ export default async function ClientDashboardPage({
                                   {packageStatusShortLabel(req.package.status)}
                                 </span>
                               ) : (
-                                <span className="text-xs font-medium text-gray-400">Awaiting warehouse intake</span>
+                                <span className="text-xs font-medium text-gray-400">{tPage("overview.table.awaitingWarehouseIntake")}</span>
                               )}
                             </td>
                             <td className="p-4">
                               {!req.invoice ? (
-                                <span className="text-xs font-medium text-gray-400">Not invoiced yet</span>
+                                <span className="text-xs font-medium text-gray-400">{tPage("overview.table.notInvoicedYet")}</span>
                               ) : req.invoice.status === "UNPAID" ? (
                                 <div className="flex flex-col gap-1">
                                   <span className="font-black text-red-600">${Number(req.invoice.totalAmount).toFixed(2)}</span>
@@ -619,7 +617,7 @@ export default async function ClientDashboardPage({
                                     href={`/pay/${req.invoice.id}`}
                                     className="inline-flex w-fit items-center gap-1 text-xs font-bold text-mex-orange hover:underline"
                                   >
-                                    <CreditCard size={12} /> Pay now
+                                    <CreditCard size={12} /> {tPage("overview.table.payNow")}
                                   </Link>
                                 </div>
                               ) : (
@@ -647,7 +645,7 @@ export default async function ClientDashboardPage({
 
                 <div className="space-y-4 p-4 md:hidden">
                   {requests.length === 0 ? (
-                    <p className="py-8 text-center font-medium text-gray-500">No shipments yet.</p>
+                    <p className="py-8 text-center font-medium text-gray-500">{tPage("overview.table.noShipmentsShort")}</p>
                   ) : (
                     requests.map((req: any) => (
                       <div
@@ -673,9 +671,9 @@ export default async function ClientDashboardPage({
                         ) : null}
                         <div className="grid gap-2 border-t border-gray-100 pt-3 text-sm">
                           <div className="flex justify-between gap-2">
-                            <span className="font-bold text-gray-400">Invoice</span>
+                            <span className="font-bold text-gray-400">{tPage("overview.table.invoice")}</span>
                             {!req.invoice ? (
-                              <span className="text-gray-400">Not invoiced</span>
+                              <span className="text-gray-400">{tPage("overview.table.notInvoiced")}</span>
                             ) : req.invoice.status === "UNPAID" ? (
                               <span className="font-black text-red-600">${Number(req.invoice.totalAmount).toFixed(2)}</span>
                             ) : (
@@ -691,13 +689,13 @@ export default async function ClientDashboardPage({
                             </Link>
                           )}
                           <div className="flex justify-between gap-2">
-                            <span className="font-bold text-gray-400">Package</span>
+                            <span className="font-bold text-gray-400">{tPage("overview.table.package")}</span>
                             <span className="max-w-[55%] text-right font-semibold text-mex-dark">
                               {req.package ? packageStatusShortLabel(req.package.status) : "—"}
                             </span>
                           </div>
                           <div className="flex justify-between gap-2">
-                            <span className="font-bold text-gray-400">Tracking</span>
+                            <span className="font-bold text-gray-400">{tPage("overview.table.tracking")}</span>
                             <ClientTrackingIdLink trackingId={req.package?.trackingId} className="text-sm" />
                           </div>
                         </div>
@@ -717,20 +715,20 @@ export default async function ClientDashboardPage({
           {currentTab === "shipments" && (
             <div className="animate-in fade-in duration-500">
               <div className="mb-8">
-                <h1 className="text-3xl font-black text-mex-dark mb-2">Shipment History</h1>
-                <p className="text-gray-500 font-medium">Every package you have ever shipped with MEX509.</p>
+                <h1 className="text-3xl font-black text-mex-dark mb-2">{tPage("shipments.title")}</h1>
+                <p className="text-gray-500 font-medium">{tPage("shipments.subtitle")}</p>
               </div>
               {currentTab === "shipments" && shipmentsFilterBannerLabel && (
                 <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-mex-blue/20 bg-blue-50/80 px-4 py-3 text-sm">
                   <p className="font-bold text-mex-dark">
-                    Showing: <span className="text-mex-blue">{shipmentsFilterBannerLabel}</span>
+                    {tPage("shipments.showing")}: <span className="text-mex-blue">{shipmentsFilterBannerLabel}</span>
                   </p>
                   <Link
                     href="/dashboard?tab=shipments"
                     className="font-bold text-mex-blue hover:underline"
                     prefetch={false}
                   >
-                    Clear filter — show all
+                    {tPage("shipments.clearFilter")}
                   </Link>
                 </div>
               )}
@@ -748,16 +746,14 @@ export default async function ClientDashboardPage({
                   <tbody className="text-sm divide-y divide-gray-50">
                     {requests.length === 0 ? (
                       <tr>
-                        <td colSpan={5} className="p-8 text-center text-gray-500">
-                          No shipments found.
-                        </td>
+                        <td colSpan={5} className="p-8 text-center text-gray-500">{tPage("shipments.noneFound")}</td>
                       </tr>
                     ) : shipmentsToShow.length === 0 ? (
                       <tr>
                         <td colSpan={5} className="p-8 text-center text-gray-500">
-                          No shipments match this filter.{" "}
+                          {tPage("shipments.noneMatch")}{" "}
                           <Link href="/dashboard?tab=shipments" className="font-bold text-mex-blue hover:underline" prefetch={false}>
-                            Show all shipments
+                            {tPage("shipments.showAll")}
                           </Link>
                           .
                         </td>
@@ -803,20 +799,20 @@ export default async function ClientDashboardPage({
           {currentTab === "invoices" && (
             <div className="animate-in fade-in duration-500">
               <div className="mb-8">
-                <h1 className="text-3xl font-black text-mex-dark mb-2">Billing & Invoices</h1>
-                <p className="text-gray-500 font-medium">Review your payment history and outstanding balances.</p>
+                <h1 className="text-3xl font-black text-mex-dark mb-2">{tPage("invoices.title")}</h1>
+                <p className="text-gray-500 font-medium">{tPage("invoices.subtitle")}</p>
               </div>
               {currentTab === "invoices" && invoicesFilterBannerLabel && (
                 <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-mex-orange/25 bg-orange-50/80 px-4 py-3 text-sm">
                   <p className="font-bold text-mex-dark">
-                    Showing: <span className="text-mex-orange">{invoicesFilterBannerLabel}</span>
+                    {tPage("invoices.showing")}: <span className="text-mex-orange">{invoicesFilterBannerLabel}</span>
                   </p>
                   <Link
                     href="/dashboard?tab=invoices"
                     className="font-bold text-mex-blue hover:underline"
                     prefetch={false}
                   >
-                    Clear filter — show all
+                    {tPage("invoices.clearFilter")}
                   </Link>
                 </div>
               )}
@@ -833,16 +829,14 @@ export default async function ClientDashboardPage({
                   <tbody className="text-sm divide-y divide-gray-50">
                     {requests.filter((req: any) => req.invoice).length === 0 ? (
                       <tr>
-                        <td colSpan={4} className="p-8 text-center text-gray-500">
-                          No invoices generated yet.
-                        </td>
+                        <td colSpan={4} className="p-8 text-center text-gray-500">{tPage("invoices.noneGenerated")}</td>
                       </tr>
                     ) : invoicesToShow.length === 0 ? (
                       <tr>
                         <td colSpan={4} className="p-8 text-center text-gray-500">
-                          No invoices match this filter.{" "}
+                          {tPage("invoices.noneMatch")}{" "}
                           <Link href="/dashboard?tab=invoices" className="font-bold text-mex-blue hover:underline" prefetch={false}>
-                            Show all invoices
+                            {tPage("invoices.showAll")}
                           </Link>
                           .
                         </td>
@@ -862,9 +856,9 @@ export default async function ClientDashboardPage({
                         <td className="p-5 font-black text-mex-dark text-lg">${req.invoice!.totalAmount.toFixed(2)}</td>
                         <td className="p-5 text-right">
                           {req.invoice!.status === 'PAID' ? (
-                            <span className="text-green-600 font-bold flex items-center justify-end gap-1"><CheckCircle size={16}/> Paid</span>
+                            <span className="text-green-600 font-bold flex items-center justify-end gap-1"><CheckCircle size={16}/> {tPage("invoices.paid")}</span>
                           ) : (
-                            <Link href={`/pay/${req.invoice!.id}`} className="bg-mex-orange text-white px-4 py-2 rounded-lg font-bold text-xs hover:bg-orange-700 transition-colors shadow-sm">Pay Now</Link>
+                            <Link href={`/pay/${req.invoice!.id}`} className="bg-mex-orange text-white px-4 py-2 rounded-lg font-bold text-xs hover:bg-orange-700 transition-colors shadow-sm">{tPage("invoices.payNow")}</Link>
                           )}
                         </td>
                       </tr>
@@ -1010,8 +1004,8 @@ export default async function ClientDashboardPage({
           {currentTab === "profile" && (
             <div className="animate-in fade-in duration-500 max-w-5xl mx-auto pb-10">
               <div className="mb-8">
-                <h1 className="text-3xl font-black text-mex-dark mb-2">Profile & Settings</h1>
-                <p className="text-gray-500 font-medium">Update your personal information and delivery address.</p>
+                <h1 className="text-3xl font-black text-mex-dark mb-2">{tPage("profile.title")}</h1>
+                <p className="text-gray-500 font-medium">{tPage("profile.subtitle")}</p>
               </div>
               <ClientProfileForm user={user} />
             </div>

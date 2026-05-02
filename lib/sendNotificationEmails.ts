@@ -265,3 +265,25 @@ export async function sendTrackingScanOpsEmail(opts: {
     })
   );
 }
+
+/** Fallback email copy mirroring in-app notification payloads. */
+export async function sendInAppNotificationEmail(opts: {
+  to: string;
+  title: string;
+  body: string;
+  link?: string | null;
+  isStaff?: boolean;
+}) {
+  const subjectPrefix = opts.isStaff ? "[MEX509 Ops Alert]" : "[MEX509 Notification]";
+  await sendTransactionalEmail(
+    opts.to,
+    `${subjectPrefix} ${opts.title}`,
+    notifyHtml({
+      title: opts.title,
+      intro: opts.body,
+      detailLines: [opts.isStaff ? "Audience: Staff dashboard" : "Audience: Client dashboard"],
+      buttonLabel: opts.link ? "Open notification" : undefined,
+      buttonUrl: opts.link ?? undefined,
+    })
+  );
+}

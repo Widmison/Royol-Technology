@@ -15,9 +15,23 @@ import {
 import { isAdminPortalLoginEmail } from "@/lib/adminAuthConfig";
 import { hashPassword, verifyPassword, shouldUpgradePasswordHash } from "@/lib/passwordCrypto";
 import { allowAuthAttempt, clientIp } from "@/lib/authRateLimit";
+import {
+  maskPhoneTail,
+  normalizeClientPhoneForWhatsApp,
+} from "@/lib/clientPhoneWhatsapp";
+import {
+  isWhatsAppOtpConfigured,
+  sendClientVerificationWhatsApp,
+} from "@/lib/sendWhatsAppVerification";
 
 // Helper function to generate a random 6-digit code
 const generateCode = () => Math.floor(100000 + Math.random() * 900000).toString();
+
+function parseOtpChannel(body: unknown): "email" | "whatsapp" {
+  if (typeof body !== "object" || body === null) return "email";
+  const ch = (body as { otpChannel?: string }).otpChannel;
+  return ch === "whatsapp" ? "whatsapp" : "email";
+}
 
 function normalizeReferralCode(raw: unknown): string | null {
   if (typeof raw !== "string") return null;
@@ -98,7 +112,14 @@ export async function POST(req: Request) {
     } = body;
 
     const ip = clientIp(req);
-    const rateBuckets = ["login", "signup", "forgot_password", "verify_reset_code", "reset_password"];
+    const rateBuckets = [
+      "login",
+      "signup",
+      "forgot_password",
+      "verify_reset_code",
+      "reset_password",
+      "resend_verification",
+    ];
     if (
       typeof action === "string" &&
       rateBuckets.includes(action) &&
@@ -178,6 +199,84 @@ export async function POST(req: Request) {
       return NextResponse.json({ success: true, message: "Password updated. You can sign in now." });
     }
 
+    if (action === "resend_verification") {
+      const em = typeof email === "string" ? email.trim() : "";
+      const pwd = typeof password === "string" ? password : "";
+      if (!em || !pwd) {
+        return NextResponse.json({ error: "Email and password are required." }, { status: 400 });
+      }
+
+      const otpChannel = parseOtpChannel(body);
+      const u = await prisma.user.findUnique({ where: { email: em } });
+      if (!u || !(await verifyPassword(pwd, u.password))) {
+        return NextResponse.json({ error: "Invalid email or password." }, { status: 401 });
+      }
+      if (u.role !== "CLIENT") {
+        return NextResponse.json({ error: "Invalid account." }, { status: 403 });
+      }
+      if (u.isVerified) {
+        return NextResponse.json({ error: "Account is already verified." }, { status: 400 });
+      }
+
+      const newCode = generateCode();
+
+      if (otpChannel === "whatsapp") {
+        const phoneE164 = normalizeClientPhoneForWhatsApp(u.phone ?? "");
+        if (!phoneE164) {
+          return NextResponse.json(
+            {
+              error:
+                "No valid phone on file. Choose email for your code or update your phone with support.",
+            },
+            { status: 400 }
+          );
+        }
+        if (!isWhatsAppOtpConfigured()) {
+          return NextResponse.json(
+            { error: "WhatsApp delivery is not configured. Choose email instead." },
+            { status: 503 }
+          );
+        }
+        const sent = await sendClientVerificationWhatsApp(phoneE164, newCode);
+        if (!sent) {
+          return NextResponse.json({ error: "Could not send WhatsApp. Try email instead." }, { status: 503 });
+        }
+        await prisma.user.update({
+          where: { id: u.id },
+          data: { verificationCode: newCode },
+        });
+        return NextResponse.json({
+          success: true,
+          verificationChannel: "whatsapp",
+          maskedPhone: maskPhoneTail(phoneE164),
+          ...(process.env.NODE_ENV === "development" && {
+            devVerificationCode: newCode,
+            devVerificationNote: "Development only — code echoed here.",
+          }),
+        });
+      }
+
+      await prisma.user.update({
+        where: { id: u.id },
+        data: { verificationCode: newCode },
+      });
+      const emailed = await sendSignupVerificationEmail(em, newCode);
+      if (process.env.NODE_ENV === "development") {
+        console.log(`\n[MEX509] Resend verification for ${em}. Code: ${newCode}. Email ok: ${emailed}\n`);
+      }
+      return NextResponse.json({
+        success: true,
+        verificationChannel: "email",
+        verificationEmailSent: emailed,
+        ...(process.env.NODE_ENV === "development" && {
+          devVerificationCode: newCode,
+          devVerificationNote: emailed
+            ? "Verification email sent; code also shown for development."
+            : "Check RESEND — code shown for local testing.",
+        }),
+      });
+    }
+
     if (!email) return NextResponse.json({ error: "Email is required" }, { status: 400 });
 
     let user;
@@ -195,6 +294,33 @@ export async function POST(req: Request) {
 
       const existingUser = await prisma.user.findUnique({ where: { email } });
       if (existingUser) return NextResponse.json({ error: "Email already in use." }, { status: 400 });
+
+      const otpChannel = parseOtpChannel(body);
+      const phoneRaw = typeof phone === "string" ? phone.trim() : "";
+      let phoneForDb = phoneRaw;
+      let whatsappE164: string | null = null;
+
+      if (otpChannel === "whatsapp") {
+        whatsappE164 = normalizeClientPhoneForWhatsApp(phoneRaw);
+        if (!whatsappE164) {
+          return NextResponse.json(
+            {
+              error:
+                "Enter a mobile number with country code (e.g. +509xxxxxxxx or +1305xxxxxxx) for WhatsApp.",
+            },
+            { status: 400 }
+          );
+        }
+        if (!isWhatsAppOtpConfigured()) {
+          return NextResponse.json(
+            {
+              error: "WhatsApp verification is not enabled on this server. Choose email or contact support.",
+            },
+            { status: 503 }
+          );
+        }
+        phoneForDb = whatsappE164;
+      }
 
       const newCode = generateCode();
       const referralCode = await generateUniqueReferralCode();
@@ -217,7 +343,7 @@ export async function POST(req: Request) {
           password: await hashPassword(password),
           firstName,
           lastName,
-          phone,
+          phone: phoneForDb || phoneRaw,
           address,
           city,
           state,
@@ -229,25 +355,54 @@ export async function POST(req: Request) {
         },
       });
 
-      const emailed = await sendSignupVerificationEmail(email, newCode);
+      if (otpChannel === "whatsapp") {
+        const sent = await sendClientVerificationWhatsApp(whatsappE164!, newCode);
+        if (!sent) {
+          await prisma.user.delete({ where: { id: user.id } });
+          return NextResponse.json(
+            { error: "Could not send WhatsApp. Check your number or choose email instead." },
+            { status: 503 }
+          );
+        }
+      } else {
+        const emailed = await sendSignupVerificationEmail(email, newCode);
 
-      if (process.env.NODE_ENV === "development") {
-        console.log(`\n========================================`);
-        console.log(`🔒 EMAIL VERIFICATION CODE FOR ${email}: ${newCode}`);
-        console.log(emailed ? "   (copy also sent by email via Resend)" : "   (email not sent — check RESEND_API_KEY / EMAIL_FROM)");
-        console.log(`========================================\n`);
+        if (process.env.NODE_ENV === "development") {
+          console.log(`\n========================================`);
+          console.log(`🔒 EMAIL VERIFICATION CODE FOR ${email}: ${newCode}`);
+          console.log(
+            emailed ? "   (copy also sent by email via Resend)" : "   (email not sent — check RESEND_API_KEY / EMAIL_FROM)"
+          );
+          console.log(`========================================\n`);
+        }
+
+        return NextResponse.json(
+          {
+            success: true,
+            requireVerification: true,
+            verificationChannel: "email",
+            verificationEmailSent: emailed,
+            ...(process.env.NODE_ENV === "development" && {
+              devVerificationCode: newCode,
+              devVerificationNote: emailed
+                ? "A verification email was sent. The code is also shown here in development only."
+                : "RESEND_API_KEY or EMAIL_FROM may be missing — code shown here for local testing.",
+            }),
+          },
+          { status: 200 }
+        );
       }
 
       return NextResponse.json(
         {
           success: true,
           requireVerification: true,
-          verificationEmailSent: emailed,
+          verificationChannel: "whatsapp",
+          verificationWhatsAppSent: true,
+          maskedPhone: maskPhoneTail(whatsappE164!),
           ...(process.env.NODE_ENV === "development" && {
             devVerificationCode: newCode,
-            devVerificationNote: emailed
-              ? "A verification email was sent. The code is also shown here in development only."
-              : "RESEND_API_KEY or EMAIL_FROM may be missing — code shown here for local testing.",
+            devVerificationNote: "WhatsApp sent; code shown here only in development.",
           }),
         },
         { status: 200 }
@@ -275,30 +430,76 @@ export async function POST(req: Request) {
       }
 
       if (!user.isVerified) {
+        const otpChannel = parseOtpChannel(body);
         const newCode = generateCode();
+
+        if (otpChannel === "whatsapp") {
+          const phoneE164 = normalizeClientPhoneForWhatsApp(user.phone ?? "");
+          if (!phoneE164) {
+            return NextResponse.json(
+              {
+                error:
+                  "No valid phone on this account. Choose email for your code, or contact support to add your WhatsApp number.",
+              },
+              { status: 400 }
+            );
+          }
+          if (!isWhatsAppOtpConfigured()) {
+            return NextResponse.json(
+              { error: "WhatsApp is not enabled here yet. Choose email for your code." },
+              { status: 503 }
+            );
+          }
+          const sent = await sendClientVerificationWhatsApp(phoneE164, newCode);
+          if (!sent) {
+            return NextResponse.json(
+              { error: "Could not send WhatsApp. Try email instead." },
+              { status: 503 }
+            );
+          }
+          await prisma.user.update({
+            where: { id: user.id },
+            data: { verificationCode: newCode },
+          });
+          return NextResponse.json({
+            success: true,
+            requireVerification: true,
+            verificationChannel: "whatsapp",
+            verificationWhatsAppSent: true,
+            maskedPhone: maskPhoneTail(phoneE164),
+            ...(process.env.NODE_ENV === "development" && {
+              devVerificationCode: newCode,
+              devVerificationNote: "WhatsApp sent; code echoed here in development only.",
+            }),
+          });
+        }
+
         await prisma.user.update({
           where: { id: user.id },
-          data: { verificationCode: newCode }
+          data: { verificationCode: newCode },
         });
+
+        const emailed = await sendSignupVerificationEmail(email, newCode);
 
         if (process.env.NODE_ENV === "development") {
           console.log(`\n========================================`);
           console.log(`🔒 NEW VERIFICATION CODE FOR ${email}: ${newCode}`);
+          console.log(`Email sent via Resend: ${emailed}`);
           console.log(`========================================\n`);
         }
 
-        return NextResponse.json(
-          {
-            success: true,
-            requireVerification: true,
-            ...(process.env.NODE_ENV === "development" && {
-              devVerificationCode: newCode,
-              devVerificationNote:
-                "Email/SMS is not wired yet; this code is only returned in development.",
-            }),
-          },
-          { status: 200 }
-        );
+        return NextResponse.json({
+          success: true,
+          requireVerification: true,
+          verificationChannel: "email",
+          verificationEmailSent: emailed,
+          ...(process.env.NODE_ENV === "development" && {
+            devVerificationCode: newCode,
+            devVerificationNote: emailed
+              ? "Verification email sent; code also shown for development."
+              : "Configure RESEND — code shown for local testing.",
+          }),
+        });
       }
     }
 

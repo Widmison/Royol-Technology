@@ -2,11 +2,23 @@
 
 import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Lock, Mail, ArrowRight, ArrowLeft, User as UserIcon, MapPin, KeyRound, Phone } from "lucide-react";
+import {
+  Lock,
+  Mail,
+  ArrowRight,
+  ArrowLeft,
+  User as UserIcon,
+  MapPin,
+  KeyRound,
+  Phone,
+  MessageCircle,
+} from "lucide-react";
 import { signupPasswordRuleChecks } from "@/lib/passwordPolicy";
 import SignupPasswordHints from "@/components/SignupPasswordHints";
 
 type AuthMode = "login" | "signup" | "verify" | "forgot" | "reset";
+
+type OtpChannel = "email" | "whatsapp";
 
 function RefFromQuerySync({ onRef }: { onRef: (code: string) => void }) {
   const search = useSearchParams();
@@ -37,6 +49,9 @@ export default function LoginPage() {
   const [referredBy, setReferredBy] = useState("");
 
   const [otpCode, setOtpCode] = useState("");
+  const [otpChannel, setOtpChannel] = useState<OtpChannel>("email");
+  const [verificationChannel, setVerificationChannel] = useState<OtpChannel>("email");
+  const [maskedPhoneHint, setMaskedPhoneHint] = useState<string | null>(null);
   const [devVerificationCode, setDevVerificationCode] = useState<string | null>(null);
   const [devVerificationNote, setDevVerificationNote] = useState<string | null>(null);
 
@@ -90,6 +105,10 @@ export default function LoginPage() {
           zipCode,
           referredBy,
           code: otpCode,
+          otpChannel:
+            authMode === "login" || authMode === "signup"
+              ? otpChannel
+              : undefined,
         }),
       });
 
@@ -97,7 +116,17 @@ export default function LoginPage() {
 
       if (res.ok) {
         if (data.requireVerification) {
-          if (data.verificationEmailSent === true) {
+          const vch: OtpChannel = data.verificationChannel === "whatsapp" ? "whatsapp" : "email";
+          setVerificationChannel(vch);
+          setMaskedPhoneHint(typeof data.maskedPhone === "string" ? data.maskedPhone : null);
+
+          if (vch === "whatsapp") {
+            setInfoBanner(
+              data.maskedPhone
+                ? `We sent a WhatsApp to ${data.maskedPhone}. Open the app — code arrives in seconds.`
+                : "Check WhatsApp for your 6-digit code."
+            );
+          } else if (data.verificationEmailSent === true) {
             setInfoBanner("We emailed a 6-digit code to your address. Check inbox and spam.");
           } else {
             setInfoBanner(null);
@@ -120,6 +149,54 @@ export default function LoginPage() {
       }
     } catch {
       setError("An unexpected error occurred.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleResendCode = async () => {
+    setIsSubmitting(true);
+    setError("");
+    try {
+      const res = await fetch("/api/auth", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "resend_verification",
+          email,
+          password,
+          otpChannel: verificationChannel,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(typeof data.error === "string" ? data.error : "Could not resend.");
+        return;
+      }
+      const vch: OtpChannel = data.verificationChannel === "whatsapp" ? "whatsapp" : "email";
+      setVerificationChannel(vch);
+      setMaskedPhoneHint(typeof data.maskedPhone === "string" ? data.maskedPhone : null);
+      if (vch === "whatsapp") {
+        setInfoBanner(
+          data.maskedPhone
+            ? `New code sent via WhatsApp to ${data.maskedPhone}.`
+            : "New code sent via WhatsApp."
+        );
+      } else if (data.verificationEmailSent === true) {
+        setInfoBanner("We sent a fresh code to your email.");
+      } else {
+        setInfoBanner("New code issued — if email does not arrive, check spam or environment email settings.");
+      }
+      if (typeof data.devVerificationCode === "string") {
+        setDevVerificationCode(data.devVerificationCode);
+        setDevVerificationNote(typeof data.devVerificationNote === "string" ? data.devVerificationNote : null);
+      } else {
+        setDevVerificationCode(null);
+        setDevVerificationNote(null);
+      }
+      setOtpCode("");
+    } catch {
+      setError("Network error.");
     } finally {
       setIsSubmitting(false);
     }
@@ -243,7 +320,9 @@ export default function LoginPage() {
       : authMode === "signup"
         ? "Create Your Account"
         : authMode === "verify"
-          ? "Verify Your Email"
+          ? verificationChannel === "whatsapp"
+            ? "Check WhatsApp"
+            : "Verify your email"
           : authMode === "forgot"
             ? "Forgot password"
             : resetStep === 1
@@ -256,7 +335,9 @@ export default function LoginPage() {
       : authMode === "signup"
         ? "Create an account to book shipments and track packages."
         : authMode === "verify"
-          ? "Enter the 6-digit code from your email."
+          ? verificationChannel === "whatsapp"
+            ? "Enter the code we sent on WhatsApp."
+            : "Enter the 6-digit code from your email."
           : authMode === "forgot"
             ? "Enter your email. We will send reset instructions if an account exists."
             : resetStep === 1
@@ -488,9 +569,12 @@ export default function LoginPage() {
                             value={phone}
                             onChange={(e) => setPhone(e.target.value)}
                             className="w-full rounded-xl border border-gray-300 py-3 pl-11 pr-4 font-medium text-gray-700 outline-none focus:ring-2 focus:ring-mex-blue"
-                            placeholder="(555) 123-4567"
+                            placeholder="+509 •••• •••• or +1 (305) •••••••"
                           />
                         </div>
+                        <p className="mt-1.5 text-xs font-medium text-gray-500">
+                          Needed for WhatsApp codes. For email-only you can still use your usual format.
+                        </p>
                       </div>
                     </div>
                   )}
@@ -511,6 +595,51 @@ export default function LoginPage() {
                       />
                     </div>
                   </div>
+
+                  {(authMode === "login" || authMode === "signup") && (
+                    <div className="rounded-2xl border border-gray-200/80 bg-gradient-to-br from-slate-50 via-white to-emerald-50/40 p-4 shadow-inner ring-1 ring-black/[0.04]">
+                      <p className="mb-3 flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.18em] text-gray-500">
+                        <span
+                          className="inline-flex h-2 w-2 animate-pulse rounded-full bg-mex-orange"
+                          aria-hidden
+                        />
+                        Send my code via
+                      </p>
+                      <div className="grid grid-cols-2 gap-3">
+                        <button
+                          type="button"
+                          onClick={() => setOtpChannel("email")}
+                          className={`flex flex-col items-center gap-2 rounded-xl border-2 px-3 py-3.5 text-sm font-black transition ${
+                            otpChannel === "email"
+                              ? "border-mex-blue bg-blue-50 text-mex-blue shadow-md"
+                              : "border-gray-200 bg-white text-gray-600 hover:border-gray-300"
+                          }`}
+                        >
+                          <Mail className="h-6 w-6 shrink-0" aria-hidden />
+                          Email
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setOtpChannel("whatsapp")}
+                          className={`flex flex-col items-center gap-2 rounded-xl border-2 px-3 py-3.5 text-sm font-black transition ${
+                            otpChannel === "whatsapp"
+                              ? "border-emerald-500 bg-emerald-50 text-emerald-900 shadow-md ring-1 ring-emerald-200/80"
+                              : "border-gray-200 bg-white text-gray-600 hover:border-emerald-200"
+                          }`}
+                        >
+                          <MessageCircle className="h-6 w-6 shrink-0 text-[#25D366]" aria-hidden />
+                          WhatsApp
+                        </button>
+                      </div>
+                      <p className="mt-3 text-center text-[11px] font-medium leading-snug text-gray-500">
+                        {otpChannel === "whatsapp"
+                          ? authMode === "signup"
+                            ? "We’ll WhatsApp the mobile number above. Use international format (+509…, +1…)."
+                            : "We’ll WhatsApp the phone saved on your account. No number? Choose email instead."
+                          : "We’ll email a 6-digit code — check spam folders too."}
+                      </p>
+                    </div>
+                  )}
 
                   <div>
                     <div className="mb-1 flex items-center justify-between gap-2">
@@ -663,10 +792,26 @@ export default function LoginPage() {
                   </div>
                   {!devVerificationCode && (
                     <p className="mt-2 text-center text-xs font-medium leading-relaxed text-gray-500">
-                      Use the code we sent to your email. In local development without email, run{" "}
-                      <code className="text-gray-700">npm run dev</code> and watch the terminal for the code.
+                      {verificationChannel === "whatsapp"
+                        ? maskedPhoneHint
+                          ? `Look for MEX509 on WhatsApp — we messaged ${maskedPhoneHint}.`
+                          : "Open WhatsApp — your code arrives as a short message from our business line."
+                        : "Use the code from your email. In development, your terminal may also print the code."}
                     </p>
                   )}
+                  <div className="flex flex-col gap-2 pt-2 sm:flex-row sm:items-center sm:justify-center">
+                    <button
+                      type="button"
+                      onClick={() => void handleResendCode()}
+                      disabled={isSubmitting || !password}
+                      className="rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-xs font-black uppercase tracking-wide text-gray-700 shadow-sm transition hover:bg-gray-50 disabled:opacity-50"
+                    >
+                      {isSubmitting ? "Sending…" : "Send new code"}
+                    </button>
+                    <p className="text-center text-[10px] font-medium text-gray-400 sm:text-left">
+                      Uses your password again — keeps your account safe.
+                    </p>
+                  </div>
                 </div>
               )}
 
@@ -691,6 +836,7 @@ export default function LoginPage() {
                   setInfoBanner(null);
                   setDevVerificationCode(null);
                   setDevVerificationNote(null);
+                  setOtpChannel("email");
                 }}
                 className="text-sm font-bold text-mex-blue transition-colors hover:text-blue-900"
               >

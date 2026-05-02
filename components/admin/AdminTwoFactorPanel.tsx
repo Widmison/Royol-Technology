@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { Shield } from "lucide-react";
+import QRCode from "react-qr-code";
 
 export default function AdminTwoFactorPanel() {
   const [enabled, setEnabled] = useState(false);
@@ -17,7 +18,12 @@ export default function AdminTwoFactorPanel() {
     setLoading(true);
     try {
       const res = await fetch("/api/admin/totp", { credentials: "include" });
-      const data = (await res.json().catch(() => ({}))) as { twoFactorEnabled?: boolean; hasSecret?: boolean; error?: string };
+      const data = (await res.json().catch(() => ({}))) as {
+        twoFactorEnabled?: boolean;
+        hasSecret?: boolean;
+        otpauthUrl?: string | null;
+        error?: string;
+      };
       if (!res.ok) {
         if (res.status === 403) {
           setErr("Only full admins can manage two-factor authentication. Staff members use email and password only.");
@@ -28,6 +34,13 @@ export default function AdminTwoFactorPanel() {
       }
       setEnabled(!!data.twoFactorEnabled);
       setHasSecret(!!data.hasSecret);
+      if (data.twoFactorEnabled) {
+        setOtpauthUrl(null);
+      } else if (typeof data.otpauthUrl === "string" && data.otpauthUrl.length > 0) {
+        setOtpauthUrl(data.otpauthUrl);
+      } else {
+        setOtpauthUrl(null);
+      }
     } finally {
       setLoading(false);
     }
@@ -96,20 +109,36 @@ export default function AdminTwoFactorPanel() {
           </button>
 
           {otpauthUrl && (
-            <div className="rounded-xl border border-gray-100 bg-gray-50 p-4 text-xs break-all text-gray-800">
+            <div className="rounded-xl border border-gray-100 bg-gray-50 p-4 text-xs text-gray-800">
               <p className="font-bold text-mex-dark mb-2">Add in Google Authenticator (or similar)</p>
-              <p className="text-gray-500 mb-2">Scan a QR in your app, or add manually using this <code>otpauth</code> value:</p>
-              <code className="block select-all rounded bg-white p-2 text-[10px] leading-relaxed border">{otpauthUrl}</code>
-              <label className="mt-4 block text-sm font-bold text-gray-700">
-                Enter 6-digit code to confirm
+              <p className="text-gray-500 mb-4 text-[13px] leading-snug">
+                Scan this QR code with your app. If scanning fails, use &quot;Enter a setup key&quot; / manual entry with the secret from the text below.
+              </p>
+              <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-start sm:justify-center sm:gap-8">
+                <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-inner">
+                  <QRCode value={otpauthUrl} size={200} level="M" bgColor="#ffffff" fgColor="#0f172a" />
+                </div>
+                <div className="w-full min-w-0 max-w-xl flex-1">
+                  <p className="mb-2 font-semibold text-[11px] uppercase tracking-wide text-gray-500">Manual setup (otpauth URI)</p>
+                  <code className="block select-all break-all rounded border bg-white p-3 text-[10px] leading-relaxed text-gray-900">
+                    {otpauthUrl}
+                  </code>
+                </div>
+              </div>
+              <label className="mt-6 block text-sm font-bold text-gray-700">
+                Enter 6-digit code from the app to confirm
                 <input
                   className="mt-1 w-full max-w-xs rounded-lg border border-gray-200 px-3 py-2 text-lg font-black tracking-widest"
                   inputMode="numeric"
                   autoComplete="one-time-code"
                   value={enrollCode}
                   onChange={(e) => setEnrollCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                  placeholder="000000"
                 />
               </label>
+              <p className="mt-2 text-[11px] text-gray-500">
+                The orange button stays disabled until you enter all 6 digits. If the code is rejected, check your phone&apos;s time is set automatically (network time).
+              </p>
               <button
                 type="button"
                 onClick={async () => {
@@ -130,7 +159,7 @@ export default function AdminTwoFactorPanel() {
                   await load();
                 }}
                 disabled={enrollCode.length !== 6}
-                className="mt-3 rounded-xl bg-mex-orange px-4 py-2.5 text-sm font-bold text-white disabled:opacity-50"
+                className="mt-3 rounded-xl bg-mex-orange px-4 py-2.5 text-sm font-bold text-white shadow-sm transition enabled:hover:bg-orange-700 disabled:cursor-not-allowed disabled:opacity-45"
               >
                 Enable 2FA
               </button>

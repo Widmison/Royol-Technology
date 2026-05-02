@@ -22,15 +22,22 @@ export async function GET() {
 
   const u = await prisma.user.findUnique({
     where: { id: gate.id },
-    select: { twoFactorEnabled: true, twoFactorSecret: true },
+    select: { twoFactorEnabled: true, twoFactorSecret: true, email: true },
   });
   if (!u) {
     return NextResponse.json({ error: "User not found." }, { status: 404 });
   }
 
+  /** Pending enrollment: same secret as last "begin" — lets UI show QR again after refresh without rotating the secret. */
+  let otpauthUrl: string | null = null;
+  if (u.twoFactorSecret && !u.twoFactorEnabled) {
+    otpauthUrl = buildTotpKeyUri(u.email, u.twoFactorSecret);
+  }
+
   return NextResponse.json({
     twoFactorEnabled: u.twoFactorEnabled,
     hasSecret: !!u.twoFactorSecret,
+    otpauthUrl,
   });
 }
 

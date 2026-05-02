@@ -33,7 +33,8 @@ export default async function ServicesHero() {
               <span className="block text-4xl sm:text-5xl lg:text-[3.25rem] xl:text-[3.5rem]">
                 {t("title1")}
               </span>
-              <span className="mt-2 block bg-gradient-to-r from-white via-white to-white/85 bg-clip-text text-3xl text-transparent sm:text-4xl lg:text-[2.75rem] xl:text-[3rem]">
+              {/* Solid white avoids bg-clip-text + transparent failing in some WebViews (looks like hero text is missing) */}
+              <span className="mt-2 block text-3xl text-white/95 sm:text-4xl lg:text-[2.75rem] xl:text-[3rem]">
                 {t("title2")}
               </span>
             </h1>

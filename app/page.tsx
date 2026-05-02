@@ -21,6 +21,7 @@ import { getTranslations } from "next-intl/server";
 import HomeJsonLd from "@/components/seo/HomeJsonLd";
 import { sharePreviewOgImage } from "@/lib/share-image";
 import HomeServicesCards from "@/components/home/HomeServicesCards";
+import HomeServicesPromoCarousel from "@/components/home/HomeServicesPromoCarousel";
 
 export const metadata: Metadata = {
   title: "Shipping USA, DR & China to Haiti",
@@ -108,6 +109,7 @@ export default async function Home() {
           <div className="-mt-20">
             <HomeServicesCards />
           </div>
+          <HomeServicesPromoCarousel />
           <p className="mt-10 max-w-2xl mx-auto text-center text-sm text-gray-600">
             <span className="font-bold text-mex-dark">{t("groundIntroBold")}</span> {t("groundIntro1")}{" "}
             <Link href="/services" className="font-bold text-mex-blue underline-offset-2 hover:underline">

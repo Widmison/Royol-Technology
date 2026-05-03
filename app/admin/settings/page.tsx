@@ -1,4 +1,3 @@
-import Link from "next/link";
 import {
   MapPin,
   Phone,
@@ -8,17 +7,20 @@ import {
   Shield,
   Clock,
   Keyboard,
+  MessageCircle,
 } from "lucide-react";
 import AdminTwoFactorPanel from "@/components/admin/AdminTwoFactorPanel";
 import AdminStaffAllowlistPanel from "@/components/admin/AdminStaffAllowlistPanel";
 import { getAdminSessionUser } from "@/lib/serverSession";
 import { isWebDevPortalAdmin } from "@/lib/webDevAccess";
+import { getSiteUrlString } from "@/lib/site";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminSettingsPage() {
   const admin = await getAdminSessionUser();
   const showStaffAllowlist = isWebDevPortalAdmin(admin);
+  const publicSite = getSiteUrlString();
 
   return (
     <div className="space-y-6 sm:space-y-8 animate-in fade-in duration-300">
@@ -79,18 +81,43 @@ export default async function AdminSettingsPage() {
             <Shield size={20} className="text-mex-blue" /> Support &amp; public links
           </h2>
           <div className="flex flex-col gap-2 text-sm font-bold">
-            <Link href="/track" className="text-mex-blue hover:underline flex items-center gap-2">
-              Public tracking <ExternalLink size={14} />
-            </Link>
-            <Link href="/quote" className="text-mex-blue hover:underline flex items-center gap-2">
-              Public quote form <ExternalLink size={14} />
-            </Link>
-            <div className="flex items-center gap-2 text-gray-600 font-medium mt-2">
-              <Mail size={16} /> ops@mex509.com <span className="text-xs">(placeholder)</span>
-            </div>
-            <div className="flex items-center gap-2 text-gray-600 font-medium">
-              <Phone size={16} /> +1 (305) 000-0000 <span className="text-xs">(placeholder)</span>
-            </div>
+            <a
+              href={`${publicSite}/track`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-mex-blue hover:underline inline-flex items-center gap-2"
+            >
+              Public tracking <ExternalLink size={14} aria-hidden />
+            </a>
+            <a
+              href={`${publicSite}/quote`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-mex-blue hover:underline inline-flex items-center gap-2"
+            >
+              Public quote form <ExternalLink size={14} aria-hidden />
+            </a>
+            <a
+              href="mailto:info@mex509.com"
+              className="mt-2 inline-flex items-center gap-2 font-medium text-gray-700 hover:text-mex-blue hover:underline"
+            >
+              <Mail size={16} className="shrink-0 text-mex-blue" aria-hidden /> info@mex509.com
+            </a>
+            <a
+              href="tel:+50934494494"
+              className="inline-flex items-center gap-2 font-medium text-gray-700 hover:text-mex-blue hover:underline"
+            >
+              <Phone size={16} className="shrink-0 text-mex-blue" aria-hidden /> +509 34 49 44 94
+            </a>
+            <a
+              href="https://wa.me/50934536985"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-start gap-2 font-medium text-gray-700 hover:text-mex-blue hover:underline"
+            >
+              <MessageCircle size={16} className="mt-0.5 shrink-0 text-emerald-600" aria-hidden />
+              <span>WhatsApp +509 34 53 69 85</span>
+            </a>
           </div>
         </section>
       </div>

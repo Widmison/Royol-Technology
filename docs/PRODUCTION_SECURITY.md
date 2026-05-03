@@ -47,7 +47,7 @@ For strict global limits, enable **Vercel Firewall** or **Upstash Ratelimit**.
 
 - Run `npm audit` regularly; patch Next/React when advisories apply.
 - Do **not** log verification codes, reset tokens, or passwords in production.
-- Staff email allowlist lives in `lib/adminStaffRegistry.ts` — review before launch.
+- Staff email allowlist is stored in **`StaffAllowlistEntry`** (DB) and manageable in **Admin → Settings** (Web Dev role). Review entries before launch.
 
 ## 8. Post-go-live
 

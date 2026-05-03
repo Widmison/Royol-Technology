@@ -277,5 +277,26 @@
       "intakeBody": "Miami - Cargaison prete conteneur",
       "track": "Suivre"
     }
+  },
+  "Lang": {
+    "selectAria": "Choisir la langue"
+  },
+  "AdminSecurity": {
+    "loginIntro": "Personnel : email professionnel et mot de passe. Admins complets : code email puis codes d'application a chaque connexion. Vous configurez l'application au premier acces. Google reste optionnel si active.",
+    "blockingBanner": "Les outils admin restent bloques tant que la configuration par application n'est pas terminee. Suivez les etapes puis scannez le QR code pour activer.",
+    "setupTitle": "Configurer l'application d'authentification",
+    "setupIntro": "Les comptes administrateur doivent utiliser un code temporaire depuis une application du type Google Authenticator (ou Microsoft Authenticator, 1Password, Authy…). Apres le code email a chaque connexion, completez la configuration une fois ci-dessous pour acceder au tableau de bord.",
+    "step1Title": "Installer une application",
+    "step1Body": "Sur votre telephone, installez Google Authenticator ou une application compatible depuis le store.",
+    "step2Title": "Lancer la configuration MEX509",
+    "step2Body": "Appuyez sur le bouton ci-dessous pour afficher le QR code. Ne le partagez pas et evitez les captures visibles par d'autres.",
+    "step3Title": "Scanner le QR code",
+    "step3Body": "Dans l'application : « Ajouter un compte » ou « Scanner un QR code ». Si le scan echoue, utilisez la saisie manuelle avec la cle affichee.",
+    "step4Title": "Confirmer avec un code a 6 chiffres",
+    "step4Body": "Saisissez le code a 6 chiffres affiche puis activez la 2FA. Une fois confirme, vous pouvez ouvrir toutes les pages admin.",
+    "afterSetup": "Vous pouvez revoir cette option dans Parametres plus tard.",
+    "accessDeniedTitle": "Acces refuse",
+    "accessDeniedBody": "Vous n'avez pas acces au tableau de bord admin. Seuls les comptes personnel autorises peuvent se connecter.",
+    "accessDeniedCta": "Retour a la connexion"
   }
 }

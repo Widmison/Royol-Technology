@@ -2,12 +2,15 @@
 
 import { useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
+import { useTranslations } from "next-intl";
 import { SessionProvider } from "next-auth/react";
 import GoogleAdminSignInButton from "@/components/admin/GoogleAdminSignInButton";
+import LanguageSelector from "@/components/LanguageSelector";
 
 type Step = "choose" | "otp" | "totp";
 
 function AdminLoginInner() {
+  const tSecurity = useTranslations("AdminSecurity");
   const searchParams = useSearchParams();
   const error = searchParams.get("error");
 
@@ -112,16 +115,16 @@ function AdminLoginInner() {
 
   return (
     <div className="relative min-h-screen overflow-x-hidden bg-gray-50 px-4 py-10 font-sans sm:py-14">
+      <div className="absolute right-4 top-4 z-20 sm:right-8 sm:top-6">
+        <LanguageSelector compact />
+      </div>
       <div className="pointer-events-none absolute left-[-10%] top-[-10%] h-[40%] w-[40%] rounded-full bg-mex-blue/10 blur-3xl" />
       <div className="pointer-events-none absolute bottom-[-10%] right-[-10%] h-[40%] w-[40%] rounded-full bg-mex-orange/10 blur-3xl" />
 
       <div className="relative z-10 mx-auto w-full max-w-md">
         <div className="mb-8 text-center sm:mb-10">
           <h2 className="text-2xl font-black tracking-tight text-mex-dark sm:text-3xl">Admin sign in</h2>
-          <p className="mx-auto mt-2 max-w-sm text-sm font-medium text-gray-600">
-            Staff: work email and password. Full admins: email code (and authenticator if 2FA is on). Google is optional when
-            enabled.
-          </p>
+          <p className="mx-auto mt-2 max-w-sm text-sm font-medium text-gray-600">{tSecurity("loginIntro")}</p>
         </div>
 
         <div className="rounded-3xl border border-gray-100 bg-white px-6 py-8 shadow-2xl sm:px-10 sm:py-10">

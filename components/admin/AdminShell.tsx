@@ -26,6 +26,7 @@ import PortalIdleGuard from "@/components/PortalIdleGuard";
 import DashboardShippingCalcTrigger from "@/components/DashboardShippingCalcTrigger";
 import AdminSignOutButton from "@/components/AdminSignOutButton";
 import PortalNotificationBell from "@/components/PortalNotificationBell";
+import LanguageSelector from "@/components/LanguageSelector";
 
 export type AdminShellStats = {
   pendingQuotes: number;
@@ -403,6 +404,7 @@ export default function AdminShell({
             </div>
 
             <div className="flex shrink-0 items-center justify-end gap-1 border-t border-gray-100 pt-3 sm:gap-2 lg:border-0 lg:pt-0">
+              <LanguageSelector compact />
               <PortalNotificationBell variant="admin" />
               {canAccessRestrictedAdminPages && (
                 <Link

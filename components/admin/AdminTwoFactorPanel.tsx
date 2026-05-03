@@ -1,10 +1,16 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { Shield } from "lucide-react";
 import QRCode from "react-qr-code";
 
-export default function AdminTwoFactorPanel() {
+export default function AdminTwoFactorPanel({
+  variant = "settings",
+}: {
+  variant?: "settings" | "mandatoryEnrollment";
+}) {
+  const router = useRouter();
   const [enabled, setEnabled] = useState(false);
   const [hasSecret, setHasSecret] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -70,11 +76,21 @@ export default function AdminTwoFactorPanel() {
     <section className="rounded-2xl border border-gray-100 bg-white p-5 sm:p-6 shadow-sm">
       <h2 className="text-lg font-black text-mex-dark flex items-center gap-2 mb-2">
         <Shield className="text-mex-blue" size={22} />
-        Two-factor (Google Authenticator)
+        {variant === "mandatoryEnrollment" ? "Connect this account" : "Two-factor (Google Authenticator)"}
       </h2>
       <p className="text-sm text-gray-600 font-medium mb-4">
-        Required for <span className="font-bold text-mex-dark">admin</span> sign-in when enabled: after your email code, you will enter a 6-digit
-        app code. <span className="font-bold">Staff</span> accounts are not required to use 2FA.
+        {variant === "mandatoryEnrollment" ? (
+          <>
+            Use the section below to generate a QR code and confirm with a 6-digit code. This replaces the old optional
+            setup — <span className="font-bold text-mex-dark">every full admin</span> must finish this once.
+          </>
+        ) : (
+          <>
+            Required for <span className="font-bold text-mex-dark">admin</span> sign-in when enabled: after your email
+            code, you will enter a 6-digit app code. <span className="font-bold">Staff</span> accounts are not required
+            to use 2FA.
+          </>
+        )}
       </p>
 
       {err && <div className="mb-3 rounded-lg bg-red-50 px-3 py-2 text-sm font-bold text-red-700">{err}</div>}
@@ -157,6 +173,10 @@ export default function AdminTwoFactorPanel() {
                   setOtpauthUrl(null);
                   setEnrollCode("");
                   await load();
+                  if (variant === "mandatoryEnrollment") {
+                    router.replace("/admin/dashboard");
+                    router.refresh();
+                  }
                 }}
                 disabled={enrollCode.length !== 6}
                 className="mt-3 rounded-xl bg-mex-orange px-4 py-2.5 text-sm font-bold text-white shadow-sm transition enabled:hover:bg-orange-700 disabled:cursor-not-allowed disabled:opacity-45"

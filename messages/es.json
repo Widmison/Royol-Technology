@@ -277,5 +277,26 @@
       "intakeBody": "Miami - Carga lista para contenedor",
       "track": "Rastrear"
     }
+  },
+  "Lang": {
+    "selectAria": "Seleccionar idioma"
+  },
+  "AdminSecurity": {
+    "loginIntro": "Personal: correo laboral y contrasena. Admins completos: codigo por email y luego codigos de app en cada acceso. Configuras la app en el primer login. Google es opcional si esta habilitado.",
+    "blockingBanner": "Las herramientas admin siguen bloqueadas hasta terminar la app de autenticacion. Sigue los pasos y luego escanea el QR para activar.",
+    "setupTitle": "Configura tu aplicacion de autenticacion",
+    "setupIntro": "Las cuentas de administrador deben usar un codigo temporal de una app tipo Google Authenticator (o Microsoft Authenticator, 1Password, Authy, etc.). Tras el codigo de email en cada inicio de sesion, termina estos pasos una vez para usar el panel.",
+    "step1Title": "Instala una app autenticadora",
+    "step1Body": "En tu telefono, instala Google Authenticator o una app compatible desde la tienda.",
+    "step2Title": "Inicia la configuracion en MEX509",
+    "step2Body": "Pulsa el boton inferior para ver el QR. No lo compartas ni lo captures donde otros puedan verlo.",
+    "step3Title": "Escanea el QR",
+    "step3Body": "En la app, elige anadir cuenta o escanear QR. Si falla el escaneo, usa entrada manual con la clave mostrada.",
+    "step4Title": "Confirma con codigo de 6 digitos",
+    "step4Body": "Escribe el codigo de 6 digitos rotativo de la app y activa la 2FA. Al confirmar, ya puedes abrir todas las paginas admin.",
+    "afterSetup": "Mas adelante puedes revisarlo en Configuracion.",
+    "accessDeniedTitle": "Acceso denegado",
+    "accessDeniedBody": "No tienes acceso al panel admin. Solo cuentas de personal autorizadas pueden iniciar sesion.",
+    "accessDeniedCta": "Volver al inicio de sesion"
   }
 }

@@ -7,6 +7,7 @@ import AdminShell, { type AdminShellStats } from "@/components/admin/AdminShell"
 import AdminSessionProvider from "@/components/admin/AdminSessionProvider";
 import { redirectToAdminLogin } from "@/lib/adminLoginRedirect";
 import { getAdminSessionUser } from "@/lib/serverSession";
+import { adminNeedsAuthenticatorEnrollment } from "@/lib/adminTotpRequirement";
 import { isPortalStaffRole, isSuperAdminUser } from "@/lib/staffAccess";
 
 export const dynamic = "force-dynamic";
@@ -37,6 +38,8 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   const isPrint = pathname.startsWith("/admin/print");
   const isProfileSurface =
     pathname === "/admin/complete-profile" || pathname.startsWith("/admin/complete-profile?");
+  const isSetupAuthenticatorSurface =
+    pathname === "/admin/setup-authenticator" || pathname.startsWith("/admin/setup-authenticator?");
 
   const adminUser = await getAdminSessionUser();
   const isSuperAdmin = adminUser ? isSuperAdminUser(adminUser) : false;
@@ -50,6 +53,17 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
   if (!isLoginSurface && !isPrint && adminUser && needsProfileCompletion && !isProfileSurface) {
     redirect("/admin/complete-profile");
+  }
+
+  if (
+    !isLoginSurface &&
+    !isPrint &&
+    adminUser &&
+    adminNeedsAuthenticatorEnrollment(adminUser) &&
+    !isProfileSurface &&
+    !isSetupAuthenticatorSurface
+  ) {
+    redirect("/admin/setup-authenticator");
   }
 
   // STAFF scope: operational surfaces only (no dashboard analytics, quote queue, staff directory, CRM, or settings).

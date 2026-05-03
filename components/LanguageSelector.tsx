@@ -1,6 +1,6 @@
 "use client";
 
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { Languages } from "lucide-react";
 import { locales, type AppLocale } from "@/i18n/routing";
 
@@ -10,13 +10,14 @@ function setLocaleCookie(next: AppLocale) {
 
 export default function LanguageSelector({ compact = false }: { compact?: boolean }) {
   const locale = useLocale() as AppLocale;
+  const t = useTranslations("Lang");
 
   return (
     <label
       className={`inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-white px-2.5 py-1.5 text-xs font-bold text-gray-700 ${
         compact ? "" : "shadow-sm"
       }`}
-      aria-label="Select language"
+      aria-label={t("selectAria")}
     >
       <Languages size={14} className="text-mex-blue" />
       <select

@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { getAdminSessionUser } from "@/lib/serverSession";
 import { isPortalStaffRole } from "@/lib/staffAccess";
 import CompleteAdminProfileForm from "@/components/admin/CompleteAdminProfileForm";
+import LanguageSelector from "@/components/LanguageSelector";
 
 export default async function AdminCompleteProfilePage() {
   const user = await getAdminSessionUser();
@@ -13,7 +14,11 @@ export default async function AdminCompleteProfilePage() {
   }
 
   return (
-    <CompleteAdminProfileForm
+    <div className="relative">
+      <div className="absolute right-0 top-0 z-10 sm:right-4 sm:top-0">
+        <LanguageSelector compact />
+      </div>
+      <CompleteAdminProfileForm
       initial={{
         email: user.email,
         staffRole: user.adminStaffRole,
@@ -26,5 +31,6 @@ export default async function AdminCompleteProfilePage() {
         zipCode: user.zipCode ?? "",
       }}
     />
+    </div>
   );
 }

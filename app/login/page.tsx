@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { signupPasswordRuleChecks } from "@/lib/passwordPolicy";
 import SignupPasswordHints from "@/components/SignupPasswordHints";
+import LanguageSelector from "@/components/LanguageSelector";
 
 type AuthMode = "login" | "signup" | "verify" | "forgot" | "reset";
 
@@ -298,6 +299,9 @@ export default function LoginPage() {
 
   return (
     <div className="relative min-h-screen overflow-x-hidden bg-gray-50 px-4 py-10 font-sans sm:py-14">
+      <div className="absolute right-4 top-4 z-20 sm:right-8 sm:top-6">
+        <LanguageSelector compact />
+      </div>
       <Suspense fallback={null}>
         <RefFromQuerySync onRef={setReferredBy} />
       </Suspense>

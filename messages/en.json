@@ -311,5 +311,26 @@
       "intakeBody": "Miami - Container-ready cargo",
       "track": "Track"
     }
+  },
+  "Lang": {
+    "selectAria": "Select language"
+  },
+  "AdminSecurity": {
+    "loginIntro": "Staff: work email and password. Full admins: email code, then authenticator app codes on every sign-in. You will set up the app on your first login. Google sign-in is optional when enabled.",
+    "blockingBanner": "You cannot use admin tools until authenticator enrollment is finished. Follow the numbered steps below, then use the button to scan the QR code and activate.",
+    "setupTitle": "Set up your authenticator app",
+    "setupIntro": "Full administrator accounts must use a one-time code from an authenticator app (Google Authenticator, Microsoft Authenticator, 1Password, Authy, etc.) every time you sign in after your email code. Complete the steps below once; then you can use the dashboard.",
+    "step1Title": "Install an authenticator app",
+    "step1Body": "On your phone, install Google Authenticator or any compatible app from your app store.",
+    "step2Title": "Start setup in MEX509",
+    "step2Body": "Tap the button below to generate a QR code. Do not share it or take a screenshot where others can see it.",
+    "step3Title": "Scan the QR code",
+    "step3Body": "In the app, choose “Add account” or “Scan QR code” and scan the code we show. If you cannot scan, use manual entry with the key shown on screen.",
+    "step4Title": "Confirm with a 6-digit code",
+    "step4Body": "Enter the 6-digit rotating code from the app and tap Enable. When you see confirmation, you are done — you can open any admin page.",
+    "afterSetup": "You can change or review this in Settings when you need to.",
+    "accessDeniedTitle": "Access denied",
+    "accessDeniedBody": "You do not have access to the admin dashboard. Only approved staff accounts can sign in.",
+    "accessDeniedCta": "Back to sign in"
   }
 }

@@ -22,6 +22,7 @@ import {
 import { useTranslations } from "next-intl";
 import DashboardShippingCalcTrigger from "@/components/DashboardShippingCalcTrigger";
 import ClientSignOutButton from "@/components/ClientSignOutButton";
+import LanguageSelector from "@/components/LanguageSelector";
 
 type Props = {
   user: { firstName?: string | null; lastName?: string | null; email: string };
@@ -134,6 +135,9 @@ export default function MobileClientNav({ user, currentTab, unpaidCount }: Props
           </div>
         </nav>
         <div className="shrink-0 space-y-2 border-t border-gray-800 bg-mex-dark p-4">
+          <div className="flex justify-center">
+            <LanguageSelector compact />
+          </div>
           <DashboardShippingCalcTrigger variant="drawer" />
           <ClientSignOutButton
             onBeforeNavigate={() => setOpen(false)}

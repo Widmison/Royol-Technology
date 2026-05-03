@@ -275,6 +275,9 @@ export default async function ClientDashboardPage({
         </nav>
 
         <div className="shrink-0 space-y-2 border-t border-gray-800 bg-mex-dark p-4">
+          <div className="flex justify-center">
+            <LanguageSelector compact />
+          </div>
           <DashboardShippingCalcTrigger variant="sidebar" />
           <ClientSignOutButton className="flex justify-center items-center gap-2 w-full bg-white/10 text-white hover:bg-red-500 hover:text-white px-4 py-3 rounded-xl font-bold transition-colors">
             <LogOut size={18} /> Sign Out

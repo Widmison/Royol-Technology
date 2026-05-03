@@ -38,6 +38,11 @@ export default function AdminTwoFactorPanel({
         }
         return;
       }
+      if (data.twoFactorEnabled && variant === "mandatoryEnrollment") {
+        router.replace("/admin/dashboard");
+        router.refresh();
+        return;
+      }
       setEnabled(!!data.twoFactorEnabled);
       setHasSecret(!!data.hasSecret);
       if (data.twoFactorEnabled) {

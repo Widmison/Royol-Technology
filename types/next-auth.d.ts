@@ -16,5 +16,8 @@ declare module "next-auth/jwt" {
   interface JWT {
     role?: string;
     email?: string;
+    /** Google admin portal session: mirrors DB after sign-in (may be stale until session refresh). */
+    twoFactorEnabled?: boolean;
+    portalRole?: string;
   }
 }

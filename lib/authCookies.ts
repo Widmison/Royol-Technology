@@ -2,6 +2,10 @@ const WEEK = 60 * 60 * 24 * 7;
 
 export const CLIENT_SESSION_COOKIE = "clientId";
 export const ADMIN_SESSION_COOKIE = "adminId";
+/** `admin` | `staff` — password-flow portal role for middleware (HttpOnly). */
+export const ADMIN_PORTAL_ROLE_COOKIE = "adminPortalRole";
+/** HMAC-bound cookie: browser passed admin TOTP enrollment gate for this session. */
+export const ADMIN_TOTP_GATE_COOKIE = "adminTotpGate";
 
 type CookieOpts = {
   httpOnly: boolean;
@@ -34,7 +38,7 @@ export function clearSessionCookieOptions(): Pick<CookieOpts, "httpOnly" | "secu
   return { ...rest, maxAge: 0, ...(domain ? { domain } : {}) };
 }
 
-type WritableCookieStore = {
+export type WritableCookieStore = {
   set: (name: string, value: string, options: CookieOpts | ReturnType<typeof clearSessionCookieOptions>) => void;
 };
 
@@ -43,4 +47,6 @@ export function clearAuthSessionCookies(store: WritableCookieStore) {
   const o = clearSessionCookieOptions();
   store.set(CLIENT_SESSION_COOKIE, "", o);
   store.set(ADMIN_SESSION_COOKIE, "", o);
+  store.set(ADMIN_PORTAL_ROLE_COOKIE, "", o);
+  store.set(ADMIN_TOTP_GATE_COOKIE, "", o);
 }

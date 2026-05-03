@@ -4,8 +4,11 @@ import { getToken } from "next-auth/jwt";
 import type { JWT } from "next-auth/jwt";
 import {
   ADMIN_SESSION_COOKIE,
+  ADMIN_PORTAL_ROLE_COOKIE,
+  ADMIN_TOTP_GATE_COOKIE,
   CLIENT_SESSION_COOKIE,
 } from "@/lib/authCookies";
+import { verifyAdminTotpGateCookieEdge } from "@/lib/adminTotpGateVerify.edge";
 import { isAdminDashboardHost } from "@/lib/adminDashboardHost";
 import { looksLikePrismaUserId } from "@/lib/prismaUserId";
 import { allowPublicTrackLookup, clientIp } from "@/lib/authRateLimit";
@@ -82,6 +85,70 @@ function pathnameIsPublicAdminAuthSurface(pathname: string): boolean {
     pathname === "/admin/access-denied" ||
     pathname.startsWith("/admin/access-denied?")
   );
+}
+
+function pathnameBypassesAdminTotpGate(pathname: string): boolean {
+  if (pathname === "/admin/setup-authenticator" || pathname.startsWith("/admin/setup-authenticator?")) {
+    return true;
+  }
+  if (pathnameIsPublicAdminAuthSurface(pathname)) return true;
+  if (pathname.startsWith("/api/admin/auth")) return true;
+  if (pathname.startsWith("/api/admin/totp")) return true;
+  if (pathname.startsWith("/api/admin/complete-profile")) return true;
+  if (pathname.startsWith("/api/admin/signout")) return true;
+  return false;
+}
+
+function pathnameNeedsAdminTotpGate(pathname: string, hostNoPort: string): boolean {
+  if (pathname.startsWith("/admin")) return true;
+  if (pathname.startsWith("/api/admin")) return true;
+  if (isAdminDashboardHost(hostNoPort) && isAdminShortcut(pathname)) return true;
+  return false;
+}
+
+async function enforceAdminPortalTotpGate(
+  req: NextRequest,
+  pathname: string,
+  hostNoPort: string,
+  authSecret: string | undefined,
+  adminJwt: JWT | null,
+  hasPortalAdminSession: boolean
+): Promise<NextResponse | null> {
+  if (!pathnameNeedsAdminTotpGate(pathname, hostNoPort)) return null;
+  if (pathnameBypassesAdminTotpGate(pathname)) return null;
+  if (!hasPortalAdminSession) return null;
+
+  const secret = authSecret?.trim();
+  if (!secret) return null;
+
+  const cookieUid = req.cookies.get(ADMIN_SESSION_COOKIE)?.value;
+  const jwtUid = typeof adminJwt?.sub === "string" ? adminJwt.sub : "";
+  const userId =
+    cookieUid && looksLikePrismaUserId(cookieUid)
+      ? cookieUid
+      : jwtUid && looksLikePrismaUserId(jwtUid)
+        ? jwtUid
+        : "";
+
+  if (!userId) return null;
+
+  const roleCookie = req.cookies.get(ADMIN_PORTAL_ROLE_COOKIE)?.value?.toLowerCase();
+  if (roleCookie === "staff") return null;
+
+  /** Gate cookie only (JWT can be stale after toggling 2FA). Issued at password TOTP login, TOTP enable, or GET /api/admin/totp when already enrolled. */
+  const gateCookie = req.cookies.get(ADMIN_TOTP_GATE_COOKIE)?.value;
+  const gateOk = await verifyAdminTotpGateCookieEdge(gateCookie, userId, secret);
+
+  if (gateOk) return null;
+
+  if (pathname.startsWith("/api/admin")) {
+    return NextResponse.json(
+      { error: "Authenticator enrollment required.", code: "totp_setup_required" },
+      { status: 403 }
+    );
+  }
+
+  return NextResponse.redirect(new URL("/admin/setup-authenticator", req.url));
 }
 
 function adminHostRequiresAdminSession(pathname: string): boolean {
@@ -194,6 +261,16 @@ export default async function middleware(req: NextRequest) {
     return NextResponse.redirect(adminLoginRedirectUrl(req));
   }
 
+  const totpGateRedirect = await enforceAdminPortalTotpGate(
+    req,
+    pathname,
+    hostNoPort,
+    secret,
+    adminJwt,
+    hasAdminAccess()
+  );
+  if (totpGateRedirect) return totpGateRedirect;
+
   if (isAdminDashboardHost(hostNoPort)) {
     if (adminHostRequiresAdminSession(pathname) && !hasAdminAccess()) {
       return NextResponse.redirect(adminLoginRedirectUrl(req));
@@ -231,6 +308,7 @@ export const config = {
     "/dashboard/:path*",
     "/admin",
     "/admin/:path*",
+    "/api/admin/:path*",
     "/((?!api|_next/static|_next/image|favicon.ico).*)",
   ],
 };

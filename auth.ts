@@ -73,6 +73,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           token.sub = dbUser.id;
           token.role = "admin";
           token.email = dbUser.email;
+          token.portalRole = "ADMIN";
+          token.twoFactorEnabled = dbUser.twoFactorEnabled;
         }
       }
       return token;

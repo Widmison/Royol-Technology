@@ -1,5 +1,11 @@
 import { NextResponse } from "next/server";
+import { cookies } from "next/headers";
 import { prisma } from "@/lib/prisma";
+import {
+  clearAdminTotpGateCookie,
+  setAdminPortalRoleCookie,
+  setAdminTotpGateCookie,
+} from "@/lib/adminTotpGateCookie";
 import { requireSuperAdminApiUser } from "@/lib/requireApiSession";
 import { buildTotpKeyUri, createTotpSecret, verifyTotpCode } from "@/lib/adminTotp";
 import { verifyPassword } from "@/lib/passwordCrypto";
@@ -26,6 +32,13 @@ export async function GET() {
   });
   if (!u) {
     return NextResponse.json({ error: "User not found." }, { status: 404 });
+  }
+
+  const authSecret = process.env.AUTH_SECRET?.trim();
+  const cookieStore = await cookies();
+  if (authSecret && u.twoFactorEnabled) {
+    setAdminPortalRoleCookie(cookieStore, "admin");
+    setAdminTotpGateCookie(cookieStore, gate.id, authSecret);
   }
 
   /** Pending enrollment: same secret as last "begin" — lets UI show QR again after refresh without rotating the secret. */
@@ -80,6 +93,12 @@ export async function POST(req: Request) {
       where: { id: gate.id },
       data: { twoFactorEnabled: true },
     });
+    const authSecret = process.env.AUTH_SECRET?.trim();
+    const cookieStore = await cookies();
+    if (authSecret) {
+      setAdminPortalRoleCookie(cookieStore, "admin");
+      setAdminTotpGateCookie(cookieStore, gate.id, authSecret);
+    }
     return NextResponse.json({ ok: true });
   }
 
@@ -99,6 +118,8 @@ export async function POST(req: Request) {
       where: { id: gate.id },
       data: { twoFactorSecret: null, twoFactorEnabled: false },
     });
+    const cookieStore = await cookies();
+    clearAdminTotpGateCookie(cookieStore);
     return NextResponse.json({ ok: true });
   }
 

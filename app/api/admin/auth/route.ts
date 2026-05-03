@@ -7,6 +7,10 @@ import {
   clearAuthSessionCookies,
   sessionCookieOptions,
 } from "@/lib/authCookies";
+import {
+  setAdminPortalRoleCookie,
+  setAdminTotpGateCookie,
+} from "@/lib/adminTotpGateCookie";
 import { defaultAdminBootstrapPassword } from "@/lib/adminAuthConfig";
 import {
   hashPassword,
@@ -151,6 +155,7 @@ async function handleCredentialsStep(ip: string, body: Body) {
     const opts = sessionCookieOptions();
     clearAuthSessionCookies(cookieStore);
     cookieStore.set(ADMIN_SESSION_COOKIE, existing.id, opts);
+    setAdminPortalRoleCookie(cookieStore, "staff");
 
     return NextResponse.json({
       ok: true,
@@ -313,6 +318,7 @@ async function handleOtpStep(ip: string, body: Body) {
   const opts = sessionCookieOptions();
   clearAuthSessionCookies(cookieStore);
   cookieStore.set(ADMIN_SESSION_COOKIE, user.id, opts);
+  setAdminPortalRoleCookie(cookieStore, "admin");
 
   return NextResponse.json({
     ok: true,
@@ -361,6 +367,11 @@ async function handleTotpStep(ip: string, body: Body) {
   const opts = sessionCookieOptions();
   clearAuthSessionCookies(cookieStore);
   cookieStore.set(ADMIN_SESSION_COOKIE, user.id, opts);
+  setAdminPortalRoleCookie(cookieStore, "admin");
+  const authSecret = process.env.AUTH_SECRET?.trim();
+  if (authSecret) {
+    setAdminTotpGateCookie(cookieStore, user.id, authSecret);
+  }
 
   return NextResponse.json({
     ok: true,

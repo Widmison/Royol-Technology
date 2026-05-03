@@ -230,12 +230,6 @@ export async function POST(req: Request) {
         return NextResponse.json({
           success: true,
           verificationEmailSent: emailed,
-          ...(process.env.NODE_ENV === "development" && {
-            devVerificationCode: newCode,
-            devVerificationNote: emailed
-              ? "Verification email sent; code also shown for development."
-              : "Check RESEND — code shown for local testing.",
-          }),
         });
       }
 
@@ -322,12 +316,6 @@ export async function POST(req: Request) {
             success: true,
             requireVerification: true,
             verificationEmailSent: emailed,
-            ...(process.env.NODE_ENV === "development" && {
-              devVerificationCode: newCode,
-              devVerificationNote: emailed
-                ? "A verification email was sent. The code is also shown here in development only."
-                : "RESEND_API_KEY or EMAIL_FROM may be missing — code shown here for local testing.",
-            }),
           },
           { status: 200 }
         );
@@ -392,12 +380,6 @@ export async function POST(req: Request) {
             success: true,
             requireVerification: true,
             verificationEmailSent: emailed,
-            ...(process.env.NODE_ENV === "development" && {
-              devVerificationCode: newCode,
-              devVerificationNote: emailed
-                ? "Verification email sent; code also shown for development."
-                : "Configure RESEND — code shown for local testing.",
-            }),
           });
         }
 

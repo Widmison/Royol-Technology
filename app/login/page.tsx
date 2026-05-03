@@ -47,8 +47,6 @@ export default function LoginPage() {
 
   const [otpCode, setOtpCode] = useState("");
   const [verifyFrom, setVerifyFrom] = useState<"signup" | "login" | null>(null);
-  const [devVerificationCode, setDevVerificationCode] = useState<string | null>(null);
-  const [devVerificationNote, setDevVerificationNote] = useState<string | null>(null);
 
   const [resetStep, setResetStep] = useState<1 | 2>(1);
   const [resetToken, setResetToken] = useState("");
@@ -112,15 +110,6 @@ export default function LoginPage() {
           } else {
             setInfoBanner(null);
           }
-          if (typeof data.devVerificationCode === "string") {
-            setDevVerificationCode(data.devVerificationCode);
-            setDevVerificationNote(
-              typeof data.devVerificationNote === "string" ? data.devVerificationNote : null
-            );
-          } else {
-            setDevVerificationCode(null);
-            setDevVerificationNote(null);
-          }
           setVerifyFrom(authMode === "signup" ? "signup" : "login");
           setAuthMode("verify");
         } else if (data.verified) {
@@ -158,13 +147,6 @@ export default function LoginPage() {
         setInfoBanner("We sent a fresh code to your email.");
       } else {
         setInfoBanner("New code issued — if email does not arrive, check spam or environment email settings.");
-      }
-      if (typeof data.devVerificationCode === "string") {
-        setDevVerificationCode(data.devVerificationCode);
-        setDevVerificationNote(typeof data.devVerificationNote === "string" ? data.devVerificationNote : null);
-      } else {
-        setDevVerificationCode(null);
-        setDevVerificationNote(null);
       }
       setOtpCode("");
     } catch {
@@ -687,19 +669,6 @@ export default function LoginPage() {
                       {infoBanner}
                     </div>
                   )}
-                  {process.env.NODE_ENV === "development" && devVerificationCode && (
-                    <div className="rounded-xl border-2 border-amber-300 bg-amber-50 px-4 py-3 text-center">
-                      <p className="mb-1 text-[11px] font-bold uppercase tracking-wider text-amber-900">
-                        Development — your code
-                      </p>
-                      <p className="font-black text-3xl tracking-[0.35em] text-mex-dark tabular-nums">
-                        {devVerificationCode}
-                      </p>
-                      {devVerificationNote && (
-                        <p className="mt-2 text-xs font-medium leading-snug text-amber-900/80">{devVerificationNote}</p>
-                      )}
-                    </div>
-                  )}
                   <label className="mb-2 block text-center text-sm font-bold text-gray-700">Enter 6-Digit Code</label>
                   <div className="relative mx-auto max-w-xs">
                     <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
@@ -716,9 +685,7 @@ export default function LoginPage() {
                     />
                   </div>
                   <p className="mt-2 text-center text-xs font-medium leading-relaxed text-gray-500">
-                    {process.env.NODE_ENV === "development"
-                      ? "Use the code from your email. Your terminal may also print it during local development."
-                      : "Use the code from your email. Check spam if you don’t see it within a minute."}
+                    Use the code from your email. Check spam if you don’t see it within a minute.
                   </p>
                   <div className="flex flex-col gap-2 pt-2 sm:flex-row sm:items-center sm:justify-center">
                     <button
@@ -755,8 +722,6 @@ export default function LoginPage() {
                   setAuthMode(authMode === "login" ? "signup" : "login");
                   setError("");
                   setInfoBanner(null);
-                  setDevVerificationCode(null);
-                  setDevVerificationNote(null);
                   setVerifyFrom(null);
                 }}
                 className="text-sm font-bold text-mex-blue transition-colors hover:text-blue-900"

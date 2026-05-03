@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { getAdminSessionUser } from "@/lib/serverSession";
 import { isSuperAdminUser } from "@/lib/staffAccess";
 import { adminStaffRoleLabel } from "@/lib/adminStaffRoleDisplay";
+import { STAFF_ALLOWLIST_OWNER_EMAIL } from "@/lib/webDevAccess";
 
 export default async function AdminStaffPage() {
   const admin = await getAdminSessionUser();
@@ -34,8 +35,9 @@ export default async function AdminStaffPage() {
         <div>
           <h1 className="text-2xl font-black tracking-tight text-mex-dark">Staff accounts</h1>
           <p className="mt-1 text-sm font-medium text-gray-600">
-            Users with admin access (email sign-in). Invite changes are made in code / env — contact Web
-            Dev to add emails.
+            Users with admin access (email sign-in). To add or remove who may sign in, use{" "}
+            <span className="font-bold text-mex-dark">Admin → Settings → Staff allowlist</span> — only the owner (
+            {STAFF_ALLOWLIST_OWNER_EMAIL}) and Web Dev can edit that list.
           </p>
         </div>
         <Link
@@ -69,7 +71,7 @@ export default async function AdminStaffPage() {
                     )}
                   </div>
                   <p className="break-all text-sm text-gray-700">{row.email}</p>
-                  <p className="text-sm text-gray-700">{adminStaffRoleLabel(row.adminStaffRole)}</p>
+                  <p className="text-sm text-gray-700">{adminStaffRoleLabel(row.adminStaffRole, row.email)}</p>
                   <p className="text-xs text-gray-500">
                     {row.createdAt.toLocaleDateString(undefined, {
                       year: "numeric",
@@ -98,7 +100,7 @@ export default async function AdminStaffPage() {
                         {[row.firstName, row.lastName].filter(Boolean).join(" ") || "—"}
                       </td>
                       <td className="px-4 py-3 text-gray-700">{row.email}</td>
-                      <td className="px-4 py-3 text-gray-700">{adminStaffRoleLabel(row.adminStaffRole)}</td>
+                      <td className="px-4 py-3 text-gray-700">{adminStaffRoleLabel(row.adminStaffRole, row.email)}</td>
                       <td className="px-4 py-3">
                         {row.adminProfileComplete ? (
                           <span className="rounded-full bg-green-50 px-2 py-0.5 text-xs font-bold text-green-700">

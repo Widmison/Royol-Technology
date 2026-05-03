@@ -1,5 +1,6 @@
 import type { AdminStaffRole } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
+import { normalizeStaffEmail } from "@/lib/normalizeStaffEmail";
 
 export type StaffRegistryEntry = {
   email: string;
@@ -7,9 +8,7 @@ export type StaffRegistryEntry = {
   roleLabel: string;
 };
 
-export function normalizeStaffEmail(email: string) {
-  return email.trim().toLowerCase();
-}
+export { normalizeStaffEmail };
 
 /** Resolve allowlisted staff row from the database (case-insensitive email). */
 export async function getStaffRegistryEntry(email: string): Promise<StaffRegistryEntry | undefined> {

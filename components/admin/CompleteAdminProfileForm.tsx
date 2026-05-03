@@ -74,7 +74,10 @@ export default function CompleteAdminProfileForm({ initial }: { initial: Complet
         <div className="mb-6 rounded-xl bg-mex-blue/5 px-4 py-3 text-sm">
           <div className="font-bold text-mex-dark">{initial.email}</div>
           <div className="mt-1 text-gray-600">
-            Role: <span className="font-semibold text-mex-blue">{adminStaffRoleLabel(initial.staffRole)}</span>
+            Role:{" "}
+            <span className="font-semibold text-mex-blue">
+              {adminStaffRoleLabel(initial.staffRole, initial.email)}
+            </span>
           </div>
         </div>
 

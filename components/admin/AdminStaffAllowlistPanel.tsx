@@ -4,6 +4,12 @@ import { useCallback, useEffect, useState } from "react";
 import { AdminStaffRole } from "@prisma/client";
 import { Loader2, Shield, Sparkles, Trash2, UserPlus, Users } from "lucide-react";
 import { adminStaffRoleLabel } from "@/lib/adminStaffRoleDisplay";
+import { normalizeStaffEmail } from "@/lib/normalizeStaffEmail";
+import { STAFF_ALLOWLIST_OWNER_EMAIL } from "@/lib/webDevAccess";
+
+function isOwnerAllowlistEmail(email: string) {
+  return normalizeStaffEmail(email) === normalizeStaffEmail(STAFF_ALLOWLIST_OWNER_EMAIL);
+}
 
 type Entry = {
   id: string;
@@ -110,15 +116,15 @@ export default function AdminStaffAllowlistPanel() {
           <div>
             <h2 className="text-xl font-black tracking-tight text-mex-dark sm:text-2xl">Staff allowlist</h2>
             <p className="mt-1 max-w-xl text-sm font-medium text-gray-600">
-              Only emails listed here may sign into the admin portal (password flow or Google).{" "}
-              <span className="font-bold text-mex-dark">Web Dev</span> manages this list;{" "}
-              <span className="font-bold text-gray-700">Admin team</span> accounts use the portal but don&apos;t edit this
-              section.
+              Only emails listed here may sign into the admin portal (password flow or Google). The business owner (
+              <span className="font-bold text-mex-dark">{STAFF_ALLOWLIST_OWNER_EMAIL}</span>) and{" "}
+              <span className="font-bold text-mex-dark">Web Dev</span> may add or remove entries. Other admins use the
+              dashboard but don&apos;t manage this list.
             </p>
           </div>
         </div>
         <span className="inline-flex items-center gap-1.5 self-start rounded-full border border-mex-blue/30 bg-white/90 px-3 py-1 text-[10px] font-black uppercase tracking-wider text-mex-blue shadow-sm">
-          <Sparkles size={12} aria-hidden /> Web Dev only
+          <Sparkles size={12} aria-hidden /> Owner + Web Dev
         </span>
       </div>
 
@@ -206,13 +212,18 @@ export default function AdminStaffAllowlistPanel() {
                         : "bg-blue-100 text-mex-blue ring-1 ring-blue-200"
                     }`}
                   >
-                    {adminStaffRoleLabel(row.staffRole)}
+                    {adminStaffRoleLabel(row.staffRole, row.email)}
                   </span>
                   <button
                     type="button"
                     onClick={() => void handleRemove(row.id)}
-                    disabled={saving}
-                    className="inline-flex items-center gap-1 rounded-lg border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-black text-red-700 transition hover:bg-red-100 disabled:opacity-50"
+                    disabled={saving || isOwnerAllowlistEmail(row.email)}
+                    title={
+                      isOwnerAllowlistEmail(row.email)
+                        ? "The owner email cannot be removed from the allowlist."
+                        : undefined
+                    }
+                    className="inline-flex items-center gap-1 rounded-lg border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-black text-red-700 transition hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-40"
                   >
                     <Trash2 size={14} aria-hidden />
                     Remove

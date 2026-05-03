@@ -12,14 +12,14 @@ import {
 import AdminTwoFactorPanel from "@/components/admin/AdminTwoFactorPanel";
 import AdminStaffAllowlistPanel from "@/components/admin/AdminStaffAllowlistPanel";
 import { getAdminSessionUser } from "@/lib/serverSession";
-import { isWebDevPortalAdmin } from "@/lib/webDevAccess";
+import { canManageStaffAllowlist } from "@/lib/webDevAccess";
 import { getSiteUrlString } from "@/lib/site";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminSettingsPage() {
   const admin = await getAdminSessionUser();
-  const showStaffAllowlist = isWebDevPortalAdmin(admin);
+  const showStaffAllowlist = canManageStaffAllowlist(admin);
   const publicSite = getSiteUrlString();
 
   return (

@@ -3,7 +3,7 @@ import { Prisma } from "@prisma/client";
 import { AdminStaffRole } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { getAdminSessionUser } from "@/lib/serverSession";
-import { isWebDevPortalAdmin } from "@/lib/webDevAccess";
+import { canManageStaffAllowlist, STAFF_ALLOWLIST_OWNER_EMAIL } from "@/lib/webDevAccess";
 import { normalizeStaffEmail } from "@/lib/adminStaffRegistry";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -13,13 +13,12 @@ function jsonError(message: string, status: number) {
 }
 
 /**
- * Web Dev only: who may use the admin portal (email list for sign-in + Google bootstrap).
- * `ADMIN_TEAM` full admins do not see or call this API.
+ * Owner (`info@mex509.com`) + Web Dev: emails allowed to bootstrap / use the admin portal.
  */
 export async function GET() {
   const user = await getAdminSessionUser();
-  if (!isWebDevPortalAdmin(user)) {
-    return jsonError("Only the Web Dev account can view the staff allowlist.", 403);
+  if (!canManageStaffAllowlist(user)) {
+    return jsonError("Only the owner or Web Dev account can view the staff allowlist.", 403);
   }
 
   const entries = await prisma.staffAllowlistEntry.findMany({
@@ -30,8 +29,8 @@ export async function GET() {
 
 export async function POST(req: Request) {
   const user = await getAdminSessionUser();
-  if (!isWebDevPortalAdmin(user)) {
-    return jsonError("Only the Web Dev account can add allowlist entries.", 403);
+  if (!canManageStaffAllowlist(user)) {
+    return jsonError("Only the owner or Web Dev account can add allowlist entries.", 403);
   }
 
   let body: { email?: string; staffRole?: string; roleLabel?: string };
@@ -83,8 +82,8 @@ export async function POST(req: Request) {
 
 export async function DELETE(req: Request) {
   const user = await getAdminSessionUser();
-  if (!isWebDevPortalAdmin(user)) {
-    return jsonError("Only the Web Dev account can remove allowlist entries.", 403);
+  if (!canManageStaffAllowlist(user)) {
+    return jsonError("Only the owner or Web Dev account can remove allowlist entries.", 403);
   }
 
   const id = new URL(req.url).searchParams.get("id")?.trim();
@@ -95,6 +94,10 @@ export async function DELETE(req: Request) {
   const entry = await prisma.staffAllowlistEntry.findUnique({ where: { id } });
   if (!entry) {
     return jsonError("Entry not found.", 404);
+  }
+
+  if (normalizeStaffEmail(entry.email) === normalizeStaffEmail(STAFF_ALLOWLIST_OWNER_EMAIL)) {
+    return jsonError("The owner email cannot be removed from the allowlist.", 403);
   }
 
   const total = await prisma.staffAllowlistEntry.count();

@@ -1,26 +1,28 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireClientApiUser } from "@/lib/requireApiSession";
+import { validateClientProfileBody } from "@/lib/clientProfileUpdateValidation";
 
 export async function POST(req: Request) {
   try {
     const userOrRes = await requireClientApiUser();
     if (userOrRes instanceof NextResponse) return userOrRes;
 
-    const body = await req.json();
+    let raw: unknown;
+    try {
+      raw = await req.json();
+    } catch {
+      return NextResponse.json({ error: "Expected JSON body." }, { status: 400 });
+    }
 
-    // Update the user in the database
+    const parsed = validateClientProfileBody(raw);
+    if (!parsed.ok) {
+      return NextResponse.json({ error: parsed.message }, { status: 400 });
+    }
+
     await prisma.user.update({
       where: { id: userOrRes.id },
-      data: {
-        firstName: body.firstName,
-        lastName: body.lastName,
-        phone: body.phone,
-        address: body.address,
-        city: body.city,
-        state: body.state,
-        zipCode: body.zipCode,
-      }
+      data: parsed.data,
     });
 
     return NextResponse.json({ success: true });

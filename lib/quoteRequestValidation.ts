@@ -2,9 +2,9 @@ import { DESTINATION_COUNTRIES } from "@/lib/address-options";
 
 const DESTINATION_CODES = new Set(DESTINATION_COUNTRIES.map((c) => c.code));
 
-const ALLOW_DEPARTURE = new Set(["USA", "DR", "China"]);
-const ALLOW_SHIPPING = new Set(["Air Freight", "Ocean Freight", "Ground Freight"]);
-const ALLOW_CATEGORY = new Set(["Electronics", "Clothing", "Documents", "Heavy", "Other"]);
+export const QUOTE_DEPARTURE_CODES = new Set(["USA", "DR", "China"]);
+export const QUOTE_SHIPPING_METHODS_SET = new Set(["Air Freight", "Ocean Freight", "Ground Freight"]);
+export const QUOTE_ITEM_CATEGORIES = new Set(["Electronics", "Clothing", "Documents", "Heavy", "Other"]);
 
 const LIMITS = {
   firstName: 80,
@@ -64,16 +64,16 @@ export function validateQuoteRequestBody(raw: unknown): { ok: true; data: Valida
   if (!firstName || !lastName || !phone) {
     return { ok: false, message: "First name, last name, and phone are required." };
   }
-  if (!departure || !ALLOW_DEPARTURE.has(departure)) {
+  if (!departure || !QUOTE_DEPARTURE_CODES.has(departure)) {
     return { ok: false, message: "Select a valid country of departure." };
   }
-  if (!category || !ALLOW_CATEGORY.has(category)) {
+  if (!category || !QUOTE_ITEM_CATEGORIES.has(category)) {
     return { ok: false, message: "Select a valid item category." };
   }
   if (!description || description.length < 3) {
     return { ok: false, message: "Please enter a short description of your shipment." };
   }
-  if (!shippingMethod || !ALLOW_SHIPPING.has(shippingMethod)) {
+  if (!shippingMethod || !QUOTE_SHIPPING_METHODS_SET.has(shippingMethod)) {
     return { ok: false, message: "Select a valid shipping method." };
   }
   if (!destRaw || !DESTINATION_CODES.has(destRaw)) {

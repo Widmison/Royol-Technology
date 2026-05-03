@@ -13,6 +13,9 @@ const AUTH_MAX_ATTEMPTS = 25;
 const QUOTE_WINDOW_MS = 60_000;
 const QUOTE_MAX_ATTEMPTS = 8;
 
+const TRACK_WINDOW_MS = 60_000;
+const TRACK_MAX_LOOKUPS_PER_WINDOW = 40;
+
 function prune(now: number) {
   if (buckets.size < 5000) return;
   for (const [k, v] of buckets) {
@@ -42,6 +45,11 @@ export function allowAuthAttempt(key: string): boolean {
 /** Public quote form — tighter cap to reduce spam / DB abuse. */
 export function allowQuoteSubmission(ipKey: string): boolean {
   return allowKeyedAttempt(`quote-submit:${ipKey}`, QUOTE_WINDOW_MS, QUOTE_MAX_ATTEMPTS);
+}
+
+/** GET /track?id=… — throttle enumeration / scraping (per instance). */
+export function allowPublicTrackLookup(ipKey: string): boolean {
+  return allowKeyedAttempt(`track-lookup:${ipKey}`, TRACK_WINDOW_MS, TRACK_MAX_LOOKUPS_PER_WINDOW);
 }
 
 export function clientIp(req: Request): string {

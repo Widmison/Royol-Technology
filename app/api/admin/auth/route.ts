@@ -19,6 +19,13 @@ import { getStaffRegistryEntry, normalizeStaffEmail } from "@/lib/adminStaffRegi
 import { generateAdminOtpCode, hashAdminOtpCode, verifyAdminOtpCode } from "@/lib/adminOtpCrypto";
 import { sendAdminSignInOtpEmail } from "@/lib/sendAdminOtpEmail";
 import { verifyTotpCode } from "@/lib/adminTotp";
+import {
+  ADMIN_OTP_GATE_COOKIE,
+  adminOtpGateCookieSetOpts,
+  clearAdminOtpGateCookie,
+  signAdminOtpGateToken,
+  verifyAdminOtpGateToken,
+} from "@/lib/adminOtpGateCookie";
 
 const OTP_TTL_MS = 15 * 60 * 1000;
 
@@ -140,6 +147,7 @@ async function handleCredentialsStep(ip: string, body: Body) {
     }
 
     const cookieStore = await cookies();
+    clearAdminOtpGateCookie(cookieStore);
     const opts = sessionCookieOptions();
     clearAuthSessionCookies(cookieStore);
     cookieStore.set(ADMIN_SESSION_COOKIE, existing.id, opts);
@@ -228,6 +236,9 @@ async function handleCredentialsStep(ip: string, body: Body) {
     console.log(`\n[MEX509] Admin OTP for ${canonical}. Emailed: ${emailed}. Code: ${code}\n`);
   }
 
+  const cookieStore = await cookies();
+  clearAdminOtpGateCookie(cookieStore);
+
   return NextResponse.json({
     ok: true,
     step: "otp_sent",
@@ -276,7 +287,21 @@ async function handleOtpStep(ip: string, body: Body) {
     return NextResponse.json({ error: "Account not found." }, { status: 401 });
   }
 
+  const cookieStore = await cookies();
+
   if (user.twoFactorEnabled && user.twoFactorSecret) {
+    const gate = signAdminOtpGateToken(canonical);
+    if (!gate) {
+      return NextResponse.json(
+        {
+          error:
+            "Server misconfiguration: AUTH_SECRET is required before TOTP sign-in. Set AUTH_SECRET on the server.",
+        },
+        { status: 503 }
+      );
+    }
+    cookieStore.set(ADMIN_OTP_GATE_COOKIE, gate, adminOtpGateCookieSetOpts());
+
     return NextResponse.json({
       ok: true,
       step: "totp_required",
@@ -284,7 +309,7 @@ async function handleOtpStep(ip: string, body: Body) {
     });
   }
 
-  const cookieStore = await cookies();
+  clearAdminOtpGateCookie(cookieStore);
   const opts = sessionCookieOptions();
   clearAuthSessionCookies(cookieStore);
   cookieStore.set(ADMIN_SESSION_COOKIE, user.id, opts);
@@ -308,6 +333,18 @@ async function handleTotpStep(ip: string, body: Body) {
     return NextResponse.json({ error: "Email and authenticator code are required." }, { status: 400 });
   }
 
+  const cookieStore = await cookies();
+  const gateVal = cookieStore.get(ADMIN_OTP_GATE_COOKIE)?.value;
+  if (!verifyAdminOtpGateToken(gateVal, canonical)) {
+    return NextResponse.json(
+      {
+        error:
+          "Your email verification step is missing or expired. Enter the email code first, then try your authenticator code again.",
+      },
+      { status: 401 }
+    );
+  }
+
   const user = await prisma.user.findFirst({
     where: { email: { equals: canonical, mode: "insensitive" } },
   });
@@ -320,7 +357,7 @@ async function handleTotpStep(ip: string, body: Body) {
     return NextResponse.json({ error: "Invalid authenticator code." }, { status: 401 });
   }
 
-  const cookieStore = await cookies();
+  clearAdminOtpGateCookie(cookieStore);
   const opts = sessionCookieOptions();
   clearAuthSessionCookies(cookieStore);
   cookieStore.set(ADMIN_SESSION_COOKIE, user.id, opts);

@@ -19,8 +19,16 @@ export async function POST(req: Request) {
   if (!(file instanceof File)) {
     return NextResponse.json({ error: "Missing file." }, { status: 400 });
   }
-  if (!file.type.startsWith("image/")) {
-    return NextResponse.json({ error: "Only image uploads are allowed." }, { status: 400 });
+  const allowedMime = /^image\/(jpeg|pjpeg|png|webp|gif)$/i.test(file.type);
+  if (!allowedMime) {
+    return NextResponse.json(
+      { error: "Only JPEG, PNG, WebP, or GIF images are allowed." },
+      { status: 400 }
+    );
+  }
+  const lower = file.name.toLowerCase();
+  if (lower.endsWith(".svg") || lower.endsWith(".svgz") || lower.endsWith(".htm") || lower.endsWith(".html")) {
+    return NextResponse.json({ error: "This file type is not allowed." }, { status: 400 });
   }
   if (file.size > 8 * 1024 * 1024) {
     return NextResponse.json({ error: "Image too large. Max 8MB." }, { status: 400 });

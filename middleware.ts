@@ -8,6 +8,7 @@ import {
 } from "@/lib/authCookies";
 import { isAdminDashboardHost } from "@/lib/adminDashboardHost";
 import { looksLikePrismaUserId } from "@/lib/prismaUserId";
+import { allowPublicTrackLookup, clientIp } from "@/lib/authRateLimit";
 
 /**
  * Paths that may be visited on the admin host *without* the `/admin` prefix
@@ -129,6 +130,16 @@ export default async function middleware(req: NextRequest) {
   /** Skip host routing / auth for static assets (safe even when matcher hits file-like paths). */
   if (/\.(?:ico|png|jpg|jpeg|gif|webp|svg|woff2?)$/i.test(pathname)) {
     return NextResponse.next();
+  }
+
+  if (pathname === "/track") {
+    const tid = url.searchParams.get("id")?.trim();
+    if (tid && !allowPublicTrackLookup(clientIp(req))) {
+      return new NextResponse(
+        "Too many tracking lookups from this connection. Please wait a minute and try again.",
+        { status: 429, headers: { "Content-Type": "text/plain; charset=utf-8" } }
+      );
+    }
   }
 
   const mainHost = envHostname("MEX509_MAIN_HOST");

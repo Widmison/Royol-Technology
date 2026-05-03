@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireClientApiUser } from "@/lib/requireApiSession";
+import { validateClientPortalShipmentBody } from "@/lib/clientPortalShipmentValidation";
 
 export async function POST(req: Request) {
   try {
@@ -8,34 +9,43 @@ export async function POST(req: Request) {
     if (userOrRes instanceof NextResponse) return userOrRes;
     const user = userOrRes;
 
-    const body = await req.json();
-
-    const firstName = (body.firstName as string)?.trim() || user.firstName || "";
-    const lastName = (body.lastName as string)?.trim() || user.lastName || "";
-    const phone = (body.phone as string)?.trim() || user.phone || "Not provided";
-
-    if (!firstName || !lastName) {
-      return NextResponse.json(
-        { error: "First and last name are required on your profile or in the request." },
-        { status: 400 }
-      );
+    let raw: unknown;
+    try {
+      raw = await req.json();
+    } catch {
+      return NextResponse.json({ error: "Expected JSON body." }, { status: 400 });
     }
 
-    const destRaw = typeof body.destinationCountry === "string" ? body.destinationCountry.trim().toUpperCase() : "";
-    const destinationCountry =
-      destRaw === "DO" ? "DO" : "HT";
+    const b = typeof raw === "object" && raw !== null ? (raw as Record<string, unknown>) : {};
+    const merged = {
+      ...b,
+      firstName:
+        typeof b.firstName === "string" && b.firstName.trim() !== ""
+          ? b.firstName
+          : (user.firstName ?? ""),
+      lastName:
+        typeof b.lastName === "string" && b.lastName.trim() !== "" ? b.lastName : (user.lastName ?? ""),
+      phone:
+        typeof b.phone === "string" && b.phone.trim() !== "" ? b.phone : (user.phone ?? "Not provided"),
+    };
+
+    const parsed = validateClientPortalShipmentBody(merged);
+    if (!parsed.ok) {
+      return NextResponse.json({ error: parsed.message }, { status: 400 });
+    }
+    const d = parsed.data;
 
     await prisma.shipmentRequest.create({
       data: {
         clientId: user.id,
-        firstName,
-        lastName,
-        phone,
-        departure: (body.departure as string) || "Miami Warehouse",
-        category: (body.category as string) || "Standard Box",
-        description: ((body.description as string) || "").trim() || "—",
-        shippingMethod: (body.shippingMethod as string)?.trim() || "Air Freight",
-        destinationCountry,
+        firstName: d.firstName,
+        lastName: d.lastName,
+        phone: d.phone,
+        departure: d.departure,
+        category: d.category,
+        description: d.description,
+        shippingMethod: d.shippingMethod,
+        destinationCountry: d.destinationCountry,
         address: user.address?.trim() || "—",
         state: user.state?.trim() || "—",
         city: user.city?.trim() || "—",

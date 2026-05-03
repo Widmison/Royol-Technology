@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireClientApiUser } from "@/lib/requireApiSession";
 import { calculatePickupAutoQuote, estimatePickupDistanceMiles, getPickupRatePerMile } from "@/lib/pickupPricing";
+import { isTrustedClientPickupPhotoUrl } from "@/lib/trustedClientBlobUrl";
 
 export async function GET() {
   const clientOrRes = await requireClientApiUser();
@@ -32,6 +33,13 @@ export async function POST(req: Request) {
   const state = typeof body.state === "string" ? body.state.trim() : null;
   const zipCode = typeof body.zipCode === "string" ? body.zipCode.trim() : null;
   const packagePhotoUrl = typeof body.packagePhotoUrl === "string" ? body.packagePhotoUrl.trim() : null;
+
+  if (!isTrustedClientPickupPhotoUrl(packagePhotoUrl, clientOrRes.id)) {
+    return NextResponse.json(
+      { error: "Photo must be uploaded using the portal upload button (trusted storage only)." },
+      { status: 400 }
+    );
+  }
 
   if (!name || !phone || !address) {
     return NextResponse.json({ error: "Name, phone, and address are required." }, { status: 400 });

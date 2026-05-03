@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
+import { signOut } from "next-auth/react";
 
 /** No user activity for this long → show “still there?” prompt (admin: min 5 min per ops policy) */
 const IDLE_MS_CLIENT = 30 * 60 * 1000;
@@ -53,9 +54,10 @@ export default function PortalIdleGuard({ variant }: { variant: PortalIdleGuardV
       try {
         await fetch("/api/admin/signout", { method: "POST", credentials: "include" });
       } catch {
-        /* still redirect */
+        /* still sign out NextAuth */
       }
-      window.location.href = "/admin/login";
+      await signOut({ redirect: true, callbackUrl: "/admin/login" });
+      return;
     } else {
       try {
         await fetch("/api/auth", { method: "DELETE", credentials: "include" });

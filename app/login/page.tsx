@@ -687,7 +687,7 @@ export default function LoginPage() {
                       {infoBanner}
                     </div>
                   )}
-                  {devVerificationCode && (
+                  {process.env.NODE_ENV === "development" && devVerificationCode && (
                     <div className="rounded-xl border-2 border-amber-300 bg-amber-50 px-4 py-3 text-center">
                       <p className="mb-1 text-[11px] font-bold uppercase tracking-wider text-amber-900">
                         Development — your code
@@ -715,11 +715,11 @@ export default function LoginPage() {
                       placeholder="000000"
                     />
                   </div>
-                  {!devVerificationCode && (
-                    <p className="mt-2 text-center text-xs font-medium leading-relaxed text-gray-500">
-                      Use the code from your email. In development, your terminal may also print the code.
-                    </p>
-                  )}
+                  <p className="mt-2 text-center text-xs font-medium leading-relaxed text-gray-500">
+                    {process.env.NODE_ENV === "development"
+                      ? "Use the code from your email. Your terminal may also print it during local development."
+                      : "Use the code from your email. Check spam if you don’t see it within a minute."}
+                  </p>
                   <div className="flex flex-col gap-2 pt-2 sm:flex-row sm:items-center sm:justify-center">
                     <button
                       type="button"

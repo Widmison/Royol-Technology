@@ -3,7 +3,10 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { cookies } from "next/headers";
 import { validateSignupPassword } from "@/lib/passwordPolicy";
-import { sendSignupVerificationEmail } from "@/lib/sendVerificationEmail";
+import {
+  sendClientVerificationEmail,
+  type ClientVerificationPurpose,
+} from "@/lib/sendVerificationEmail";
 import { sendPasswordResetEmail } from "@/lib/sendPasswordResetEmail";
 import { sendClientWelcomeEmail } from "@/lib/sendNotificationEmails";
 import { getPortalSiteUrl } from "@/lib/siteUrl";
@@ -18,6 +21,11 @@ import { allowAuthAttempt, clientIp } from "@/lib/authRateLimit";
 
 // Helper function to generate a random 6-digit code
 const generateCode = () => Math.floor(100000 + Math.random() * 900000).toString();
+
+const isProduction = () => process.env.NODE_ENV === "production";
+
+const EMAIL_SEND_FAILED =
+  "We could not send the verification email. Please try again in a moment or contact support if this continues.";
 
 function normalizeReferralCode(raw: unknown): string | null {
   if (typeof raw !== "string") return null;
@@ -200,24 +208,40 @@ export async function POST(req: Request) {
         return NextResponse.json({ error: "Invalid account." }, { status: 403 });
       }
       const newCode = generateCode();
+      const purpose: ClientVerificationPurpose = u.isVerified ? "signin" : "signup";
+
+      if (isProduction()) {
+        const emailed = await sendClientVerificationEmail(em, newCode, purpose);
+        if (!emailed) {
+          return NextResponse.json({ error: EMAIL_SEND_FAILED }, { status: 503 });
+        }
+      }
 
       await prisma.user.update({
         where: { id: u.id },
         data: { verificationCode: newCode },
       });
-      const emailed = await sendSignupVerificationEmail(em, newCode);
-      if (process.env.NODE_ENV === "development") {
-        console.log(`\n[MEX509] Resend verification for ${em}. Code: ${newCode}. Email ok: ${emailed}\n`);
+
+      if (!isProduction()) {
+        const emailed = await sendClientVerificationEmail(em, newCode, purpose);
+        if (process.env.NODE_ENV === "development") {
+          console.log(`\n[MEX509] Resend verification for ${em}. Code: ${newCode}. Email ok: ${emailed}\n`);
+        }
+        return NextResponse.json({
+          success: true,
+          verificationEmailSent: emailed,
+          ...(process.env.NODE_ENV === "development" && {
+            devVerificationCode: newCode,
+            devVerificationNote: emailed
+              ? "Verification email sent; code also shown for development."
+              : "Check RESEND — code shown for local testing.",
+          }),
+        });
       }
+
       return NextResponse.json({
         success: true,
-        verificationEmailSent: emailed,
-        ...(process.env.NODE_ENV === "development" && {
-          devVerificationCode: newCode,
-          devVerificationNote: emailed
-            ? "Verification email sent; code also shown for development."
-            : "Check RESEND — code shown for local testing.",
-        }),
+        verificationEmailSent: true,
       });
     }
 
@@ -256,6 +280,13 @@ export async function POST(req: Request) {
         referredById = referrer.id;
       }
 
+      if (isProduction()) {
+        const emailed = await sendClientVerificationEmail(email, newCode, "signup");
+        if (!emailed) {
+          return NextResponse.json({ error: EMAIL_SEND_FAILED }, { status: 503 });
+        }
+      }
+
       user = await prisma.user.create({
         data: {
           email,
@@ -274,28 +305,39 @@ export async function POST(req: Request) {
         },
       });
 
-      const emailed = await sendSignupVerificationEmail(email, newCode);
+      if (!isProduction()) {
+        const emailed = await sendClientVerificationEmail(email, newCode, "signup");
 
-      if (process.env.NODE_ENV === "development") {
-        console.log(`\n========================================`);
-        console.log(`🔒 EMAIL VERIFICATION CODE FOR ${email}: ${newCode}`);
-        console.log(
-          emailed ? "   (copy also sent by email via Resend)" : "   (email not sent — check RESEND_API_KEY / EMAIL_FROM)"
+        if (process.env.NODE_ENV === "development") {
+          console.log(`\n========================================`);
+          console.log(`🔒 EMAIL VERIFICATION CODE FOR ${email}: ${newCode}`);
+          console.log(
+            emailed ? "   (copy also sent by email via Resend)" : "   (email not sent — check RESEND_API_KEY / EMAIL_FROM)"
+          );
+          console.log(`========================================\n`);
+        }
+
+        return NextResponse.json(
+          {
+            success: true,
+            requireVerification: true,
+            verificationEmailSent: emailed,
+            ...(process.env.NODE_ENV === "development" && {
+              devVerificationCode: newCode,
+              devVerificationNote: emailed
+                ? "A verification email was sent. The code is also shown here in development only."
+                : "RESEND_API_KEY or EMAIL_FROM may be missing — code shown here for local testing.",
+            }),
+          },
+          { status: 200 }
         );
-        console.log(`========================================\n`);
       }
 
       return NextResponse.json(
         {
           success: true,
           requireVerification: true,
-          verificationEmailSent: emailed,
-          ...(process.env.NODE_ENV === "development" && {
-            devVerificationCode: newCode,
-            devVerificationNote: emailed
-              ? "A verification email was sent. The code is also shown here in development only."
-              : "RESEND_API_KEY or EMAIL_FROM may be missing — code shown here for local testing.",
-          }),
+          verificationEmailSent: true,
         },
         { status: 200 }
       );
@@ -323,30 +365,46 @@ export async function POST(req: Request) {
 
       if (user.role === "CLIENT") {
         const newCode = generateCode();
+
+        if (isProduction()) {
+          const emailed = await sendClientVerificationEmail(email, newCode, "signin");
+          if (!emailed) {
+            return NextResponse.json({ error: EMAIL_SEND_FAILED }, { status: 503 });
+          }
+        }
+
         await prisma.user.update({
           where: { id: user.id },
           data: { verificationCode: newCode },
         });
 
-        const emailed = await sendSignupVerificationEmail(email, newCode);
+        if (!isProduction()) {
+          const emailed = await sendClientVerificationEmail(email, newCode, "signin");
 
-        if (process.env.NODE_ENV === "development") {
-          console.log(`\n========================================`);
-          console.log(`🔒 SIGN-IN VERIFICATION CODE FOR ${email}: ${newCode}`);
-          console.log(`Email sent via Resend: ${emailed}`);
-          console.log(`========================================\n`);
+          if (process.env.NODE_ENV === "development") {
+            console.log(`\n========================================`);
+            console.log(`🔒 SIGN-IN VERIFICATION CODE FOR ${email}: ${newCode}`);
+            console.log(`Email sent via Resend: ${emailed}`);
+            console.log(`========================================\n`);
+          }
+
+          return NextResponse.json({
+            success: true,
+            requireVerification: true,
+            verificationEmailSent: emailed,
+            ...(process.env.NODE_ENV === "development" && {
+              devVerificationCode: newCode,
+              devVerificationNote: emailed
+                ? "Verification email sent; code also shown for development."
+                : "Configure RESEND — code shown for local testing.",
+            }),
+          });
         }
 
         return NextResponse.json({
           success: true,
           requireVerification: true,
-          verificationEmailSent: emailed,
-          ...(process.env.NODE_ENV === "development" && {
-            devVerificationCode: newCode,
-            devVerificationNote: emailed
-              ? "Verification email sent; code also shown for development."
-              : "Configure RESEND — code shown for local testing.",
-          }),
+          verificationEmailSent: true,
         });
       }
     }

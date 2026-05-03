@@ -36,7 +36,8 @@ export default function ConditionalLayoutClient({
   const pathname = usePathname() ?? "";
 
   if (isPortalPath(pathname, isAdminPortalHost)) {
-    const showWhatsApp = !pathname.startsWith("/admin");
+    const showWhatsApp =
+      !pathname.startsWith("/admin") && pathname !== "/login";
     return (
       <>
         {children}
